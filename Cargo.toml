@@ -12,3 +12,11 @@ members = [
 
 [dependencies]
 bootloader = { version = "*" } # replace this with a version number
+
+
+[package.metadata.bootloader]
+map_physical_memory = true
+physical-memory-offset = "0x0000_0000_0000_0000"
+map_page_table_recursively = true
+recursive_index = 511
+kernel_stack_size = 0x0001_0000
