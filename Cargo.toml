@@ -29,8 +29,6 @@ uart_16550 = "0.2.14"
 spin = { version = "0.9.4", features = ["lazy"] }
 noto-sans-mono-bitmap = {version = "0.1.5", default-features = false, features = ["regular", "size_16"]}
 
-
-
 # [package.metadata.bootloader]
 # map-physical-memory = true
 # physical-memory-offset = "0x0000_0000_0000_0000"

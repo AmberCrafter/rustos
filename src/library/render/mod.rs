@@ -16,13 +16,13 @@ pub struct TextWriter {
 }
 
 impl TextWriter {
-    pub fn new(framebuffer: &'static mut [u8], frameinfo: FrameBufferInfo) -> Self {
-        let mut writer = Self { framebuffer, info: frameinfo, x_position: 0, y_position: 0 };
-        writer.clean();
+    pub fn new(framebuffer: &'static mut [u8], info: FrameBufferInfo) -> Self {
+        let mut writer = Self { framebuffer, info, x_position: 0, y_position: 0 };
+        writer.clear();
         writer
     }
 
-    pub fn clean(&mut self) {
+    pub fn clear(&mut self) {
         self.x_position = 0;
         self.y_position = 0;
         self.framebuffer.fill(0);
@@ -56,7 +56,7 @@ impl TextWriter {
                 
                 const BITMAP_LETTER_WIDTH: usize = get_bitmap_width(FontWeight::Regular, BitmapHeight::Size16);
                 if self.y_position >= (self.height()-BITMAP_LETTER_WIDTH) {
-                    self.clean();
+                    self.clear();
                 }
                 let bitmap_char = get_bitmap(c, FontWeight::Regular, BitmapHeight::Size16).unwrap();
                 self.write_rendered_char(bitmap_char);
@@ -67,7 +67,7 @@ impl TextWriter {
     fn write_rendered_char(&mut self, rendered_char: BitmapChar) {
         for (y, row) in rendered_char.bitmap().iter().enumerate() {
             for (x, byte) in row.iter().enumerate() {
-                self.write_pixel(self.x_position, self.y_position, *byte);
+                self.write_pixel(self.x_position + x , self.y_position + y, *byte);
             }
         }
         self.x_position += rendered_char.width();
