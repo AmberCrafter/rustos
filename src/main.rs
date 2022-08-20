@@ -9,26 +9,17 @@ use bootloader::{entry_point, BootInfo};
 // use spin::Mutex;
 use core::panic::PanicInfo;
 
-use rustos::library;
+use rustos;
 use rustos::library::render;
+#[allow(dead_code)]
 use rustos::{serial_print, serial_println};
+#[allow(dead_code)]
 use rustos::{print, println};
 
 entry_point!(kernel_main);
 
 fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
-    // // init writer
-    // let mut writer = if let Some(framebuffer) = boot_info.framebuffer.as_mut() {
-    //     let buffer_info = framebuffer.info();
-    //     let mut buffer = framebuffer.buffer_mut();
-    //     render::TEXTWRITER
-    //         .get_or_init(move || Mutex::new(render::TextWriter::new(&mut buffer, buffer_info)))
-    // } else {
-    //     panic!("Screen renderer init failed");
-    // };
-
-    // use core::fmt::Write;
-    // writeln!(writer.lock(), "Hello world").unwrap();
+    rustos::init(boot_info);
     println!("Hello world");
 
     // #[cfg(test)]
