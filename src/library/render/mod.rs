@@ -87,3 +87,15 @@ impl TextWriter {
 
     }
 }
+
+unsafe impl Send for TextWriter {}
+unsafe impl Sync for TextWriter {}
+
+impl core::fmt::Write for TextWriter {
+    fn write_str(&mut self, s: &str) -> core::fmt::Result {
+        for c in s.chars() {
+            self.write_char(c);
+        }
+        Ok(())
+    }
+}

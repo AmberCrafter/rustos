@@ -22,18 +22,25 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
         }
     }
 
-    if let Some(framebuffer) = boot_info.framebuffer.as_mut() {
+    let mut writer = if let Some(framebuffer) = boot_info.framebuffer.as_mut() {
         let buffer_info = framebuffer.info();
         let mut buffer = framebuffer.buffer_mut();
         let mut writer = render::TextWriter::new(buffer, buffer_info);
-        for c in "Hello world".chars() {
-            writer.write_char(c);
-        }
-    }
+        // for c in "Hello world".chars() {
+        //     writer.write_char(c);
+        // }
+
+        writer
+    } else {
+        panic!("failed");
+    };
+
+    use core::fmt::Write;
+    write!(writer, "Hello world");
 
 
-    #[cfg(test)]
-    test_main();
+    // #[cfg(test)]
+    // test_main();
 
     loop {}
 }
