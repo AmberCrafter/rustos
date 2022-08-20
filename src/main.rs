@@ -4,11 +4,13 @@
 #![test_runner(test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
+use bootloader::boot_info::FrameBuffer;
 use bootloader::{entry_point, BootInfo};
 use core::panic::PanicInfo;
 
 use rustos::library;
 use rustos::{serial_print, serial_println};
+use rustos::library::render;
 
 entry_point!(kernel_main);
 
@@ -19,6 +21,16 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
             *byte = 0x90;
         }
     }
+
+    if let Some(framebuffer) = boot_info.framebuffer.as_mut() {
+        let buffer_info = framebuffer.info();
+        let mut buffer = framebuffer.buffer_mut();
+        let mut writer = render::TextWriter::new(buffer, buffer_info);
+        for c in "Hello world".chars() {
+            writer.write_char(c);
+        }
+    }
+
 
     #[cfg(test)]
     test_main();
