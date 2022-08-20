@@ -1,8 +1,12 @@
 use bootloader::boot_info::{FrameBufferInfo, PixelFormat};
 use noto_sans_mono_bitmap::{get_bitmap_width, FontWeight, BitmapHeight, get_bitmap, BitmapChar};
 
+use conquer_once::spin::OnceCell;
+use spin::Mutex;
 const CURSOR_HEIGHT: usize = BitmapHeight::Size16.val();
 const LINE_SPACING: usize = 0;
+
+pub static TEXTWRITER: OnceCell<Mutex<TextWriter>> = OnceCell::uninit();
 
 pub struct TextWriter {
     framebuffer: &'static mut [u8],
