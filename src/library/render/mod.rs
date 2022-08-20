@@ -1,4 +1,6 @@
-use bootloader::boot_info::{FrameBufferInfo, PixelFormat};
+use core::fmt::{Arguments, Write};
+
+use bootloader::{boot_info::{FrameBufferInfo, PixelFormat}, BootInfo};
 use noto_sans_mono_bitmap::{get_bitmap_width, FontWeight, BitmapHeight, get_bitmap, BitmapChar};
 
 use conquer_once::spin::OnceCell;
@@ -7,6 +9,21 @@ const CURSOR_HEIGHT: usize = BitmapHeight::Size16.val();
 const LINE_SPACING: usize = 0;
 
 pub static TEXTWRITER: OnceCell<Mutex<TextWriter>> = OnceCell::uninit();
+
+
+pub fn init(boot_info: &'static mut BootInfo) {
+    // init TEXTWRITER
+    if let Some(framebuffer) = boot_info.framebuffer.as_mut() {
+        let info = framebuffer.info();
+        let framebuffer = framebuffer.buffer_mut();
+        TEXTWRITER.init_once(move || Mutex::new(
+            TextWriter { framebuffer, info, x_position: 0, y_position: 0 }
+        ));
+    } else {
+        panic!("TEXTWRITER initialize failed");
+    }
+}
+
 
 pub struct TextWriter {
     framebuffer: &'static mut [u8],
@@ -102,4 +119,30 @@ impl core::fmt::Write for TextWriter {
         }
         Ok(())
     }
+}
+
+
+// setup global interface
+#[doc(hidden)]
+pub fn _print(args: Arguments) {
+    if let Some(writer) = TEXTWRITER.get() {
+        writer
+            .lock()
+            .write_fmt(args)
+            .expect("Printing to render failed");
+    }
+}
+
+#[macro_export]
+macro_rules! print {
+    ($($arg:tt)*) => {
+        $crate::library::render::_print(format_args!($($arg)*));
+    };
+}
+
+#[macro_export]
+macro_rules! println {
+    () => {$crate::print!("\n");};
+    ($fmt:expr) => {$crate::print!(concat!($fmt, "\n"));};
+    ($fmt:expr, $($arg:tt)*) => {$crate::print!(concat!($fmt, "\n", $($arg)*));};
 }

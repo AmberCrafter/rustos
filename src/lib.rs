@@ -4,6 +4,6 @@ use bootloader::BootInfo;
 #[macro_use]
 pub mod library;
 
-pub fn init(boot_info: &mut BootInfo) {
-    // library::vga_buffer::init(boot_info);
+pub fn init(boot_info: &'static mut BootInfo) {
+    library::render::init(boot_info);
 }

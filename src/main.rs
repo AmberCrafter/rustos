@@ -10,41 +10,27 @@ use bootloader::{entry_point, BootInfo};
 use core::panic::PanicInfo;
 
 use rustos::library;
-use rustos::{serial_print, serial_println};
 use rustos::library::render;
+use rustos::{serial_print, serial_println};
+use rustos::{print, println};
 
 entry_point!(kernel_main);
 
 fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
-    // turn the screen gray
-    if let Some(framebuffer) = boot_info.framebuffer.as_mut() {
-        for byte in framebuffer.buffer_mut() {
-            *byte = 0x90;
-        }
-        // framebuffer.buffer_mut().fill(u8::MAX);
-    }
+    // // init writer
+    // let mut writer = if let Some(framebuffer) = boot_info.framebuffer.as_mut() {
+    //     let buffer_info = framebuffer.info();
+    //     let mut buffer = framebuffer.buffer_mut();
+    //     render::TEXTWRITER
+    //         .get_or_init(move || Mutex::new(render::TextWriter::new(&mut buffer, buffer_info)))
+    // } else {
+    //     panic!("Screen renderer init failed");
+    // };
 
-    // init writer
-    let mut writer = if let Some(framebuffer) = boot_info.framebuffer.as_mut() {
-        let buffer_info = framebuffer.info();
-        let mut buffer = framebuffer.buffer_mut();
-        // let writer = render::TEXTWRITER.get_or_init(move ||Mutex::new(render::TextWriter::new(buffer, buffer_info)));
-        
-        let mut writer = render::TextWriter::new(buffer, buffer_info);
-        for _ in 0..2000{
-            for c in "Hello world".chars() {
-                writer.write_char(c);
-            }
-        }
+    // use core::fmt::Write;
+    // writeln!(writer.lock(), "Hello world").unwrap();
+    println!("Hello world");
 
-        writer
-    } else {
-        panic!("failed");
-    };
-
-    use core::fmt::Write;
-    // writeln!(writer.lock(), "Hello world");
-        
     // #[cfg(test)]
     // test_main();
 
