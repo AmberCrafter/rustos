@@ -63,6 +63,21 @@ impl TextWriter {
         self.carriage_return();
     }
 
+    pub fn shift_frame(&mut self) {
+        // get each bitmap line has pixel numbers
+        let nums = self.info.bytes_per_pixel * self.info.stride;
+        let total = self.width() * self.height();
+
+        for i in nums..total {
+            self.framebuffer[i-nums] = self.framebuffer[i];
+        }
+
+        // clean remain
+        for i in total-nums..total {
+            self.framebuffer[i] = 0x0;
+        }
+    }
+
     pub fn write_char(&mut self, c: char) {
         match c {
             '\n' => self.newline(),

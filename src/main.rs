@@ -4,23 +4,31 @@
 #![test_runner(test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
-use bootloader::boot_info::FrameBuffer;
 use bootloader::{entry_point, BootInfo};
 // use spin::Mutex;
 use core::panic::PanicInfo;
 
 use rustos;
-use rustos::library::render;
-#[allow(dead_code)]
+#[allow(unused)]
 use rustos::{serial_print, serial_println};
-#[allow(dead_code)]
+#[allow(unused)]
 use rustos::{print, println};
 
 entry_point!(kernel_main);
 
 fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
     rustos::init(boot_info);
-    println!("Hello world");
+    println!("1 Hello world");
+    println!("2 Hello world");
+    println!("3 Hello world");
+    println!("4 Hello world");
+    println!("5 Hello world");
+    if let Some(writer) = rustos::library::render::TEXTWRITER.get() {
+        writer.lock().shift_frame();
+    }
+    println!("6 Hello world");
+    println!("7 Hello world");
+    println!("8 Hello world");
 
     // #[cfg(test)]
     // test_main();
