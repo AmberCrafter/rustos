@@ -16,9 +16,10 @@ pub fn init(boot_info: &'static mut BootInfo) {
     if let Some(framebuffer) = boot_info.framebuffer.as_mut() {
         let info = framebuffer.info();
         let framebuffer = framebuffer.buffer_mut();
-        TEXTWRITER.init_once(move || Mutex::new(
+        let writer = TEXTWRITER.get_or_init(move || Mutex::new(
             TextWriter { framebuffer, info, x_position: 0, y_position: 0 }
         ));
+        writer.lock().clear();
     } else {
         panic!("TEXTWRITER initialize failed");
     }
