@@ -14,8 +14,10 @@ members = [
 bootloader = { version = "0.10.12" } # replace this with a version number
 volatile = "0.4.5"
 lazy_static ={ version = "1.4.0", features = ["spin_no_std"]}
-spin = "0.9.4"
 conquer-once  = {version = "0.3.2", default-features = false}
+x86_64 = "0.14.7"
+uart_16550 = "0.2.14"
+spin = { version = "0.9.4", features = ["lazy"] }
 
 # [package.metadata.bootloader]
 # map-physical-memory = true
