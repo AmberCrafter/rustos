@@ -11,8 +11,10 @@ members = [
 ]
 
 [dependencies]
-bootloader = { version = "*" } # replace this with a version number
-
+bootloader = { version = "0.10.12" } # replace this with a version number
+volatile = "0.4.5"
+lazy_static ={ version = "1.4.0", features = ["spin_no_std"]}
+spin = "0.9.4"
 
 [package.metadata.bootloader]
 map_physical_memory = true
