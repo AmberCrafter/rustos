@@ -3,6 +3,7 @@
 #![feature(lang_items)]
 
 use rustos::library;
+use rustos::println;
 
 use bootloader::{entry_point, BootInfo};
 use core::panic::PanicInfo;
@@ -10,6 +11,7 @@ use core::panic::PanicInfo;
 entry_point!(kernel_main);
 
 fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
+    println!("Hello world");
     // turn the screen gray
     // if let Some(framebuffer) = boot_info.framebuffer.as_mut() {
     //     for byte in framebuffer.buffer_mut() {

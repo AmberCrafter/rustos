@@ -16,9 +16,9 @@ volatile = "0.4.5"
 lazy_static ={ version = "1.4.0", features = ["spin_no_std"]}
 spin = "0.9.4"
 
-[package.metadata.bootloader]
-map_physical_memory = true
-physical-memory-offset = "0x0000_0000_0000_0000"
-map_page_table_recursively = true
-recursive_index = 511
-kernel_stack_size = 0x0001_0000
+# [package.metadata.bootloader]
+# map-physical-memory = true
+# physical-memory-offset = "0x0000_0000_0000_0000"
+# map-page-table-recursively = true
+# recursive-index = 511
+# kernel-stack-size = 0x0001_0000
