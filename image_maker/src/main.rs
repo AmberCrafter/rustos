@@ -3,6 +3,8 @@ use std::{
     process::Command,
 };
 
+// const RUN_ARGS: &[&str] = &["--no-reboot", "-s", "-nographic", "-monitor", "telnet::45454,server,nowait", "-serial", "mon:stdio"];
+// const RUN_ARGS: &[&str] = &["--no-reboot", "-s", "-nographic"];
 const RUN_ARGS: &[&str] = &["--no-reboot", "-s"];
 
 fn main() {
@@ -33,6 +35,8 @@ fn main() {
         .arg("-drive")
         .arg(format!("format=raw,file={}", bios.display()));
     run_cmd.args(RUN_ARGS);
+
+    println!("{:?}", run_cmd.get_args());
 
     let exit_status = run_cmd.status().unwrap();
     if !exit_status.success() {

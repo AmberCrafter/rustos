@@ -1,18 +1,19 @@
 use core::fmt;
-use lazy_static::lazy_static;
-use spin::Mutex;
+// use lazy_static::lazy_static;
+// use spin::Mutex;
 
-use super::{ColorCode, screen::{Buffer, ScreenChar}, VGA_BUFFER_WIDTH, VGA_BUFFER_HEIGHT, VGA_BUFFER_ADDR, Color};
+use super::{ColorCode, screen::{Buffer, ScreenChar}, VGA_BUFFER_WIDTH, VGA_BUFFER_HEIGHT};
+use super::VGA_BUFFER;
 
-lazy_static! {
-    pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer {
-        column_position: 0,
-        color_code: ColorCode::new(Color::LightGreen, Color::Black),
-        buffer: unsafe {
-            &mut *(VGA_BUFFER_ADDR as *mut Buffer)
-        }
-    });
-}
+// lazy_static! {
+//     pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer {
+//         column_position: 0,
+//         color_code: ColorCode::new(Color::LightGreen, Color::Black),
+//         buffer: unsafe {
+//             &mut *(VGA_BUFFER_ADDR as *mut Buffer)
+//         }
+//     });
+// }
 
 pub struct Writer {
     column_position: usize,
@@ -21,6 +22,10 @@ pub struct Writer {
 }
 
 impl Writer {
+    pub fn new(column_position: usize, color_code: ColorCode, buffer: &'static mut Buffer) -> Self {
+        Self { column_position, color_code, buffer }
+    }
+
     pub fn write_byte(&mut self, byte: u8) {
         match byte {
             b'\n' => self.new_line(),
@@ -90,5 +95,7 @@ macro_rules! println {
 #[doc(hidden)]
 pub fn _print(args: fmt::Arguments) {
     use core::fmt::Write;
-    WRITER.lock().write_fmt(args).unwrap();
+    if let Ok(writer) = VGA_BUFFER.try_get() {
+        writer.lock().write_fmt(args).unwrap();
+    }
 }
