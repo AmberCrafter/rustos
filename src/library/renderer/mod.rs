@@ -63,18 +63,32 @@ impl TextWriter {
         self.carriage_return();
     }
 
-    pub fn shift_frame(&mut self) {
-        // get each bitmap line has pixel numbers
-        let nums = self.info.bytes_per_pixel * self.info.stride;
-        let total = self.width() * self.height();
+    fn bytes_per_text_line(&self) -> usize {
+        self.info.bytes_per_pixel * self.info.stride * CURSOR_HEIGHT
+    }
 
-        for i in nums..total {
-            self.framebuffer[i-nums] = self.framebuffer[i];
+    pub fn cursor_last_line(&mut self) {
+        self.x_position = 0;
+        self.y_position = self.info.byte_len - self.bytes_per_text_line();
+    }
+
+    pub fn shift_frame(&mut self, lines: usize) {
+        for _ in 0..lines {
+            // get each bitmap line has pixel numbers
+            let nums = bytes_per_text_line();
+            let total = self.info.byte_len;
+    
+            for i in 0..total-nums {
+                self.framebuffer[i] = self.framebuffer[i+nums];
+    
+            }
+            // clean remain
+            for i in total-nums..total {
+                self.framebuffer[i] = 0x0;
+            }
         }
-
-        // clean remain
-        for i in total-nums..total {
-            self.framebuffer[i] = 0x0;
+        unsafe {
+            core::ptr::read_volatile(&self.framebuffer);
         }
     }
 
@@ -158,7 +172,11 @@ macro_rules! print {
 
 #[macro_export]
 macro_rules! println {
-    () => {$crate::print!("\n");};
-    ($fmt:expr) => {$crate::print!(concat!($fmt, "\n"));};
-    ($fmt:expr, $($arg:tt)*) => {$crate::print!(concat!($fmt, "\n", $($arg)*));};
+    () => ($crate::print!("\n"));
+    ($fmt:expr) => ($crate::print!(concat!($fmt, "\n")));
+    ($fmt:expr, $($arg:tt)*) => {
+        ($crate::print!(
+            concat!($fmt, "\n"), $($arg)*
+        ));
+    };
 }

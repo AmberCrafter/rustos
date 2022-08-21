@@ -23,8 +23,8 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
     println!("3 Hello world");
     println!("4 Hello world");
     println!("5 Hello world");
-    if let Some(writer) = rustos::library::render::TEXTWRITER.get() {
-        writer.lock().shift_frame();
+    if let Some(writer) = rustos::library::renderer::TEXTWRITER.get() {
+        writer.lock().shift_frame(1);
     }
     println!("6 Hello world");
     println!("7 Hello world");

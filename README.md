@@ -8,6 +8,10 @@ Target:
 
 ---
 # ChangeLog
+[2022-08-21]
+1. Change module name: render -> renderer
+2. Make document for renderer
+
 [2022-08-20]
 1. Due to make the screen output interface consistent on both bios and uefi, VGA_Buffer no longer to use.
 2. Package the screen print interface from bootloader logger as library/render.
