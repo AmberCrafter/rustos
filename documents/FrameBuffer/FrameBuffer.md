@@ -1,10 +1,12 @@
 # bootloader::FrameBuffer
 
-structure:
+## Structure:
 ![](./FrameBuffer.png)
 
+> When the textwriter run out last pixel and still have other inputs, the Framebuffer will automatical change to the new page (clear it and move cursor to the first index).
+
 ---
-Package Interface:
+## Package Interface:
 
 Source code come from bootloader: src/binary/logger.rs, and modified the interface like as [blog_os - VGA Text Mode](https://os.phil-opp.com/vga-text-mode/)
 
