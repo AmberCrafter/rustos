@@ -51,9 +51,11 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
  - init : Initialize TextWriter as static variable -> TEXTWRITER: OnceCell<Mutex<TextWriter>>
  - TextWriter::new : Build instance of text writer
  - TextWriter::clear : Clear screen with black background color
- - cursor_last_line : move cursor to last line left side, just like as terminal
- - shift_frame : shift all context up n string lines
- - write_char : print a character at current cursor position
+ - TextWriter::cursor_last_line : move cursor to last line left side, just like as terminal
+ - TextWriter::shift_frame : shift all context up n string lines
+ - TextWriter::write_char : print a character at current cursor position
+ - TextWriter::set_foreground_color : Change foreground (text) color
+ - TextWriter::set_background_color : Change background color
  
 ## support macro
  - write

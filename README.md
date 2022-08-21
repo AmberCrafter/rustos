@@ -11,6 +11,7 @@ Target:
 [2022-08-21]
 1. Change module name: render -> renderer
 2. Make document for renderer
+3. Append features: change fore/background color for TextWriter
 
 [2022-08-20]
 1. Due to make the screen output interface consistent on both bios and uefi, VGA_Buffer no longer to use.
