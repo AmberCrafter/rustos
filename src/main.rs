@@ -17,10 +17,14 @@ use rustos::{print, println};
 entry_point!(kernel_main);
 
 fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
+    use rustos::library::renderer::color::{ColorRGB, Color};
     rustos::init(boot_info);
     println!("1 Hello world");
     println!("2 Hello world");
     println!("3 Hello world");
+    if let Some(writer) = rustos::library::renderer::TEXTWRITER.get() {
+        writer.lock().set_foreground_color(ColorRGB::vga(Color::Red));
+    }
     println!("4 Hello world");
     println!("5 Hello world");
     if let Some(writer) = rustos::library::renderer::TEXTWRITER.get() {
@@ -28,6 +32,10 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
     }
     println!("6 Hello world");
     println!("7 Hello world");
+    if let Some(writer) = rustos::library::renderer::TEXTWRITER.get() {
+        writer.lock().set_foreground_color(ColorRGB::vga(Color::Black));
+        writer.lock().set_background_color(ColorRGB::vga(Color::Pink));
+    }
     println!("8 Hello world");
 
     // #[cfg(test)]
