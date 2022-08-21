@@ -20,7 +20,13 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
     use rustos::library::renderer::color::{ColorRGB, Color};
     rustos::init(boot_info);
     println!("1 Hello world");
+    if let Some(writer) = rustos::library::renderer::TEXTWRITER.get() {
+        writer.lock().set_background_color(ColorRGB::vga(Color::White));
+    }
     println!("2 Hello world");
+    if let Some(writer) = rustos::library::renderer::TEXTWRITER.get() {
+        writer.lock().set_background_color(ColorRGB::vga(Color::Black));
+    }
     println!("3 Hello world");
     if let Some(writer) = rustos::library::renderer::TEXTWRITER.get() {
         writer.lock().set_foreground_color(ColorRGB::vga(Color::Red));

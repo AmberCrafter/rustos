@@ -1,10 +1,15 @@
 # rustos
 Experimental OS base on blog_os
 
-Target:
+Goal:
 1. Without all assembly and link file, depends on bootloader and x86_64 crate.
 2. Filesystem
 3. Network interface
+
+---
+# Future works
+1. TextWriter: Support console like input
+
 
 ---
 # ChangeLog

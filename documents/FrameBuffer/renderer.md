@@ -225,21 +225,35 @@ impl TextWriter {
             // }
 
             // assume intensity below and equal 75 is background
+    fn write_pixel(&mut self, x: usize, y: usize, intensity: u8) {
+        fn color_convert<'a>(intensity: u8, foreground_color: &'a ColorRGB, background_color: &'a ColorRGB) -> ColorRGB {
+            // ColorRGB { 
+            //     red: (intensity as i32 * foreground_color.red as i32 / 255) as u8, 
+            //     green: (intensity as i32 * foreground_color.green as i32 / 255) as u8, 
+            //     blue: (intensity as i32 * foreground_color.blue as i32 / 255) as u8,  
+            // }
+
+            // assume intensity below and equal 75 is background
             match intensity {
                 0..=50 => ColorRGB { 
                     red: background_color.red, 
                     green: background_color.green,
                     blue: background_color.blue
                 },
-                51..=100 => ColorRGB { 
-                    red: (intensity as i32 * background_color.red as i32 / 255) as u8, 
-                    green: (intensity as i32 * background_color.green as i32 / 255) as u8, 
-                    blue: (intensity as i32 * background_color.blue as i32 / 255) as u8,  
-                },
+                // 51..=100 => ColorRGB { 
+                //     red: (intensity as i32 * background_color.red as i32 / 255) as u8, 
+                //     green: (intensity as i32 * background_color.green as i32 / 255) as u8, 
+                //     blue: (intensity as i32 * background_color.blue as i32 / 255) as u8,  
+                // },
+                // _ => ColorRGB { 
+                //     red: (intensity as i32 * foreground_color.red as i32 / 255) as u8, 
+                //     green: (intensity as i32 * foreground_color.green as i32 / 255) as u8, 
+                //     blue: (intensity as i32 * foreground_color.blue as i32 / 255) as u8,  
+                // }
                 _ => ColorRGB { 
-                    red: (intensity as i32 * foreground_color.red as i32 / 255) as u8, 
-                    green: (intensity as i32 * foreground_color.green as i32 / 255) as u8, 
-                    blue: (intensity as i32 * foreground_color.blue as i32 / 255) as u8,  
+                    red: foreground_color.red,
+                    green: foreground_color.green,
+                    blue: foreground_color.blue,
                 }
             }
         }
