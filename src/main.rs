@@ -1,7 +1,7 @@
 #![no_std]
 #![no_main]
 #![feature(custom_test_frameworks)]
-#![test_runner(crate::library::test_runner)]
+#![test_runner(rustos::library::unittest::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
 use bootloader::{entry_point, BootInfo};
@@ -24,8 +24,12 @@ mod kernel {
     use super::println;
 
     pub fn main(boot_info: &'static mut BootInfo) -> ! {
-        println!("Hello, this is main::kernel");
         rustos::init(boot_info);
+        println!("Hello, this is main::kernel");
+        println!("Hello, this is main::kernel");
+        println!("Hello, this is main::kernel");
+        println!("Hello, this is main::kernel");
+        println!("Hello, this is main::kernel");
         rustos::hlt_loop();
     }
 
@@ -40,9 +44,13 @@ mod kernel {
 entry_point!(tests::main);
 #[cfg(test)]
 mod tests {
+    use super::BootInfo;
+    use super::PanicInfo;
+    use super::println;
+
     pub fn main(boot_info: &'static mut BootInfo) -> ! {
-        println!("Hello, this is main::tests");
         rustos::init(boot_info);
+        println!("Hello, this is main::tests");
         super::test_main();
         rustos::hlt_loop()
     }

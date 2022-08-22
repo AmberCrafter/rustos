@@ -25,7 +25,8 @@ entry_point!(tests::main);
 #[cfg(test)]
 mod tests {
     use core::panic::PanicInfo;
-    use super::{print, println};
+    use super::BootInfo;
+    // use crate::{print, println};
 
 
     pub fn main(boot_info: &'static mut BootInfo) -> ! {
