@@ -4,6 +4,9 @@
 #![test_runner(crate::library::unittest::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
+#![feature(abi_x86_interrupt)]
+
+
 #[allow(unused)]
 use bootloader::{BootInfo, entry_point};
 #[macro_use]
@@ -11,6 +14,7 @@ pub mod library;
 
 pub fn init(boot_info: &'static mut BootInfo) {
     library::renderer::init(boot_info);
+    library::interrupt::init_idt();
 }
 
 pub fn hlt_loop() -> ! {

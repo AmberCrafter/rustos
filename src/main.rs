@@ -4,6 +4,8 @@
 #![test_runner(rustos::library::unittest::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
+#![feature(abi_x86_interrupt)]
+
 use bootloader::{entry_point, BootInfo};
 // use spin::Mutex;
 use core::panic::PanicInfo;
@@ -25,10 +27,6 @@ mod kernel {
 
     pub fn main(boot_info: &'static mut BootInfo) -> ! {
         rustos::init(boot_info);
-        println!("Hello, this is main::kernel");
-        println!("Hello, this is main::kernel");
-        println!("Hello, this is main::kernel");
-        println!("Hello, this is main::kernel");
         println!("Hello, this is main::kernel");
         rustos::hlt_loop();
     }
