@@ -1,5 +1,6 @@
 pub mod qemu;
 pub mod unittest;
+pub mod handler;
 
 
 #[macro_use]

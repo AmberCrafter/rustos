@@ -1,4 +1,5 @@
 use super::qemu::{QemuExitCode,exit_qemu};
+use crate::{serial_print, serial_println};
 
 pub fn test_runner(tests: &[&dyn Testable]) {
     serial_println!("Running {} tests", tests.len());

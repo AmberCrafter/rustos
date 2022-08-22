@@ -220,7 +220,7 @@ pub fn _print(args: Arguments) {
 #[macro_export]
 macro_rules! print {
     ($($arg:tt)*) => {
-        $crate::library::renderer::text_renderer::_print(format_args!($($arg)*));
+        $crate::library::renderer::text_renderer::_print(format_args!($($arg)*))
     };
 }
 
