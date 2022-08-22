@@ -9,10 +9,15 @@ Goal:
 ---
 # Future works
 1. TextWriter: Support console like input
+2. Make cargo ktest work
 
 
 ---
 # ChangeLog
+[2022-08-22]
+1. Modulize unittest, qemu, panic handler
+
+
 [2022-08-21]
 1. Change module name: render -> renderer
 2. Make document for renderer
