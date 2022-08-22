@@ -1,7 +1,7 @@
 #![no_std]
 #![no_main]
 #![feature(custom_test_frameworks)]
-#![test_runner(test_runner)]
+#![test_runner(crate::library::`test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
 use bootloader::{entry_point, BootInfo};
@@ -51,28 +51,6 @@ fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
     loop {}
 }
 
-pub fn test_runner(tests: &[&dyn Testable]) {
-    serial_println!("Running {} tests", tests.len());
-    for test in tests {
-        test.run();
-    }
-    exit_qemu(QemuExitCode::Success);
-}
-
-pub trait Testable {
-    fn run(&self) -> ();
-}
-
-impl<T> Testable for T
-where
-    T: Fn(),
-{
-    fn run(&self) {
-        serial_print!("{}...\t", core::any::type_name::<T>());
-        self();
-        serial_println!("[ok]");
-    }
-}
 
 #[cfg(not(test))]
 #[panic_handler]
