@@ -43,6 +43,7 @@ mod tests {
     pub fn main(boot_info: &'static mut BootInfo) -> ! {
         println!("Hello, this is main::tests");
         rustos::init(boot_info);
+        super::test_main();
         rustos::hlt_loop()
     }
 

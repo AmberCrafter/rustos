@@ -2,6 +2,8 @@
 runner = "cargo run --package image_maker --"
 
 [alias]
-kbuild = "build --target x86_64-rustos-none.json -Zbuild-std=core -Zbuild-std-features=compiler-builtins-mem"
-kimage = "run --target x86_64-rustos-none.json -Zbuild-std=core -Zbuild-std-features=compiler-builtins-mem -- --no-run"
-krun = "run --target x86_64-rustos-none.json -Zbuild-std=core -Zbuild-std-features=compiler-builtins-mem"
+kbuild = "build --target x86_64-rustos-none.json -Zbuild-std=core,compiler_builtins,alloc -Zbuild-std-features=compiler-builtins-mem"
+kimage = "run --target x86_64-rustos-none.json -Zbuild-std=core,compiler_builtins,alloc -Zbuild-std-features=compiler-builtins-mem -- --no-run"
+krun = "run --target x86_64-rustos-none.json -Zbuild-std=core,compiler_builtins,alloc -Zbuild-std-features=compiler-builtins-mem"
+ktest = "test --target x86_64-rustos-none.json -Zbuild-std=core,compiler_builtins,alloc -Zbuild-std-features=compiler-builtins-mem"
+ktestfile = "test --target x86_64-rustos-none.json -Zbuild-std=core,compiler_builtins,alloc -Zbuild-std-features=compiler-builtins-mem --package rustos --test "
