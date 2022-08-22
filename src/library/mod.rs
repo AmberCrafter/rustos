@@ -1,3 +1,5 @@
+pub mod qemu;
+
 
 #[macro_use]
 pub mod serial;

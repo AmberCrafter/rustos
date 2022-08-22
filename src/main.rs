@@ -9,6 +9,7 @@ use bootloader::{entry_point, BootInfo};
 use core::panic::PanicInfo;
 
 use rustos;
+use rustos::library::qemu::{exit_qemu, QemuExitCode};
 #[allow(unused)]
 use rustos::{serial_print, serial_println};
 #[allow(unused)]
@@ -87,23 +88,6 @@ fn panic(info: &PanicInfo) -> ! {
     exit_qemu(QemuExitCode::Failed);
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u32)]
-pub enum QemuExitCode {
-    Success = 0x10,
-    Failed = 0x11,
-}
-
-pub fn exit_qemu(exit_code: QemuExitCode) -> ! {
-    use x86_64::instructions::port::Port;
-
-    unsafe {
-        let mut port = Port::new(0xf4);
-        port.write(exit_code as u32);
-    }
-
-    loop {}
-}
 
 #[cfg(test)]
 mod tests {
