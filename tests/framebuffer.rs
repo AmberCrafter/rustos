@@ -19,7 +19,7 @@ use rustos::{serial_print, serial_println};
 entry_point!(main);
 pub fn main(boot_info: &'static mut BootInfo) -> ! {
     rustos::init(boot_info);
-    println!("Hello, this is tests::framebuffer");
+    serial_println!("Hello, this is tests::framebuffer");
     test_main();
     rustos::hlt_loop()
 }
@@ -32,9 +32,9 @@ fn panic(info: &PanicInfo) -> ! {
 // test case
 #[test_case]
 fn test_framebuffer_print() {
-    print!("Hello");
-    println!(" World!");
+    serial_print!("Hello");
+    serial_println!(" World!");
 
-    println!("int: {}, float: {}, char: {}, str: {}", 1, 1.0/3.0, 'c', "words");
+    serial_println!("int: {}, float: {}, char: {}, str: {}", 1, 1.0/3.0, 'c', "words");
     assert_eq!(0,0);
 }

@@ -20,7 +20,7 @@ use rustos::{print, println};
 entry_point!(main);
 pub fn main(boot_info: &'static mut BootInfo) -> ! {
     rustos::init(boot_info);
-    println!("Hello, this is tests::interrupt");
+    serial_println!("Hello, this is tests::interrupt");
     test_main();
     rustos::hlt_loop();
 }
@@ -35,5 +35,5 @@ fn panic(info: &PanicInfo) -> ! {
 fn test_interrupt_breakpoint() {
     // invoke a breakpoint exception
     x86_64::instructions::interrupts::int3();
-    println!("After invoke breakpoint interrupt");
+    serial_println!("After invoke breakpoint interrupt");
 }
