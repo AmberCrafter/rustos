@@ -26,11 +26,11 @@ entry_point!(tests::main);
 mod tests {
     use core::panic::PanicInfo;
     use super::BootInfo;
-    // use crate::{print, println};
-
+    use super::println;
 
     pub fn main(boot_info: &'static mut BootInfo) -> ! {
         super::init(boot_info);
+        println!("Hello, this is lib::tests");
         super::test_main();
         super::hlt_loop()
     }

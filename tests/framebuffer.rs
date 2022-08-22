@@ -35,6 +35,6 @@ fn framebuffer_print() {
     print!("Hello");
     println!(" World!");
 
-    println!("int: {}, float: {}, char: {}, str: {}", 1, 1/3, 'c', "words");
+    println!("int: {}, float: {}, char: {}, str: {}", 1, 1.0/3.0, 'c', "words");
     assert_eq!(0,0);
 }
