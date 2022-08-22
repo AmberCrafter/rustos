@@ -18,8 +18,8 @@ use rustos::{serial_print, serial_println};
 
 entry_point!(main);
 pub fn main(boot_info: &'static mut BootInfo) -> ! {
-    println!("Hello, this is main::tests");
     rustos::init(boot_info);
+    println!("Hello, this is tests::framebuffer");
     test_main();
     rustos::hlt_loop()
 }

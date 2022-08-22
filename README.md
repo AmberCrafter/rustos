@@ -16,6 +16,7 @@ Goal:
 # ChangeLog
 [2022-08-22]
 1. Modulize unittest, qemu, panic handler
+2. Fix ktest error: https://github.com/rust-lang/cargo/issues/7359
 
 
 [2022-08-21]
