@@ -33,7 +33,7 @@ mod kernel {
 
     #[panic_handler]
     fn panic(info: &PanicInfo) -> ! {
-        rustos::library::handler::kernel_panic::panic_handler(info)
+        rustos::library::handler_panic::kernel_panic::panic_handler(info)
     }
 }
 
@@ -55,6 +55,6 @@ mod tests {
 
     #[panic_handler]
     fn panic(info: &PanicInfo) -> ! {
-        rustos::library::handler::kernel_panic::panic_handler(info)
+        rustos::library::handler_panic::kernel_panic::panic_handler(info)
     }
 }

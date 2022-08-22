@@ -27,7 +27,7 @@ pub fn main(boot_info: &'static mut BootInfo) -> ! {
 
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
-    rustos::library::handler::kernel_panic::panic_handler(info)
+    rustos::library::handler_panic::kernel_panic::panic_handler(info)
 }
 
 
@@ -37,3 +37,14 @@ fn test_interrupt_breakpoint() {
     x86_64::instructions::interrupts::int3();
     serial_println!("After invoke breakpoint interrupt");
 }
+
+#[test_case]
+fn test_interrupt_double_fault() {
+    // invoke a double_fault exception
+    // trigger a page fault
+    unsafe {
+        *(0xdeadbeef as *mut u64) = 42;
+    };
+    serial_println!("After invoke double_fault interrupt");
+}
+

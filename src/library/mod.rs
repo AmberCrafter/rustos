@@ -1,6 +1,6 @@
 pub mod qemu;
 pub mod unittest;
-pub mod handler;
+pub mod handler_panic;
 
 #[macro_use]
 pub mod serial;

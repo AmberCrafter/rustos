@@ -42,6 +42,6 @@ mod tests {
 
     #[panic_handler]
     fn panic(info: &PanicInfo) -> ! {
-        crate::library::handler::kernel_panic::panic_handler(info)
+        crate::library::handler_panic::kernel_panic::panic_handler(info)
     }
 }
