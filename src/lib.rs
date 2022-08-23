@@ -15,6 +15,7 @@ pub mod library;
 pub fn init(boot_info: &'static mut BootInfo) {
     library::renderer::init(boot_info);
     library::interrupt::init_idt();
+    library::gdt::init_gdt();
 }
 
 pub fn hlt_loop() -> ! {

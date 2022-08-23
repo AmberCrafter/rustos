@@ -9,3 +9,4 @@ pub mod serial;
 pub mod renderer;
 
 pub mod interrupt;
+pub mod gdt;

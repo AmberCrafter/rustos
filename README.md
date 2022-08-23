@@ -6,14 +6,25 @@ Goal:
 2. Filesystem
 3. Network interface
 
+
+TODO LIST:
+1. Convert TSS table into implementation with memory allocator
+
+
+> Note.
+>
+> 1. Leave the Qemu: ctrl+a x
 ---
 # Future works
-1. TextWriter: Support console like input
-2. Make cargo ktest work
+ - [ ] TextWriter: Support console like input
+ - [x] Make cargo ktest work
 
 
 ---
 # ChangeLog
+[2022-08-23]
+1. Setup interrupt handler: breakpoint, doubl_fault
+
 [2022-08-22]
 1. Modulize unittest, qemu, panic handler
 2. Fix ktest error: https://github.com/rust-lang/cargo/issues/7359

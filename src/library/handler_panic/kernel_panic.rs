@@ -18,10 +18,12 @@ pub fn panic_handler(info: &PanicInfo) -> ! {
 }
 
 #[allow(unused)]
-pub fn should_panic_handler(_info: &PanicInfo) -> ! {
+pub fn should_panic_handler(info: &PanicInfo) -> ! {
     println!("[Ok]");
 
     serial_println!("[Ok]");
+    serial_println!("Panic info:\n{:#?}\n", info);
+
     exit_qemu(QemuExitCode::Success);
     hlt_loop()
 }
