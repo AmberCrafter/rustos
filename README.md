@@ -18,7 +18,7 @@ TODO LIST:
 # Future works
  - [ ] TextWriter: Support console like input
  - [x] Make cargo ktest work
-
+ - [ ] Implement APIC (current use 8259 PIC)
 
 ---
 # ChangeLog

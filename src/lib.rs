@@ -14,8 +14,10 @@ pub mod library;
 
 pub fn init(boot_info: &'static mut BootInfo) {
     library::renderer::init(boot_info);
-    library::interrupt::init_idt();
     library::gdt::init_gdt();
+    library::interrupt::init_idt();
+    library::interrupt::init_pic();
+    library::interrupt::enable_hardware_interrupt(); // enable pic
 }
 
 pub fn hlt_loop() -> ! {
@@ -31,11 +33,11 @@ entry_point!(tests::main);
 mod tests {
     use core::panic::PanicInfo;
     use super::BootInfo;
-    use super::println;
+    use super::serial_println;
 
     pub fn main(boot_info: &'static mut BootInfo) -> ! {
         super::init(boot_info);
-        println!("Hello, this is lib::tests");
+        serial_println!("Hello, this is lib::tests");
         super::test_main();
         super::hlt_loop()
     }
