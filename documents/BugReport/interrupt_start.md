@@ -10,7 +10,7 @@ Base on blog_os gdt and interrupt code, it works under bootloader version 0.9 wi
 
 ---
 ## Note
-1. Same kind of error ocurr at the brackpoint interrupt return, but different in mechine code.
+1. Same kind of error ocurr at the brackpoint/timer interrupt return, but different in mechine code.
 2. The brackpoint exception work fine without gdt setting. (Disable src/lib.rs `library::blog_gdt::init();`)
 
 ---
