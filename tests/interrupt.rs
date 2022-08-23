@@ -38,13 +38,13 @@ fn test_interrupt_breakpoint() {
     serial_println!("After invoke breakpoint interrupt");
 }
 
-#[test_case]
-fn test_interrupt_double_fault() {
-    // invoke a double_fault exception
-    // trigger a page fault
-    unsafe {
-        *(0xdeadbeef as *mut u64) = 42;
-    };
-    serial_println!("After invoke double_fault interrupt");
-}
+// #[test_case]
+// fn test_interrupt_double_fault() {
+//     // invoke a double_fault exception
+//     // trigger a page fault
+//     unsafe {
+//         *(0xdeadbeef as *mut u64) = 42;
+//     };
+//     serial_println!("After invoke double_fault interrupt");
+// }
 

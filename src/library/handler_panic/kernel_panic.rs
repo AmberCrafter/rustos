@@ -10,7 +10,7 @@ pub fn panic_handler(info: &PanicInfo) -> ! {
     println!("[Panic]");
     println!("Error: {}\n", info);
 
-    serial_println!("[Failed]");
+    serial_println!("[Panic]");
     serial_println!("Error: {}\n", info);
 
     exit_qemu(QemuExitCode::Failed);

@@ -21,8 +21,9 @@ members = [
 
 [dependencies]
 bootloader = { version = "0.10.12" } # replace this with a version number
+# bootloader = {git = "https://github.com/rust-osdev/bootloader.git", tag = "v0.11.0-alpha.0"}
 volatile = "0.4.5"
-# lazy_static ={ version = "1.4.0", features = ["spin_no_std"]}
+lazy_static ={ version = "1.4.0", features = ["spin_no_std"]}
 conquer-once  = {version = "0.3.2", default-features = false}
 x86_64 = "0.14.10"
 uart_16550 = "0.2.18"
@@ -31,9 +32,9 @@ noto-sans-mono-bitmap = {version = "0.1.5", default-features = false, features =
 pic8259 = "0.10.2"
 
 
-# [package.metadata.bootloader]
-# map-physical-memory = true
-# physical-memory-offset = "0x0000_0000_0000_0000"
+[package.metadata.bootloader]
+map-physical-memory = true
+# physical-memory-offset = "0x0000_4000_0000_0000"
 # map-page-table-recursively = true
 # recursive-index = 511
-# kernel-stack-size = 0x0001_0000
+kernel-stack-size = 0x000a_0000

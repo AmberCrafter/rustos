@@ -13,11 +13,17 @@ use bootloader::{BootInfo, entry_point};
 pub mod library;
 
 pub fn init(boot_info: &'static mut BootInfo) {
-    library::renderer::init(boot_info);
-    library::gdt::init_gdt();
-    library::interrupt::init_idt();
-    library::interrupt::init_pic();
-    library::interrupt::enable_hardware_interrupt(); // enable pic
+    // library::renderer::init(boot_info);
+    // library::gdt::init_gdt();
+    // library::interrupt::init_idt();
+    // library::interrupt::init_pic();
+    // library::interrupt::enable_hardware_interrupt(); // enable pic
+
+    library::blog_gdt::init();
+    library::blog_interrupt::init_idt();
+    // unsafe { library::blog_interrupt::PICS.lock().initialize() };
+    // x86_64::instructions::interrupts::enable();
+    
 }
 
 pub fn hlt_loop() -> ! {
