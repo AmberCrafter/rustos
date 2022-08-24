@@ -1,5 +1,6 @@
 use x86_64::structures::idt::InterruptStackFrame;
 
+use crate::print;
 use crate::println;
 use crate::serial_println;
 
@@ -16,8 +17,8 @@ pub extern "x86-interrupt" fn double_fault_handler(stack_frame: InterruptStackFr
 }
 
 pub extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFrame) {
-    println!(".");
-    serial_println!(".");
+    print!(".");
+    serial_print!(".");
     unsafe {
         PICS.lock().notify_end_of_interrupt(InterruptIndex::Timer.as_u8());
     }
