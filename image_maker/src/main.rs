@@ -9,9 +9,9 @@ use std::{
 // const RUN_ARGS: &[&str] = &["--no-reboot", "-s"];
 
 // This use on non-UI environment
-// const RUN_ARGS: &[&str] = &["--no-reboot", "-s", "-display", "none", "-serial", "mon:stdio"];
+const RUN_ARGS: &[&str] = &["--no-reboot", "-s", "-display", "none", "-serial", "mon:stdio"];
 // const RUN_ARGS: &[&str] = &["-d", "int", "--no-reboot", "-s", "-display", "none", "-serial", "mon:stdio"];
-const RUN_ARGS: &[&str] = &["-d", "int", "--no-reboot", "-s", "-S", "-display", "none", "-serial", "mon:stdio"];
+// const RUN_ARGS: &[&str] = &["-d", "int", "--no-reboot", "-s", "-S", "-display", "none", "-serial", "mon:stdio"];
 
 fn main() {
     let mut args = std::env::args().skip(1); // skip executable name

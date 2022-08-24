@@ -1,10 +1,10 @@
 # Register
- - CS: code segment
- - DS: data segment
- - SS: stack segment
- - ES: extra segment
- - FS: general F segment
- - GS: general G segment
+ - CS: code segment register
+ - DS: data segment register
+ - SS: stack segment register
+ - ES: extra segment register
+ - FS: general F segment register
+ - GS: general G segment register
 
 ---
 ## [Segment](https://pages.cs.wisc.edu/~remzi/OSTEP/vm-segmentation.pdf)
@@ -28,23 +28,28 @@ Thus, 8086/8088 defined (16bit<<4)+16bit to represent 20bits which will able to 
 >> - Disable: Represent as 8086/8088 address, which mean drop the largest bit
 
 A20 gate: used to represent 20 address bus condition
+
 ie.
-When we want to address FFFF:
+When we want to address 0xFFFF, we can set:
+ - 0000:FFFF 
+ - 000F:FF0F
+ - 00F0:F0FF
+ - 0FFF:000F
+ - ... and so on
 
-
-Layout: SegmentRegister:Offset
-
-Due to lagecy design, the memory address will be defined as 
-$$Address = SegmentRegister*16+Offset$$
-or
-$$Address = SegmentRegister<<4+Offset$$
+> Layout: SegmentRegister:Offset
+> 
+> Due to lagecy design, the memory address will be defined as 
+> $$Address = SegmentRegister*16+Offset$$
+> or
+> $$Address = SegmentRegister<<4+Offset$$
 
 
 ---
-CPU instruction
+### CPU instruction
 posiiton: CS:IP
 
-Data 
+### Data 
 position: DS:[bx] can be simplfied as [bx], but not other segment registers. This mean only ES:[bx] is valid (for exmaple).
 
  - DS:[bx] => Valid
@@ -52,7 +57,7 @@ position: DS:[bx] can be simplfied as [bx], but not other segment registers. Thi
  - ES:[bx] => Valid
  - [bx] represnet ES:[bx] => Invalid
 
-[Stack](https://stackoverflow.com/a/8643013)
+### [Stack](https://stackoverflow.com/a/8643013)
 postion:
  - 16-bits (real mode, segment): 
     - SS:SP => Stack top pointer

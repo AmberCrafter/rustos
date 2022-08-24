@@ -27,7 +27,8 @@ pub fn init_gdt() {
 
     GDT.0.load();
     unsafe {
-        SS::set_reg(SegmentSelector::new(0, GDT.1.code_selector.rpl()));
+        // SS::set_reg(SegmentSelector::new(0, GDT.1.code_selector.rpl()));
+        SS::set_reg(SegmentSelector::NULL);
         CS::set_reg(GDT.1.code_selector);
         load_tss(GDT.1.tss_selector);
     }
