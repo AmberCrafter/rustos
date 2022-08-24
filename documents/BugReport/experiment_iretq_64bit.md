@@ -362,7 +362,7 @@ Base on the [blog_os post](https://os.phil-opp.com/returning-from-exceptions/), 
  - Set new RSP
  - Execute handle funtion
 
-When finished the exception handle funtion and need to go back to keep going running code, there are execute `iretq` which was reverse the privous process. And in [this book](https://0xax.gitbooks.io/linux-insides/content/Interrupts/linux-interrupts-1.html) mention that
+When finished the exception handle funtion and need to go back to keep going running code, there are execute `iretq` which was reverse the privous process. And [this book](https://0xax.gitbooks.io/linux-insides/content/Interrupts/linux-interrupts-1.html) mention that
 
 > The iret instruction unconditionally pops the stack pointer (ss:rsp) to restore the stack of the interrupted process and does not depend on the cpl change.
 
