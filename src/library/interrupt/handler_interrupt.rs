@@ -17,7 +17,7 @@ pub extern "x86-interrupt" fn double_fault_handler(stack_frame: InterruptStackFr
 }
 
 pub extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFrame) {
-    // print!(".");
+    print!(".");
     serial_print!(".");
     unsafe {
         PICS.lock().notify_end_of_interrupt(InterruptIndex::Timer.as_u8());
@@ -27,17 +27,15 @@ pub extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptSta
 // https://wiki.osdev.org/%228042%22_PS/2_Controller
 // only test on graphic mode
 pub extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStackFrame) {
-    println!("Trigger keyboard");
-    serial_println!("Trigger keyboard");
-    // use x86_64::instructions::port::Port;
-    // let mut port = Port::new(0x60);
-    // let scancode:u8 = unsafe {
-    //     port.read()
-    // };
-    // serial_print!("Scancode: {:}", scancode);
+    use x86_64::instructions::port::Port;
+    let mut port = Port::new(0x60);
+    let scancode:u8 = unsafe {
+        port.read()
+    };
+    print!("Scancode: {:}", scancode);
+    serial_print!("Scancode: {:}", scancode);
 
     unsafe {
         PICS.lock().notify_end_of_interrupt(InterruptIndex::Keyboard.as_u8());
     }
-    println!("Release?");
 }
