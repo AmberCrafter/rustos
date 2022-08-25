@@ -1,3 +1,6 @@
+use pc_keyboard::Keyboard;
+use spin::Lazy;
+use spin::Mutex;
 use x86_64::structures::idt::InterruptStackFrame;
 
 use crate::print;
@@ -26,14 +29,39 @@ pub extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptSta
 
 // https://wiki.osdev.org/%228042%22_PS/2_Controller
 // only test on graphic mode
+// need to read out the buffer, otherwise keyboard interrupt will be stuck
+// Use the pc-keyboard to decode it 
 pub extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStackFrame) {
+    use pc_keyboard::{ layouts::Us104Key, ScancodeSet1, HandleControl::Ignore, DecodedKey };
     use x86_64::instructions::port::Port;
+
+    static KEYBOARD: Lazy<Mutex<Keyboard<Us104Key, ScancodeSet1>>> = Lazy::new(|| {
+        let mut keyboard = pc_keyboard::Keyboard::new(
+            Us104Key, ScancodeSet1, Ignore
+        );
+        Mutex::new(keyboard) 
+    });
+
+    let mut keyboard = KEYBOARD.lock();
     let mut port = Port::new(0x60);
     let scancode:u8 = unsafe {
         port.read()
     };
-    print!("Scancode: {:}", scancode);
-    serial_print!("Scancode: {:}", scancode);
+    
+    if let Ok(Some(event)) = keyboard.add_byte(scancode) {
+        if let Some(key) = keyboard.process_keyevent(envet) {
+            match key {
+                DecodedKey::RawKey(key) => {
+                    print!("{:?}", key);
+                    serial_print!("{:?}", key);
+                },
+                DecodedKey::Unicode(charactor) => {
+                    print!("{:}", charactor);
+                    serial_print!("{:}", charactor);
+                }
+            }
+        }
+    }
 
     unsafe {
         PICS.lock().notify_end_of_interrupt(InterruptIndex::Keyboard.as_u8());

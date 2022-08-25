@@ -30,6 +30,7 @@ uart_16550 = "0.2.18"
 spin = { version = "0.9.4", features = ["lazy"] }
 noto-sans-mono-bitmap = {version = "0.1.5", default-features = false, features = ["regular", "size_16"]}
 pic8259 = "0.10.2"
+pc-keyboard = "0.5.1"
 
 
 [package.metadata.bootloader]
