@@ -11,6 +11,7 @@ use noto_sans_mono_bitmap::{get_bitmap, get_bitmap_width, BitmapChar, BitmapHeig
 use conquer_once::spin::OnceCell;
 use spin::Mutex;
 const CURSOR_HEIGHT: usize = BitmapHeight::Size16.val();
+const BITMAP_LETTER_WIDTH: usize = get_bitmap_width(FontWeight::Regular, BitmapHeight::Size16);
 const LINE_SPACING: usize = 0;
 
 pub static TEXTWRITER: OnceCell<Mutex<TextWriter>> = OnceCell::uninit();
@@ -54,6 +55,7 @@ impl TextWriter {
             background_color,
         };
         writer.clear();
+        writer.render_cursor();
         writer
     }
 
@@ -82,14 +84,13 @@ impl TextWriter {
     fn carriage_return(&mut self) {
         self.x_position = 0;
     }
-
+    
     fn newline(&mut self) {
+        self.render_cursor();
         self.y_position += CURSOR_HEIGHT + LINE_SPACING;
         self.carriage_return();
 
-        const BITMAP_LETTER_WIDTH: usize =
-            get_bitmap_width(FontWeight::Regular, BitmapHeight::Size16);
-        if self.y_position >= (self.height() - BITMAP_LETTER_WIDTH -1) {
+        if self.y_position >= (self.height() - CURSOR_HEIGHT -1) {
             // self.clear();
             self.shift_frame(1);
             self.cursor_last_line();
@@ -101,17 +102,33 @@ impl TextWriter {
     }
 
     pub fn cursor_up(&mut self) {
-        self.y_position -= CURSOR_HEIGHT;
+        self.render_cursor();
+        if self.y_position >= CURSOR_HEIGHT {
+            self.y_position -= CURSOR_HEIGHT;
+        }
+        self.render_cursor();
     }
     pub fn cursor_down(&mut self) {
-        self.y_position += CURSOR_HEIGHT;
+        self.render_cursor();
+        if self.y_position < (self.height() - CURSOR_HEIGHT -1) {
+            self.y_position += CURSOR_HEIGHT;
+        }
+        self.render_cursor();
     }
-    // pub fn cursor_left(&mut self) {
-    //     self.x_position -= rendered_char.width();
-    // }
-    // pub fn cursor_right(&mut self) {
-    //     self.x_position += rendered_char.width();
-    // }
+    pub fn cursor_left(&mut self) {
+        self.render_cursor();
+        if self.x_position >= BITMAP_LETTER_WIDTH {
+            self.x_position -= BITMAP_LETTER_WIDTH;
+        }
+        self.render_cursor();
+    }
+    pub fn cursor_right(&mut self) {
+        self.render_cursor();
+        if self.x_position < self.info.stride-1 {
+            self.x_position += BITMAP_LETTER_WIDTH;
+        }
+        self.render_cursor();
+    }
 
     pub fn cursor_last_line(&mut self) {
         self.x_position = 0;
@@ -138,12 +155,12 @@ impl TextWriter {
     }
 
     pub fn write_char(&mut self, c: char) {
-        const invalid_char: char = 0xfe as char;
+        const INVALID_CHAR: char = 0x7f as char;
         match c {
             '\n' => self.newline(),
             '\r' => self.carriage_return(),
             // TODO: Need to filter invalid charactors
-            c @ ' '..=invalid_char => {
+            c @ ' '..=INVALID_CHAR => {
                 if self.x_position >= self.info.stride-1 {
                     self.newline();
                 }
@@ -151,9 +168,10 @@ impl TextWriter {
                 self.write_rendered_char(bitmap_char);
             },
             _ => {
-                self.write_char(invalid_char);
+                self.write_char(INVALID_CHAR);
             }
         }
+        self.render_cursor();
     }
 
     fn write_rendered_char(&mut self, rendered_char: BitmapChar) {
@@ -162,7 +180,7 @@ impl TextWriter {
                 self.write_pixel(self.x_position + x, self.y_position + y, *byte);
             }
         }
-        self.x_position += rendered_char.width();
+        self.x_position += BITMAP_LETTER_WIDTH;
     }
 
     fn write_pixel(&mut self, x: usize, y: usize, intensity: u8) {
@@ -212,6 +230,26 @@ impl TextWriter {
             .copy_from_slice(&color[..bytes_pre_pixel]);
         let _ = unsafe { core::ptr::read_volatile(&self.framebuffer[byte_offset]) };
     }
+
+    
+    fn render_cursor(&mut self) {
+        // ignore rendered_char value, only get 
+        for y in 0..CURSOR_HEIGHT {
+            for x in 0..BITMAP_LETTER_WIDTH {
+                self.inverse_pixel(self.x_position + x, self.y_position + y);
+            }
+        }
+    }
+
+    fn inverse_pixel(&mut self, x: usize, y: usize) {
+        let pixel_offset = y * self.info.stride + x;
+        let bytes_pre_pixel = self.info.bytes_per_pixel;
+        let byte_offset = pixel_offset * bytes_pre_pixel;
+        for i in 0..bytes_pre_pixel {
+            self.framebuffer[byte_offset+i] = u8::MAX - self.framebuffer[byte_offset+i];
+        }
+        let _ = unsafe { core::ptr::read_volatile(&self.framebuffer[byte_offset]) };
+    }
 }
 
 unsafe impl Send for TextWriter {}
@@ -229,11 +267,14 @@ impl core::fmt::Write for TextWriter {
 // setup global interface
 #[doc(hidden)]
 pub fn _print(args: Arguments) {
+    use x86_64::instructions::interrupts::without_interrupts;
     if let Some(writer) = TEXTWRITER.get() {
-        writer
-            .lock()
-            .write_fmt(args)
-            .expect("Printing to render failed");
+        without_interrupts(|| {
+            writer
+                .lock()
+                .write_fmt(args)
+                .expect("Printing to render failed");
+        })
     }
 }
 

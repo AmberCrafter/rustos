@@ -8,30 +8,25 @@ Goal:
 
 
 TODO LIST:
-1. Convert TSS table into implementation with memory allocator
-2. - [ ] Fix keyboard interrupt work on
-    - [ ] backspace
-    - [ ] tab
-    - [ ] esc
-    - [ ] delete
-    - [ ] ctrl (left/right)
-    - [ ] alt (right)
-    - [ ] shift (left/right)
-    - [ ] caps lock
-    - [ ] number lock
-3. - [ ] Fix render overflow
+1. - [ ] Convert TSS table into implementation with memory allocator
+2. - [x] Fix render overflow
+3. - [x] Make textrenderer support cursor
 
 > Note.
 >
-> 1. Leave the Qemu: ctrl+a x
+> 1. Leave the Qemu: ctrl+a x (-serial mon:stdio)
+> 2. keyboard interrupt only work on graphic mode currently
 ---
 # Future works
- - [ ] TextWriter: Support console like input
+ - [x] TextWriter: Support console like input
  - [x] Make cargo ktest work
  - [ ] Implement APIC (current use 8259 PIC)
 
 ---
 # ChangeLog
+[2022-08-24]
+1. Solve ireqt double fault exception
+
 [2022-08-23]
 1. Setup interrupt handler: breakpoint, doubl_fault
 
