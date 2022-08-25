@@ -36,7 +36,7 @@ pub extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: Interrupt
     use x86_64::instructions::port::Port;
 
     static KEYBOARD: Lazy<Mutex<Keyboard<Us104Key, ScancodeSet1>>> = Lazy::new(|| {
-        let mut keyboard = pc_keyboard::Keyboard::new(
+        let keyboard = pc_keyboard::Keyboard::new(
             Us104Key, ScancodeSet1, Ignore
         );
         Mutex::new(keyboard) 
@@ -48,8 +48,12 @@ pub extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: Interrupt
         port.read()
     };
     
+    print!("Scancode: {:?}", scancode);
+
     if let Ok(Some(event)) = keyboard.add_byte(scancode) {
-        if let Some(key) = keyboard.process_keyevent(envet) {
+        println!("Event tirgger: {:?}", event);
+        if let Some(key) = keyboard.process_keyevent(event) {
+            println!("Key: {:?}", key);
             match key {
                 DecodedKey::RawKey(key) => {
                     print!("{:?}", key);

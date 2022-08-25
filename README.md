@@ -9,6 +9,16 @@ Goal:
 
 TODO LIST:
 1. Convert TSS table into implementation with memory allocator
+2. Fix keyboard interrupt work on
+    - [ ] backspace
+    - [ ] tab
+    - [ ] esc
+    - [ ] delete
+    - [ ] ctrl (left/right)
+    - [ ] alt (right)
+    - [ ] shift (left/right)
+    - [ ] caps lock
+    - [ ] number lock
 
 
 > Note.
