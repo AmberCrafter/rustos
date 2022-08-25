@@ -155,12 +155,12 @@ impl TextWriter {
     }
 
     pub fn write_char(&mut self, c: char) {
-        const INVALID_CHAR: char = 0x7f as char;
+        const INVALID_CHAR: char = 0xfe as char;
         match c {
             '\n' => self.newline(),
             '\r' => self.carriage_return(),
             // TODO: Need to filter invalid charactors
-            c @ ' '..=INVALID_CHAR => {
+            c @ ' '..='~' => {
                 if self.x_position >= self.info.stride-1 {
                     self.newline();
                 }
@@ -168,7 +168,11 @@ impl TextWriter {
                 self.write_rendered_char(bitmap_char);
             },
             _ => {
-                self.write_char(INVALID_CHAR);
+                if self.x_position >= self.info.stride-1 {
+                    self.newline();
+                }
+                let bitmap_char = get_bitmap(INVALID_CHAR, FontWeight::Regular, BitmapHeight::Size16).unwrap();
+                self.write_rendered_char(bitmap_char);
             }
         }
         self.render_cursor();

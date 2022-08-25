@@ -57,6 +57,10 @@ pub extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: Interrupt
         // println!("Event tirgger: {:?}", event);
         match event {
             KeyEvent {
+                code: KeyCode::Delete,
+                state: KeyState::Down,
+            } => { },
+            KeyEvent {
                 code: KeyCode::Backspace,
                 state: KeyState::Down,
             } => {
@@ -121,8 +125,13 @@ pub extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: Interrupt
                     // println!("Key: {:?}", key);
                     match key {
                         DecodedKey::Unicode(charactor) => {
-                            print!("{:}", charactor);
-                            serial_print!("{:}", charactor);
+                            if charactor.is_ascii() {
+                                print!("{:}", charactor);
+                                serial_print!("{:}", charactor);
+                            } else {
+                                print!("{:?}", key);
+                                serial_print!("{:?}", key);
+                            }
                         },
                         DecodedKey::RawKey(key) => {
                             print!("{:?}", key);
