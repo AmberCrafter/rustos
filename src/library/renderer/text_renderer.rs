@@ -55,7 +55,6 @@ impl TextWriter {
             background_color,
         };
         writer.clear();
-        writer.render_cursor();
         writer
     }
 
@@ -71,6 +70,7 @@ impl TextWriter {
         self.x_position = 0;
         self.y_position = 0;
         self.framebuffer.fill(0);
+        self.render_cursor();
     }
 
     fn width(&self) -> usize {
@@ -82,19 +82,22 @@ impl TextWriter {
     }
 
     fn carriage_return(&mut self) {
+        self.render_cursor();
         self.x_position = 0;
+        self.render_cursor();
     }
     
     fn newline(&mut self) {
+        self.carriage_return();
         self.render_cursor();
         self.y_position += CURSOR_HEIGHT + LINE_SPACING;
-        self.carriage_return();
 
         if self.y_position >= (self.height() - CURSOR_HEIGHT -1) {
             // self.clear();
             self.shift_frame(1);
             self.cursor_last_line();
         }
+        // self.render_cursor();
     }
 
     fn bytes_per_text_line(&self) -> usize {
@@ -235,7 +238,6 @@ impl TextWriter {
         let _ = unsafe { core::ptr::read_volatile(&self.framebuffer[byte_offset]) };
     }
 
-    
     fn render_cursor(&mut self) {
         // ignore rendered_char value, only get 
         for y in 0..CURSOR_HEIGHT {

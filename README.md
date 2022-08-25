@@ -11,11 +11,17 @@ TODO LIST:
 1. - [ ] Convert TSS table into implementation with memory allocator
 2. - [x] Fix render overflow
 3. - [x] Make textrenderer support cursor
+4. - [ ] Package TextWriter as editor and console
+        - [ ] Document it!
+        - [ ] Editor
+        - [ ] Console
+        - [ ] Support Del?
 
 > Note.
 >
 > 1. Leave the Qemu: ctrl+a x (-serial mon:stdio)
 > 2. keyboard interrupt only work on graphic mode currently
+
 ---
 # Future works
  - [x] TextWriter: Support console like input
@@ -24,6 +30,10 @@ TODO LIST:
 
 ---
 # ChangeLog
+[2022-08-25]
+1. Finished keyboard interrupt
+2. Update TextEditor: Support cursor, Bugfix
+
 [2022-08-24]
 1. Solve ireqt double fault exception
 

@@ -8,6 +8,7 @@ use std::{
 // const RUN_ARGS: &[&str] = &["--no-reboot", "-s", "-nographic", "-monitor", "telnet::45454,server,nowait", "-serial", "mon:stdio"];
 // const RUN_ARGS: &[&str] = &["--no-reboot", "-s", "-nographic", "-serial", "mon:stdio"];
 // const RUN_ARGS: &[&str] = &["--no-reboot", "-s", "-serial", "mon:stdio"];
+// const RUN_ARGS: &[&str] = &["--no-reboot", "-s", "-S"];
 // const RUN_ARGS: &[&str] = &["--no-reboot", "-s"];
 const RUN_ARGS: &[&str] = &["--no-reboot"];
 

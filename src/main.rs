@@ -23,10 +23,12 @@ entry_point!(kernel::main);
 mod kernel {
     use super::PanicInfo;
     use super::BootInfo;
+    use super::println;
     use super::serial_println;
 
     pub fn main(boot_info: &'static mut BootInfo) -> ! {
         rustos::init(boot_info);
+        println!("Hello, this is main::kernel");
         serial_println!("Hello, this is main::kernel");
         rustos::hlt_loop();
     }
