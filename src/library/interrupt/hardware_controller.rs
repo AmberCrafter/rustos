@@ -13,7 +13,8 @@ pub static PICS: Mutex<ChainedPics> = Mutex::new(
 #[derive(Debug, Clone, Copy)]
 #[repr(u8)]
 pub enum InterruptIndex {
-    Timer = PIC_1_OFFSET
+    Timer = PIC_1_OFFSET,
+    Keyborad = PIC_1_OFFSET+1,
 }
 
 impl InterruptIndex {

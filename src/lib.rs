@@ -16,9 +16,8 @@ pub fn init(boot_info: &'static mut BootInfo) {
     // library::renderer::init(boot_info);
     library::gdt::init_gdt();
     library::interrupt::init_idt();
-    // library::interrupt::init_pic();
-    // library::interrupt::enable_hardware_interrupt(); // enable pic
-
+    library::interrupt::init_pic();
+    library::interrupt::enable_hardware_interrupt(); // enable pic
 }
 
 pub fn hlt_loop() -> ! {

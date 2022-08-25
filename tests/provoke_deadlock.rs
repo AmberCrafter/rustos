@@ -20,7 +20,7 @@ use rustos::{print, println};
 entry_point!(main);
 pub fn main(boot_info: &'static mut BootInfo) -> ! {
     rustos::init(boot_info);
-    serial_println!("Hello, this is tests::interrupt");
+    serial_println!("Hello, this is tests::provoke_deadlock");
     test_main();
     rustos::hlt_loop();
 }
@@ -32,19 +32,10 @@ fn panic(info: &PanicInfo) -> ! {
 
 
 #[test_case]
-fn test_interrupt_breakpoint() {
-    // invoke a breakpoint exception
-    x86_64::instructions::interrupts::int3();
-    serial_println!("After invoke breakpoint interrupt");
-}
-
-#[test_case]
-fn test_interrupt_double_fault() {
-    // invoke a double_fault exception
-    // trigger a page fault
-    unsafe {
-        *(0xdeadbeef as *mut u64) = 42;
-    };
-    serial_println!("After invoke double_fault interrupt");
+fn test_deadlock() {
+    // running time interrupt in the background
+    loop {
+        serial_print!("-");
+    }
 }
 
