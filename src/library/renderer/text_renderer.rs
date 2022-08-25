@@ -75,6 +75,10 @@ impl TextWriter {
         self.info.horizontal_resolution
     }
 
+    fn width_screen(&self) -> usize {
+        self.info.stride * self.info.bytes_per_pixel
+    }
+
     fn height(&self) -> usize {
         self.info.vertical_resolution
     }
@@ -121,14 +125,15 @@ impl TextWriter {
             '\n' => self.newline(),
             '\r' => self.carriage_return(),
             c => {
-                if self.x_position >= self.width() {
+                if self.x_position >= self.width_screen() {
                     self.newline();
                 }
 
                 const BITMAP_LETTER_WIDTH: usize =
                     get_bitmap_width(FontWeight::Regular, BitmapHeight::Size16);
-                if self.y_position >= (self.height() - BITMAP_LETTER_WIDTH) {
-                    self.clear();
+                if self.y_position >= (self.height() - BITMAP_LETTER_WIDTH - 1) {
+                    // self.clear();
+                    self.shift_frame(1);
                 }
                 let bitmap_char = get_bitmap(c, FontWeight::Regular, BitmapHeight::Size16).unwrap();
                 self.write_rendered_char(bitmap_char);

@@ -55,14 +55,14 @@ pub extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: Interrupt
         if let Some(key) = keyboard.process_keyevent(event) {
             println!("Key: {:?}", key);
             match key {
+                DecodedKey::Unicode(charactor) => {
+                    print!("{:}", charactor);
+                    serial_print!("{:}", charactor);
+                },
                 DecodedKey::RawKey(key) => {
                     print!("{:?}", key);
                     serial_print!("{:?}", key);
                 },
-                DecodedKey::Unicode(charactor) => {
-                    print!("{:}", charactor);
-                    serial_print!("{:}", charactor);
-                }
             }
         }
     }
