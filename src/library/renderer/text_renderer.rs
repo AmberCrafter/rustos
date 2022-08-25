@@ -75,10 +75,6 @@ impl TextWriter {
         self.info.horizontal_resolution
     }
 
-    fn width_screen(&self) -> usize {
-        self.info.stride * self.info.bytes_per_pixel
-    }
-
     fn height(&self) -> usize {
         self.info.vertical_resolution
     }
@@ -90,11 +86,32 @@ impl TextWriter {
     fn newline(&mut self) {
         self.y_position += CURSOR_HEIGHT + LINE_SPACING;
         self.carriage_return();
+
+        const BITMAP_LETTER_WIDTH: usize =
+            get_bitmap_width(FontWeight::Regular, BitmapHeight::Size16);
+        if self.y_position >= (self.height() - BITMAP_LETTER_WIDTH -1) {
+            // self.clear();
+            self.shift_frame(1);
+            self.cursor_last_line();
+        }
     }
 
     fn bytes_per_text_line(&self) -> usize {
         self.info.bytes_per_pixel * self.info.stride * CURSOR_HEIGHT
     }
+
+    pub fn cursor_up(&mut self) {
+        self.y_position -= CURSOR_HEIGHT;
+    }
+    pub fn cursor_down(&mut self) {
+        self.y_position += CURSOR_HEIGHT;
+    }
+    // pub fn cursor_left(&mut self) {
+    //     self.x_position -= rendered_char.width();
+    // }
+    // pub fn cursor_right(&mut self) {
+    //     self.x_position += rendered_char.width();
+    // }
 
     pub fn cursor_last_line(&mut self) {
         self.x_position = 0;
@@ -121,22 +138,20 @@ impl TextWriter {
     }
 
     pub fn write_char(&mut self, c: char) {
+        const invalid_char: char = 0xfe as char;
         match c {
             '\n' => self.newline(),
             '\r' => self.carriage_return(),
-            c => {
-                if self.x_position >= self.width() {
+            // TODO: Need to filter invalid charactors
+            c @ ' '..=invalid_char => {
+                if self.x_position >= self.info.stride-1 {
                     self.newline();
-                }
-
-                const BITMAP_LETTER_WIDTH: usize =
-                    get_bitmap_width(FontWeight::Regular, BitmapHeight::Size16);
-                if self.y_position >= (self.height() - BITMAP_LETTER_WIDTH) {
-                    self.clear();
-                    // self.shift_frame(1);
                 }
                 let bitmap_char = get_bitmap(c, FontWeight::Regular, BitmapHeight::Size16).unwrap();
                 self.write_rendered_char(bitmap_char);
+            },
+            _ => {
+                self.write_char(invalid_char);
             }
         }
     }
