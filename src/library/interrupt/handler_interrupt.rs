@@ -48,7 +48,7 @@ pub extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: Interrupt
         port.read()
     };
     
-    print!("Scancode: {:?}", scancode);
+    println!("Scancode: {:?}", scancode);
 
     if let Ok(Some(event)) = keyboard.add_byte(scancode) {
         println!("Event tirgger: {:?}", event);
@@ -56,8 +56,8 @@ pub extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: Interrupt
             println!("Key: {:?}", key);
             match key {
                 DecodedKey::Unicode(charactor) => {
-                    print!("{:}", charactor);
-                    serial_print!("{:}", charactor);
+                    print!("{:?}", charactor);
+                    serial_print!("{:?}", charactor);
                 },
                 DecodedKey::RawKey(key) => {
                     print!("{:?}", key);
