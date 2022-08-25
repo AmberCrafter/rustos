@@ -3,10 +3,13 @@ use std::{
     process::Command,
 };
 
+// -nographic can't combine with -serial stdio, need to use -serial mon:stdio
+
 // const RUN_ARGS: &[&str] = &["--no-reboot", "-s", "-nographic", "-monitor", "telnet::45454,server,nowait", "-serial", "mon:stdio"];
 // const RUN_ARGS: &[&str] = &["--no-reboot", "-s", "-nographic", "-serial", "mon:stdio"];
 // const RUN_ARGS: &[&str] = &["--no-reboot", "-s", "-serial", "mon:stdio"];
 // const RUN_ARGS: &[&str] = &["--no-reboot", "-s"];
+// const RUN_ARGS: &[&str] = &["--no-reboot"];
 
 // This use on non-UI environment
 const RUN_ARGS: &[&str] = &["--no-reboot", "-display", "none", "-serial", "stdio"];
