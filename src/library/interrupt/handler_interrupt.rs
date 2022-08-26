@@ -3,7 +3,9 @@ use pc_keyboard::Keyboard;
 use spin::Lazy;
 use spin::Mutex;
 use x86_64::structures::idt::InterruptStackFrame;
+use x86_64::structures::idt::PageFaultErrorCode;
 
+use crate::hlt_loop;
 use crate::library::renderer::TEXTWRITER;
 use crate::print;
 use crate::println;
@@ -13,8 +15,8 @@ use super::PICS;
 use super::InterruptIndex;
 
 pub extern "x86-interrupt" fn breakpoint_handler(stack_frame: InterruptStackFrame) {
-    println!("[Interrupt] Exception: BREAKPOINT\n{:#?}\n", stack_frame);
-    serial_println!("[Interrupt] Exception: BREAKPOINT\n{:#?}\n", stack_frame);
+    println!("\n[Interrupt] Exception: BREAKPOINT\n{:#?}\n", stack_frame);
+    serial_println!("\n[Interrupt] Exception: BREAKPOINT\n{:#?}\n", stack_frame);
 }
 
 pub extern "x86-interrupt" fn double_fault_handler(stack_frame: InterruptStackFrame, _error_code: u64) -> ! {
@@ -148,4 +150,21 @@ pub extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: Interrupt
     unsafe {
         PICS.lock().notify_end_of_interrupt(InterruptIndex::Keyboard.as_u8());
     }
+}
+
+
+pub extern "x86-interrupt" fn page_fault_handler(stack_frame: InterruptStackFrame, error_code: PageFaultErrorCode) {
+    //The CR2 register is automatically set by the CPU on a page fault and contains the accessed virtual address that caused the page fault.
+    use x86_64::registers::control::Cr2;
+    println!("\n[Interrupt] Exception: PAGE FAULT");
+    println!("Accessed Address: {:?}", Cr2::read());
+    println!("Error Code: {:?}", error_code);
+    println!("{:#?}", stack_frame);
+
+    serial_println!("\n[Interrupt] Exception: PAGE FAULT");
+    serial_println!("Accessed Address: {:?}", Cr2::read());
+    serial_println!("Error Code: {:?}", error_code);
+    serial_println!("{:#?}", stack_frame);
+
+    hlt_loop()
 }

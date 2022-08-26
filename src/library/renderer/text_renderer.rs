@@ -73,6 +73,7 @@ impl TextWriter {
         self.render_cursor();
     }
 
+    #[allow(unused)]
     fn width(&self) -> usize {
         self.info.horizontal_resolution
     }

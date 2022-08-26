@@ -31,20 +31,32 @@ fn panic(info: &PanicInfo) -> ! {
 }
 
 
-#[test_case]
-fn test_interrupt_breakpoint() {
-    // invoke a breakpoint exception
-    x86_64::instructions::interrupts::int3();
-    serial_println!("After invoke breakpoint interrupt");
-}
+// #[test_case]
+// fn test_interrupt_breakpoint() {
+//     // invoke a breakpoint exception
+//     x86_64::instructions::interrupts::int3();
+//     serial_println!("After invoke breakpoint interrupt");
+// }
+
+// #[test_case]
+// fn test_interrupt_double_fault() {
+//     // invoke a double_fault exception
+//     // trigger a page fault
+//     unsafe {
+//         *(0xdeadbeef as *mut u64) = 42;
+//     };
+//     serial_println!("After invoke double_fault interrupt");
+// }
 
 #[test_case]
-fn test_interrupt_double_fault() {
-    // invoke a double_fault exception
+fn test_interrupt_page_fault() {
+    // invoke a page_fault exception
     // trigger a page fault
+
+    let ptr = 0xdeadbeef as *mut u64;
     unsafe {
-        *(0xdeadbeef as *mut u64) = 42;
+        *ptr = 42;
     };
-    serial_println!("After invoke double_fault interrupt");
+    serial_println!("After invoke page_fault interrupt");
 }
 
