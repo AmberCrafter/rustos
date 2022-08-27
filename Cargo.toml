@@ -35,7 +35,7 @@ pc-keyboard = "0.5.1"
 
 [package.metadata.bootloader]
 map-physical-memory = true
-# physical-memory-offset = "0x0000_4000_0000_0000"
+physical-memory-offset = "0x0000_4000_0000_0000"  # default value: 0x0000_0180_0000_0000
 # map-page-table-recursively = true
 # recursive-index = 511
 kernel-stack-size = 0x000a_0000

@@ -5,6 +5,9 @@
 #![reexport_test_harness_main = "test_main"]
 
 #![feature(abi_x86_interrupt)]
+// #![feature(alloc_error_handler)]
+
+// extern crate alloc;
 
 
 #[allow(unused)]
@@ -47,4 +50,9 @@ mod tests {
     fn panic(info: &PanicInfo) -> ! {
         crate::library::handler_panic::kernel_panic::panic_handler(info)
     }
+
+    // #[alloc_error_handler]
+    // fn alloc_error_handler(layout: alloc::alloc::Layout) ->! {
+    //     rustos::library::handler_panic::kernel_panic::alloc_error_handler(layout)
+    // }
 }

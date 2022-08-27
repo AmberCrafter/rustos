@@ -5,6 +5,10 @@
 #![reexport_test_harness_main = "test_main"]
 
 #![feature(abi_x86_interrupt)]
+// #![feature(alloc_error_handler)]
+
+// extern crate alloc;
+
 
 use bootloader::{entry_point, BootInfo};
 // use spin::Mutex;
@@ -37,6 +41,11 @@ mod kernel {
     fn panic(info: &PanicInfo) -> ! {
         rustos::library::handler_panic::kernel_panic::panic_handler(info)
     }
+
+    // #[alloc_error_handler]
+    // fn alloc_error_handler(layout: alloc::alloc::Layout) ->! {
+    //     rustos::library::handler_panic::kernel_panic::alloc_error_handler(layout)
+    // }
 }
 
 
@@ -59,4 +68,9 @@ mod tests {
     fn panic(info: &PanicInfo) -> ! {
         rustos::library::handler_panic::kernel_panic::panic_handler(info)
     }
+
+    // #[alloc_error_handler]
+    // fn alloc_error_handler(layout: alloc::alloc::Layout) ->! {
+    //     rustos::library::handler_panic::kernel_panic::alloc_error_handler(layout)
+    // }
 }

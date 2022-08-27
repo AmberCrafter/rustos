@@ -4,7 +4,11 @@
 #![feature(custom_test_frameworks)]
 #![test_runner(rustos::library::unittest::test_runner)]
 #![reexport_test_harness_main = "test_main"]
+
 #![feature(abi_x86_interrupt)]
+#![feature(alloc_error_handler)]
+
+extern crate alloc;
 
 use bootloader::{entry_point, BootInfo};
 use rustos::library::qemu::{exit_qemu, QemuExitCode};
@@ -31,6 +35,11 @@ pub fn main(boot_info: &'static mut BootInfo) -> ! {
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     rustos::library::handler_panic::kernel_panic::should_panic_handler(info)
+}
+
+#[alloc_error_handler]
+fn alloc_error_handler(layout: alloc::alloc::Layout) ->! {
+    rustos::library::handler_panic::kernel_panic::alloc_error_handler(layout)
 }
 
 static TEST_IDT: Lazy<InterruptDescriptorTable> = Lazy::new(|| {

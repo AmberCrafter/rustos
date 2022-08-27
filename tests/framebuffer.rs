@@ -6,6 +6,10 @@
 #![test_runner(rustos::library::unittest::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
+#![feature(alloc_error_handler)]
+
+extern crate alloc;
+
 use bootloader::{entry_point, BootInfo};
 // use spin::Mutex;
 use core::panic::PanicInfo;
@@ -27,6 +31,11 @@ pub fn main(boot_info: &'static mut BootInfo) -> ! {
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     rustos::library::handler_panic::kernel_panic::panic_handler(info)
+}
+
+#[alloc_error_handler]
+fn alloc_error_handler(layout: alloc::alloc::Layout) ->! {
+    rustos::library::handler_panic::kernel_panic::alloc_error_handler(layout)
 }
 
 // test case

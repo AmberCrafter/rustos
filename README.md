@@ -27,6 +27,8 @@ TODO LIST:
  - [x] TextWriter: Support console like input
  - [x] Make cargo ktest work
  - [ ] Implement APIC (current use 8259 PIC)
+ - [ ] Learn E820 (memory controller?)
+
 
 ---
 # ChangeLog

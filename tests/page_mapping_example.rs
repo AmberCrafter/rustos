@@ -1,0 +1,63 @@
+// this test will be invalid in future
+
+#![no_std]
+#![no_main]
+#![feature(custom_test_frameworks)]
+#![test_runner(rustos::library::unittest::test_runner)]
+#![reexport_test_harness_main = "test_main"]
+
+// #![feature(alloc_error_handler)]
+
+// extern crate alloc;
+
+use bootloader::{entry_point, BootInfo};
+use x86_64::VirtAddr;
+use x86_64::structures::paging::Page;
+// use spin::Mutex;
+use core::panic::PanicInfo;
+
+use rustos;
+#[allow(unused)]
+use rustos::{print, println};
+#[allow(unused)]
+use rustos::{serial_print, serial_println};
+
+entry_point!(main);
+pub fn main(boot_info: &'static mut BootInfo) -> ! {
+    let physical_memory_offset = VirtAddr::new(boot_info.physical_memory_offset.into_option().unwrap());
+    rustos::init(boot_info);
+    serial_println!("Hello, this is tests::page_mapping_example");
+    test_mapping_example(physical_memory_offset);
+    test_main();
+    rustos::hlt_loop()
+}
+
+#[panic_handler]
+fn panic(info: &PanicInfo) -> ! {
+    rustos::library::handler_panic::kernel_panic::panic_handler(info)
+}
+
+// #[alloc_error_handler]
+// fn alloc_error_handler(layout: alloc::alloc::Layout) ->! {
+//     rustos::library::handler_panic::kernel_panic::alloc_error_handler(layout)
+// }
+
+// test case
+fn test_mapping_example(physical_memory_offset: VirtAddr) {
+    // get mapper(Page manager) and frame_allocator
+    let mut mapper = unsafe {rustos::library::memory::init(physical_memory_offset)};
+    let mut frame_allocator = rustos::library::memory::frame_allocator::empty_allocator::EmptyAllocator;
+
+    // choose a unused page
+    let page = Page::containing_address(VirtAddr::new(0x0));
+    rustos::library::memory::example_mapping::create_example_mapping(page, &mut mapper, &mut frame_allocator);
+
+
+    let page_ptr: *mut u64 = page.start_address().as_mut_ptr();
+    unsafe {
+        page_ptr.offset(110).write_volatile(0x90);
+        page_ptr.offset(111).write_volatile(0x90);
+        page_ptr.offset(112).write_volatile(0x90);
+        page_ptr.offset(113).write_volatile(0x90);
+    }
+}

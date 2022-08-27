@@ -27,3 +27,8 @@ pub fn should_panic_handler(info: &PanicInfo) -> ! {
     exit_qemu(QemuExitCode::Success);
     hlt_loop()
 }
+
+// #[allow(unused)]
+// pub fn alloc_error_handler(layout: alloc::alloc::Layout) ->! {
+//     panic!("alloc error: {:?}", layout)
+// }
