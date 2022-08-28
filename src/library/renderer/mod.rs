@@ -1,10 +1,11 @@
-use bootloader::BootInfo;
+use bootloader::{BootInfo, boot_info::FrameBuffer};
 
 pub use self::text_renderer::TEXTWRITER;
 
 pub mod color;
 pub mod text_renderer;
 
-pub fn init(boot_info: &'static mut BootInfo) {
-    text_renderer::init(boot_info);
+pub fn init(framebuffer: Option<&'static mut FrameBuffer>) {
+    if framebuffer.is_none() {panic!("FrameBuffer initialize failed");}
+    text_renderer::init(framebuffer);
 }

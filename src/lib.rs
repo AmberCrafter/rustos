@@ -10,18 +10,30 @@
 // extern crate alloc;
 
 
+use bootloader::boot_info::MemoryRegions;
 #[allow(unused)]
 use bootloader::{BootInfo, entry_point};
+use library::memory::frame_allocator::bootinfo_allocator::BootInfoFrameAllocator;
 #[macro_use]
 pub mod library;
 
 pub fn init(boot_info: &'static mut BootInfo) {
-    library::renderer::init(boot_info);
+    let framebuffer = boot_info.framebuffer.as_mut().take();
+
+    library::renderer::init(framebuffer);
     library::gdt::init_gdt();
     library::interrupt::init_idt();
     library::interrupt::init_pic();
     library::interrupt::enable_hardware_interrupt(); // enable pic
+    
 }
+
+// unsafe fn init_memory_map(memory_region: &'static mut MemoryRegions) {
+//     // unsafe: need valid memory_region
+//     let mut frame_allocator = library::memory::frame_allocator::bootinfo_allocator::BootInfoFrameAllocator::init(&boot_info.memory_regions);
+
+
+// }
 
 pub fn hlt_loop() -> ! {
     loop {

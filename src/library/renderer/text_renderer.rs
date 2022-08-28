@@ -3,7 +3,7 @@ use super::color::{Color, ColorRGB};
 use core::fmt::{Arguments, Write};
 
 use bootloader::{
-    boot_info::{FrameBufferInfo, PixelFormat},
+    boot_info::{FrameBufferInfo, PixelFormat, FrameBuffer},
     BootInfo,
 };
 use noto_sans_mono_bitmap::{get_bitmap, get_bitmap_width, BitmapChar, BitmapHeight, FontWeight};
@@ -16,9 +16,9 @@ const LINE_SPACING: usize = 0;
 
 pub static TEXTWRITER: OnceCell<Mutex<TextWriter>> = OnceCell::uninit();
 
-pub fn init(boot_info: &'static mut BootInfo) {
+pub fn init(framebuffer: Option<&'static mut FrameBuffer>) {
     // init TEXTWRITER
-    if let Some(framebuffer) = boot_info.framebuffer.as_mut() {
+    if let Some(framebuffer) = framebuffer {
         let info = framebuffer.info();
         let framebuffer = framebuffer.buffer_mut();
         let writer = TEXTWRITER.get_or_init(move || {
