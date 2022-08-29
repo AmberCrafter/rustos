@@ -50,6 +50,8 @@ When we want to address 0xFFFF, we can set:
 posiiton: CS:IP
 
 ### Data 
+position: DS:BX | DS:DI | DS:SI
+position: ES:BX | ES:DI | ES:SI
 position: DS:[bx] can be simplfied as [bx], but not other segment registers. This mean only ES:[bx] is valid (for exmaple).
 
  - DS:[bx] => Valid

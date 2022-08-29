@@ -6,9 +6,9 @@
 #![test_runner(rustos::library::unittest::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
-// #![feature(alloc_error_handler)]
+#![feature(alloc_error_handler)]
 
-// extern crate alloc;
+extern crate alloc;
 
 use bootloader::boot_info::FrameBuffer;
 use bootloader::{entry_point, BootInfo};
@@ -46,10 +46,10 @@ fn panic(info: &PanicInfo) -> ! {
     rustos::library::handler_panic::kernel_panic::panic_handler(info)
 }
 
-// #[alloc_error_handler]
-// fn alloc_error_handler(layout: alloc::alloc::Layout) ->! {
-//     rustos::library::handler_panic::kernel_panic::alloc_error_handler(layout)
-// }
+#[alloc_error_handler]
+fn alloc_error_handler(layout: alloc::alloc::Layout) ->! {
+    rustos::library::handler_panic::kernel_panic::alloc_error_handler(layout)
+}
 
 // test case
 // #[test_case]

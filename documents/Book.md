@@ -1,0 +1,4 @@
+- i386 reading: https://pdos.csail.mit.edu/6.828/2005/readings/i386
+- osdev: https://wiki.osdev.org/Main_Page
+- 知呼[术道经纬]: https://zhuanlan.zhihu.com/p/93289632
+- blog_os: https://os.phil-opp.com/

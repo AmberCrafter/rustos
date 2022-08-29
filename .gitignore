@@ -17,5 +17,3 @@ Cargo.lock
 
 # some testing code
 /disable
-src/library/allocator
-tests/allocation.rs
