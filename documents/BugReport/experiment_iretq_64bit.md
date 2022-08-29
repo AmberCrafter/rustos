@@ -381,5 +381,5 @@ When the new GDT set by our rust code (under long mode with paging), `SS` is not
 Due to iretq is used (ss:rsp) to restore the stack, which will offset our virtural memory into invalid memory position.
 $$SS:RPS = VirtualMemory + SS<<4$$
 
-To solve this problem, we need to set `SS=0` or other valid value when set GDT by our rust code.
+To solve this problem, we need to set `SS=0` or other valid value when set GDT by our rust code. (Flat model?)
 

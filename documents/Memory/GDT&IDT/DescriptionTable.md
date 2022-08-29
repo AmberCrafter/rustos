@@ -1,6 +1,5 @@
 # Description Table
 
-
 ### Access step:
  * [GDT](https://www.twblogs.net/a/5b89f4f32b71775d1ce4a8ce)
 
