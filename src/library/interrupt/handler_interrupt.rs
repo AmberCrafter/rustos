@@ -36,116 +36,15 @@ pub extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptSta
 // need to read out the buffer, otherwise keyboard interrupt will be stuck
 // Use the pc-keyboard to decode it 
 pub extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStackFrame) {
-    use pc_keyboard::{ layouts::Us104Key, ScancodeSet1, HandleControl::Ignore, DecodedKey, KeyCode, KeyState };
     use x86_64::instructions::port::Port;
-    use x86_64::instructions::interrupts::without_interrupts;
+    use crate::library::renderer::pc_keyboard_interface;
 
-    static KEYBOARD: Lazy<Mutex<Keyboard<Us104Key, ScancodeSet1>>> = Lazy::new(|| {
-        let keyboard = pc_keyboard::Keyboard::new(
-            Us104Key, ScancodeSet1, Ignore
-        );
-        Mutex::new(keyboard) 
-    });
-
-    let mut keyboard = KEYBOARD.lock();
     let mut port = Port::new(0x60);
     let scancode:u8 = unsafe {
         port.read()
     };
-    
     // println!("Scancode: {:?}", scancode);
-
-    if let Ok(Some(event)) = keyboard.add_byte(scancode) {
-        // println!("Event tirgger: {:?}", event);
-        match event {
-            KeyEvent {
-                code: KeyCode::Delete,
-                state: KeyState::Down,
-            } => { },
-            KeyEvent {
-                code: KeyCode::Backspace,
-                state: KeyState::Down,
-            } => {
-                if let Some(writer) = TEXTWRITER.get() {
-                    without_interrupts(|| {
-                        writer
-                            .lock()
-                            .cursor_left()
-                    })
-                }
-            },
-            KeyEvent {
-                code: KeyCode::ArrowLeft,
-                state: KeyState::Down,
-            } => {
-                if let Some(writer) = TEXTWRITER.get() {
-                    without_interrupts(|| {
-                        writer
-                            .lock()
-                            .cursor_left()
-                    })
-                }
-            },
-            KeyEvent {
-                code: KeyCode::ArrowRight,
-                state: KeyState::Down,
-            } => {
-                if let Some(writer) = TEXTWRITER.get() {
-                    without_interrupts(|| {
-                        writer
-                            .lock()
-                            .cursor_right()
-                    })
-                }
-            },
-            KeyEvent {
-                code: KeyCode::ArrowUp,
-                state: KeyState::Down,
-            } => {
-                if let Some(writer) = TEXTWRITER.get() {
-                    without_interrupts(|| {
-                        writer
-                            .lock()
-                            .cursor_up()
-                    })
-                }
-            },
-            KeyEvent {
-                code: KeyCode::ArrowDown,
-                state: KeyState::Down,
-            } => {
-                if let Some(writer) = TEXTWRITER.get() {
-                    without_interrupts(|| {
-                        writer
-                            .lock()
-                            .cursor_down()
-                    })
-                }
-            },
-            _ => {
-                if let Some(key) = keyboard.process_keyevent(event) {
-                    // println!("Key: {:?}", key);
-                    match key {
-                        DecodedKey::Unicode(charactor) => {
-                            if charactor.is_ascii() {
-                                print!("{:}", charactor);
-                                serial_print!("{:}", charactor);
-                            } else {
-                                print!("{:?}", key);
-                                serial_print!("{:?}", key);
-                            }
-                        },
-                        DecodedKey::RawKey(key) => {
-                            print!("{:?}", key);
-                            serial_print!("{:?}", key);
-                        },
-                    }
-                }
-            }
-        }
-    }
-    
-    // println!("Reach");
+    pc_keyboard_interface::execute(scancode);
 
     unsafe {
         PICS.lock().notify_end_of_interrupt(InterruptIndex::Keyboard.as_u8());
