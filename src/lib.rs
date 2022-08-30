@@ -31,6 +31,8 @@ pub fn init(boot_info: &'static mut BootInfo) {
     unsafe {
         init_memory_map(physical_memory_offset, &mut boot_info.memory_regions);
     }
+
+    library::task::init();
 }
 
 unsafe fn init_memory_map(physical_memory_offset: VirtAddr, memory_regions: &'static mut MemoryRegions) {

@@ -1,7 +1,10 @@
 pub mod simple_executor;
+pub mod keyboard;
 
 use core::{pin::Pin, future::Future, task::{Context, Poll}};
 use alloc::boxed::Box;
+
+use self::simple_executor::SimpleExecutor;
 
 
 pub struct Task {
@@ -18,4 +21,11 @@ impl Task {
     fn poll(&mut self, context: &mut Context) -> Poll<()> {
         self.future.as_mut().poll(context)
     }
+}
+
+
+pub fn init() {
+    let mut executor = SimpleExecutor::new();
+    executor.spawn(Task::new(keyboard::execute_keycode()));
+    executor.run();
 }
