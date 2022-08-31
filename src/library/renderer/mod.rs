@@ -1,4 +1,4 @@
-use bootloader::{BootInfo, boot_info::FrameBuffer};
+use bootloader::boot_info::FrameBuffer;
 
 pub use self::text_renderer::TEXTWRITER;
 

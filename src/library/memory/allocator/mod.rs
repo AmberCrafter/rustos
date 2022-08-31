@@ -1,4 +1,4 @@
-mod dummy_allocator;
+// mod dummy_allocator;
 
 use linked_list_allocator::LockedHeap;
 use x86_64::{structures::paging::{Mapper, Size4KiB, FrameAllocator, mapper::MapToError, Page, PageTableFlags}, VirtAddr};

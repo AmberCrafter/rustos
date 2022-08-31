@@ -1,16 +1,13 @@
-use pc_keyboard::KeyEvent;
-use pc_keyboard::Keyboard;
-use spin::Lazy;
-use spin::Mutex;
 use x86_64::structures::idt::InterruptStackFrame;
 use x86_64::structures::idt::PageFaultErrorCode;
 
 use crate::hlt_loop;
-use crate::library::renderer::TEXTWRITER;
 use crate::library::task;
-use crate::print;
-use crate::println;
-use crate::serial_println;
+
+#[allow(unused)]
+use crate::{print, println};
+#[allow(unused)]
+use crate::{serial_print, serial_println};
 
 use super::PICS;
 use super::InterruptIndex;

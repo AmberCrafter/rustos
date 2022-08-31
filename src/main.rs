@@ -25,7 +25,6 @@ entry_point!(kernel::main);
 
 #[cfg(not(test))]
 mod kernel {
-    use alloc::boxed::Box;
 
     use super::PanicInfo;
     use super::BootInfo;

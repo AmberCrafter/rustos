@@ -2,7 +2,7 @@
 // Virtual memory:  page
 
 use crate::println;
-use x86_64::{registers::control::Cr3, VirtAddr, structures::paging::{PageTable, OffsetPageTable}};
+use x86_64::{registers::control::Cr3, VirtAddr, structures::paging::PageTable};
 
 // pub(super) unsafe fn get_level_4_table(physical_memory_offset: VirtAddr) -> &'static mut PageTable {
 pub unsafe fn get_level_4_table(physical_memory_offset: VirtAddr) -> &'static mut PageTable {

@@ -4,7 +4,6 @@ use core::fmt::{Arguments, Write};
 
 use bootloader::{
     boot_info::{FrameBufferInfo, PixelFormat, FrameBuffer},
-    BootInfo,
 };
 use noto_sans_mono_bitmap::{get_bitmap, get_bitmap_width, BitmapChar, BitmapHeight, FontWeight};
 
