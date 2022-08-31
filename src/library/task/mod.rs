@@ -19,7 +19,6 @@ impl TaskId {
     }
 }
 
-
 pub struct Task {
     id: TaskId,
     future: Pin<Box<dyn Future<Output = ()>>>
