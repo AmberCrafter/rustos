@@ -32,6 +32,9 @@ TODO LIST:
 
 ---
 # ChangeLog
+[2022-08-31]
+1. Finished async implement
+
 [2022-08-25]
 1. Finished keyboard interrupt
 2. Update TextEditor: Support cursor, Bugfix
