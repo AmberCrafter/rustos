@@ -88,13 +88,13 @@ impl Executor {
         } = self;
 
         while let Some(task_id) = task_queue.pop() {
-            let task = match tasks.get(&task_id) {
+            let task = match tasks.get_mut(&task_id) {
                 Some(task) => task,
                 None => continue,
             };
 
             let waker = waker_cache
-                .entry(&task_id)
+                .entry(task_id)
                 .or_insert_with(|| TaskWaker::new(task_id, task_queue.clone()));
 
             let mut context = Context::from_waker(waker);
