@@ -4,3 +4,5 @@
 - blog_os: https://os.phil-opp.com/
 - syscall: https://docs.rs/crate/syscall/latest/source/src/platform/linux-x86_64/mod.rs
 - interrup and syscall: https://www.cs.unc.edu/~porter/courses/comp530/f16/slides/interrupts.pdf
+
+- exmaple: https://github.com/martimos/kernel
