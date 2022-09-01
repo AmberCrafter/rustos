@@ -8,6 +8,7 @@
 
 extern crate alloc;
 
+use alloc::collections::BTreeMap;
 use bootloader::{entry_point, BootInfo};
 // use spin::Mutex;
 use core::panic::PanicInfo;
@@ -59,4 +60,14 @@ fn test_alloc_box() {
     serial_println!("current reference count is {}", Rc::strong_count(&cloned_reference));
     core::mem::drop(reference_counted);
     serial_println!("reference count is {} now", Rc::strong_count(&cloned_reference));
+
+    serial_println!("Test BTreeMap");
+    let mut map = BTreeMap::new();
+    map.insert(1, "One");
+    map.insert(2, "Two");
+    map.insert(3, "Three");
+
+    for key in map.keys() {
+        serial_println!("key: {:?}, value: {:?}", key, map.get(key));
+    }
 }

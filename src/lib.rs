@@ -7,6 +7,8 @@
 #![feature(abi_x86_interrupt)]
 #![feature(alloc_error_handler)]
 
+#![feature(thread_local)]
+
 extern crate alloc;
 
 
@@ -19,6 +21,7 @@ use x86_64::VirtAddr;
 pub mod library;
 
 pub fn init(boot_info: &'static mut BootInfo) {
+    serial_println!("Start init");
     let physical_memory_offset = VirtAddr::new(boot_info.physical_memory_offset.into_option().unwrap());
     let framebuffer = boot_info.framebuffer.as_mut().take();
 
@@ -32,8 +35,12 @@ pub fn init(boot_info: &'static mut BootInfo) {
         init_memory_map(physical_memory_offset, &mut boot_info.memory_regions);
     }
 
-    library::task::init();
+    
+    // library::task::init();
     library::context::init();
+    
+    library::filesystem::vfs::init();
+    serial_println!("Finished init");
 }
 
 unsafe fn init_memory_map(physical_memory_offset: VirtAddr, memory_regions: &'static mut MemoryRegions) {
