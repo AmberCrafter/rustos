@@ -1,52 +1,49 @@
-// use crate::library::filesystem::{FsId, FileSystem};
+use crate::library::{filesystem::{FsId, FileSystem, flags::{Mode, OpenFlags}, file_descriptor::FileDescriptor}, syscall::error::Errno};
 
-// pub struct TestFs {
-//     fsid: FsId,
-//     init_called: usize
-// }
+pub struct TestFs {
+    fsid: FsId,
+    init_callback: Option<fn()>,
+    open_callback: Option<fn(&str, Mode, OpenFlags)>
+}
 
-// impl TestFs {
-//     pub fn from(fsid: FsId) -> Self {
-//         Self {
-//             fsid,
-//             init_called: 0
-//         }
-//     }
+impl TestFs {
+    pub fn from(fsid: FsId) -> Self {
+        Self {
+            fsid,
+            init_callback: None,
+            open_callback: None
+        }
+    }
 
-//     pub fn init_called_count(&self) -> usize {
-//         self.init_called
-//     }
-// }
+    pub fn set_initialize_callback(&mut self, callback: fn()) {
+        self.init_callback = Some(callback);
+    }
+}
 
-// impl FileSystem for TestFs {
-//     fn fsid(&self) -> FsId {
-//         self.fsid
-//     }
+impl FileSystem for TestFs {
+    fn fsid(&self) -> FsId {
+        self.fsid
+    }
 
-//     fn initialize(&mut self) -> bool {
-//         self.init_called += 1;
-//         true
-//     }
+    fn initialize(&self) -> bool {
+        true
+    }
 
-//     fn is_read_only(&self) -> bool {
-//         false
-//     }
+    fn is_read_only(&self) -> bool {
+        false
+    }
 
-//     fn total_block_count(&self) -> usize {
-//         todo!()
-//     }
+    fn mkdir(&self, path: &str, mode: Mode) -> Result<(), Errno> {
+        todo!()
+    }
 
-//     fn free_block_count(&self) -> usize {
-//         todo!()
-//     }
+    fn open(&self, path: &str, mode: Mode, flags: OpenFlags) -> Result<FileDescriptor, Errno> {
+        todo!()
+    }
 
-//     fn total_inode_count(&self) -> usize {
-//         todo!()
-//     }
+    fn rmdir(&self, path: &str) -> Result<(), Errno> {
+        todo!()
+    }
 
-//     fn free_inode_count(&self) -> usize {
-//         todo!()
-//     }
-
-//     fn flush(&self) {}
-// }
+    fn flush(&self) {}
+}

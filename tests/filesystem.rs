@@ -10,6 +10,7 @@ extern crate alloc;
 
 use alloc::collections::BTreeMap;
 use bootloader::{entry_point, BootInfo};
+use rustos::library::syscall::error::Errno;
 // use spin::Mutex;
 use core::panic::PanicInfo;
 
@@ -40,5 +41,64 @@ fn alloc_error_handler(layout: alloc::alloc::Layout) ->! {
 // test case
 #[test_case]
 fn test_initialize_called() {
-    
+    use alloc::boxed::Box;
+    use rustos::library::filesystem::vfs::test_fs::TestFs;
+    use rustos::library::filesystem::FileSystem;
+    use rustos::library::filesystem::vfs::Vfs;
+    use rustos::library::filesystem::flags::MountFlags;
+    use rustos::library::filesystem::FsId;
+
+    let fs = Box::new(TestFs::from(7.into()));
+
+    let mut vfs = Vfs::new(FsId::from(0));
+    assert_eq!(0, vfs.mount_count());
+
+    assert!(vfs.mount("/", fs, MountFlags::NONE).is_ok());
+}
+
+#[test_case]
+fn test_mount_unmount() {
+    use alloc::boxed::Box;
+    use rustos::library::filesystem::FileSystem;
+    use rustos::library::filesystem::vfs::test_fs::TestFs;
+    use rustos::library::filesystem::vfs::Vfs;
+    use rustos::library::filesystem::flags::MountFlags;
+    use rustos::library::filesystem::FsId;
+    let fs = Box::new(TestFs::from(19.into()));
+    let vfs = Vfs::new(FsId::from(0));
+    assert_eq!(0, vfs.mount_count());
+
+    assert!(vfs.mount("/", fs, MountFlags::NONE).is_ok());
+    assert_eq!(1, vfs.mount_count());
+
+    assert!(vfs.unmount("/").is_ok());
+    assert_eq!(0, vfs.mount_count());
+
+    assert_eq!(Err(Errno::EINVAL), vfs.unmount("/"));
+    assert_eq!(0, vfs.mount_count());
+}
+
+#[test_case]
+fn test_unmount_wrong_dir() {
+    use alloc::boxed::Box;
+    use rustos::library::filesystem::FileSystem;
+    use rustos::library::filesystem::vfs::test_fs::TestFs;
+    use rustos::library::filesystem::vfs::Vfs;
+    use rustos::library::filesystem::flags::MountFlags;
+    use rustos::library::filesystem::FsId;
+    let fs = Box::new(TestFs::from(19.into()));
+    let vfs = Vfs::new(FsId::from(0));
+    assert_eq!(0, vfs.mount_count());
+
+    assert!(vfs.mount("/", fs, MountFlags::NONE).is_ok());
+    assert_eq!(1, vfs.mount_count());
+
+    assert_eq!(Err(Errno::EINVAL), vfs.unmount("/foobar"));
+    assert_eq!(1, vfs.mount_count());
+
+    assert!(vfs.unmount("/").is_ok());
+    assert_eq!(0, vfs.mount_count());
+
+    assert_eq!(Err(Errno::EINVAL), vfs.unmount("/"));
+    assert_eq!(0, vfs.mount_count());
 }

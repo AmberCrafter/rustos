@@ -13,7 +13,7 @@ pub struct FsId(u32);
 
 pub trait FileSystem {
     fn fsid(&self) -> FsId;
-    fn initialize(&self) -> bool {true}
+    fn initialize(&self) -> bool;
     fn is_read_only(&self) -> bool;
 
     fn open(&self, path: &str, mode: Mode, flags: OpenFlags) -> Result<FileDescriptor, Errno>;

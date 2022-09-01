@@ -10,6 +10,10 @@ impl FileSystem for Ext2Fs {
     fn is_read_only(&self) -> bool {
         todo!()
     }
+    
+    fn initialize(&self) -> bool {
+        true
+    }
 
     fn mkdir(&self, path: &str, mode: super::flags::Mode) -> Result<(), crate::library::syscall::error::Errno> {
         todo!()

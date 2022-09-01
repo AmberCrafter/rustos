@@ -1,65 +1,56 @@
+use alloc::collections::BTreeMap;
 use alloc::sync::Arc;
-use alloc::{collections::LinkedList, boxed::Box};
+use alloc::boxed::Box;
 use spin::Mutex;
 
 use crate::library::syscall::error::Errno;
+
+use self::mount::Mount;
 
 use super::flags::{MountFlags, Mode, OpenFlags};
 
 use super::{FileSystem, FsId, file_descriptor::FileDescriptor};
 
-// pub mod flags;
-// mod mount;
-// pub mod test_fs;
+pub mod mount;
+pub mod test_fs;
 
 
 pub fn init() {}
 
 pub struct Vfs {
     fsid: FsId,
-    mounts: Mutex<LinkedList<Mount>>,
-}
-
-struct Mount {
-    path: &'static str,
-    file_system: Arc<Box<dyn FileSystem>>,
-}
-
-impl Mount {
-    fn new(path: &'static str, file_system: Box<dyn FileSystem>) -> Self {
-        Self {
-            path, 
-            file_system: Arc::new(file_system)
-        }
-    }
+    mounts: Mutex<BTreeMap<&'static str, Mount>>,
 }
 
 impl Vfs {
     pub fn new(fsid: FsId) -> Self {
-        Self { fsid, mounts: Mutex::new(LinkedList::new()) }
+        Self { fsid, mounts: Mutex::new(BTreeMap::<&str, Mount>::new()) }
     }
 
     pub fn mount(&self, path: &'static str, file_system: Box<dyn FileSystem>, _flags: MountFlags) -> Result<(), Errno> {
-        self.mounts.lock().push_back(Mount::new(path, file_system));
-        Ok(())
+        match self.mounts.lock().insert(path, Mount::new(path, file_system)) {
+            None => Ok(()),
+            Some(_) => Err(Errno::EINVAL),
+        }
     }
 
     pub fn mount_count(&self) -> usize {
         self.mounts.lock().len()
     }
 
-    pub fn unmount(&mut self) -> Result<(), Errno> {
-        Ok(())
+    pub fn unmount(&self, path: &str) -> Result<(), Errno> {
+        match self.mounts.lock().remove(path) {
+            None => Err(Errno::EINVAL),
+            Some(_) => Ok(())
+        }
     }
 
     fn find_file_system_for_path(&self, path: &str) -> Option<Arc<Box<dyn FileSystem>>> {
         self.mounts
             .lock()
             .iter()
-            .find(|&mount| path.starts_with(mount.path))
-            .take()
-            .map(|m| m.file_system.clone())
-            .take()
+            .find(|&(p, _)| path.starts_with(p))
+            .map(|(_, m)| m.file_system.clone())
     }
 }
 
@@ -72,23 +63,27 @@ impl FileSystem for Vfs {
         false
     }
 
+    fn initialize(&self) -> bool {
+        true
+    }
+
     fn open(&self, path: &str, mode: Mode, flags: OpenFlags) -> Result<FileDescriptor, Errno> {
         match self.find_file_system_for_path(path) {
-            Some(fs) => fs.open(path, mode, flags),
+            Some(fs) => fs.clone().open(path, mode, flags),
             None => Err(Errno::ENOENT),
         }
     }
 
     fn mkdir(&self, path: &str, mode: Mode) -> Result<(), Errno> {
         match self.find_file_system_for_path(path) {
-            Some(fs) => fs.mkdir(path, mode),
+            Some(fs) => fs.clone().mkdir(path, mode),
             None => Err(Errno::ENOENT),
         }
     }
 
     fn rmdir(&self, path: &str) -> Result<(), Errno> {
         match self.find_file_system_for_path(path) {
-            Some(fs) => fs.rmdir(path),
+            Some(fs) => fs.clone().rmdir(path),
             None => Err(Errno::ENOENT),
         }
     }
