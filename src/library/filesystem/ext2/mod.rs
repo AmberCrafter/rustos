@@ -1,29 +1,37 @@
-use super::{FileSystem, file_descriptor::FileDescriptor};
+pub mod superblock;
 
-pub struct Ext2Fs {}
+use alloc::boxed::Box;
 
-impl FileSystem for Ext2Fs {
+use crate::library::syscall::error::Errno;
+
+use super::{FileSystem, file_descriptor::FileDescriptor, flags::{OpenFlags, Mode}, FsId};
+
+pub struct Ext2FileSystem {
+    fsid: FsId
+}
+
+impl FileSystem for Ext2FileSystem {
     fn fsid(&self) -> super::FsId {
-        todo!()
+        self.fsid
     }
 
     fn is_read_only(&self) -> bool {
-        todo!()
+        false
     }
     
     fn initialize(&self) -> bool {
         true
     }
 
-    fn mkdir(&self, path: &str, mode: super::flags::Mode) -> Result<(), crate::library::syscall::error::Errno> {
+    fn mkdir(&self, path: &str, mode: Mode) -> Result<(), Errno> {
         todo!()
     }
 
-    fn open(&self, path: &str, mode: super::flags::Mode, flags: super::flags::OpenFlags) -> Result<FileDescriptor, crate::library::syscall::error::Errno> {
+    fn open(&self, path: &'static str, mode: Mode, flags: OpenFlags) -> Result<Box<dyn FileDescriptor>, Errno> {
         todo!()
     }
 
-    fn rmdir(&self, path: &str) -> Result<(), crate::library::syscall::error::Errno> {
+    fn rmdir(&self, path: &str) -> Result<(), Errno> {
         todo!()
     }
 

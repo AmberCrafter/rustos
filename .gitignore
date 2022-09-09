@@ -17,3 +17,4 @@ Cargo.lock
 
 # some testing code
 /disable
+/test_ext2

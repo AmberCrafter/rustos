@@ -17,6 +17,7 @@ overflow-checks = true
 [workspace]
 members = [
     "image_maker",
+    "disk_driver"
 ]
 
 [dependencies]

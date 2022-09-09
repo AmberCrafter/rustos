@@ -3,6 +3,10 @@ pub mod file_descriptor;
 pub mod vfs;
 pub mod flags;
 pub mod stat;
+pub mod inode;
+pub mod upnode;
+
+use alloc::boxed::Box;
 
 use self::{flags::{Mode, OpenFlags}, file_descriptor::FileDescriptor};
 use super::syscall::error::Errno;
@@ -16,9 +20,9 @@ pub trait FileSystem {
     fn initialize(&self) -> bool;
     fn is_read_only(&self) -> bool;
 
-    fn open(&self, path: &str, mode: Mode, flags: OpenFlags) -> Result<FileDescriptor, Errno>;
-    fn mkdir(&self, path: &str, mode: Mode) -> Result<(), Errno>;
-    fn rmdir(&self, path: &str) -> Result<(), Errno>;
+    fn open(&self, path: &'static str, mode: Mode, flags: OpenFlags) -> Result<Box<dyn FileDescriptor>, Errno>;
+    fn mkdir(&self, path: & str, mode: Mode) -> Result<(), Errno>;
+    fn rmdir(&self, path: & str) -> Result<(), Errno>;
 
 
     fn flush(&self);

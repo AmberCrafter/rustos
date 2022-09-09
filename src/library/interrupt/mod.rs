@@ -20,7 +20,7 @@ static IDT: Lazy<InterruptDescriptorTable> = Lazy::new(|| {
             .set_stack_index(gdt::DOUBLE_FAULT_IST_INDEX);
     }
     idt.page_fault.set_handler_fn(handler_interrupt::page_fault_handler);
-
+    idt.general_protection_fault.set_handler_fn(handler_interrupt::general_protection_fault_handler);
 
     idt[InterruptIndex::Timer.as_usize()].set_handler_fn(handler_interrupt::timer_interrupt_handler);
     idt[InterruptIndex::Keyboard.as_usize()].set_handler_fn(handler_interrupt::keyboard_interrupt_handler);

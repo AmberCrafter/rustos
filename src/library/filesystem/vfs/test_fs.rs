@@ -1,26 +1,26 @@
-use crate::library::{filesystem::{FsId, FileSystem, flags::{Mode, OpenFlags}, file_descriptor::FileDescriptor}, syscall::error::Errno};
+use alloc::{boxed::Box, vec::Vec};
 
-pub struct TestFs {
+use crate::library::{
+    filesystem::{
+        file_descriptor::{FileDescriptor, Seek},
+        flags::{Mode, OpenFlags},
+        stat::Stat,
+        FileSystem, FsId,
+    },
+    syscall::error::Errno,
+};
+
+pub struct EmptyFileSystem {
     fsid: FsId,
-    init_callback: Option<fn()>,
-    open_callback: Option<fn(&str, Mode, OpenFlags)>
 }
 
-impl TestFs {
+impl EmptyFileSystem {
     pub fn from(fsid: FsId) -> Self {
-        Self {
-            fsid,
-            init_callback: None,
-            open_callback: None
-        }
-    }
-
-    pub fn set_initialize_callback(&mut self, callback: fn()) {
-        self.init_callback = Some(callback);
+        Self { fsid }
     }
 }
 
-impl FileSystem for TestFs {
+impl FileSystem for EmptyFileSystem {
     fn fsid(&self) -> FsId {
         self.fsid
     }
@@ -33,17 +33,67 @@ impl FileSystem for TestFs {
         false
     }
 
-    fn mkdir(&self, path: &str, mode: Mode) -> Result<(), Errno> {
-        todo!()
+    fn open(
+        &self,
+        path: &'static str,
+        mode: Mode,
+        flags: OpenFlags,
+    ) -> Result<Box<dyn FileDescriptor>, Errno> {
+        Ok(Box::new(EmptyFileDescriptor::from(path)))
     }
 
-    fn open(&self, path: &str, mode: Mode, flags: OpenFlags) -> Result<FileDescriptor, Errno> {
-        todo!()
+    fn mkdir(&self, _path: &str, _mode: Mode) -> Result<(), Errno> {
+        Err(Errno::ENOSPC)
     }
 
-    fn rmdir(&self, path: &str) -> Result<(), Errno> {
-        todo!()
+    fn rmdir(&self, _path: &str) -> Result<(), Errno> {
+        Err(Errno::ENOENT)
     }
 
     fn flush(&self) {}
+}
+
+pub struct EmptyFileDescriptor {
+    path: &'static str,
+}
+
+impl EmptyFileDescriptor {
+    fn from(path: &'static str) -> Self {
+        Self { path }
+    }
+}
+
+impl FileDescriptor for EmptyFileDescriptor {
+    fn is_readalbe(&self) -> bool {
+        true
+    }
+    fn is_writable(&self) -> bool {
+        true
+    }
+    fn seek(&mut self, _buffer: Vec<u8>, _whence: Seek) -> Result<usize, Errno> {
+        todo!()
+    }
+    fn read(&self, _buffer: Vec<u8>) -> Result<usize, Errno> {
+        Ok(0)
+    }
+    fn write(&mut self, _buffer: Vec<u8>) -> Result<usize, Errno> {
+        Err(Errno::ENOSPC)
+    }
+    fn stat(&self) -> Result<crate::library::filesystem::stat::Stat, Errno> {
+        Ok(Stat {
+            device_id: 0,
+            inode_number: 0,
+            access_mode: Mode::from(0o777),
+            num_hard_links: 0,
+            owner_uid: 0,
+            owner_gid: 0,
+            special: false,
+            size: 0,
+            block_size: 0,
+            block_count: 0,
+        })
+    }
+    fn absolute_path(&self) -> &str {
+        self.path
+    }
 }

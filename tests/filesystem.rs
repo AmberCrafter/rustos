@@ -20,6 +20,15 @@ use rustos::{print, println};
 #[allow(unused)]
 use rustos::{serial_print, serial_println};
 
+
+use alloc::boxed::Box;
+use rustos::library::filesystem::FileSystem;
+use rustos::library::filesystem::vfs::test_fs::EmptyFileSystem;
+use rustos::library::filesystem::vfs::Vfs;
+use rustos::library::filesystem::flags::{MountFlags, OpenFlags, Mode};
+use rustos::library::filesystem::FsId;
+
+
 entry_point!(main);
 pub fn main(boot_info: &'static mut BootInfo) -> ! {
     rustos::init(boot_info);
@@ -41,14 +50,7 @@ fn alloc_error_handler(layout: alloc::alloc::Layout) ->! {
 // test case
 #[test_case]
 fn test_initialize_called() {
-    use alloc::boxed::Box;
-    use rustos::library::filesystem::vfs::test_fs::TestFs;
-    use rustos::library::filesystem::FileSystem;
-    use rustos::library::filesystem::vfs::Vfs;
-    use rustos::library::filesystem::flags::MountFlags;
-    use rustos::library::filesystem::FsId;
-
-    let fs = Box::new(TestFs::from(7.into()));
+    let fs = Box::new(EmptyFileSystem::from(7.into()));
 
     let mut vfs = Vfs::new(FsId::from(0));
     assert_eq!(0, vfs.mount_count());
@@ -58,13 +60,7 @@ fn test_initialize_called() {
 
 #[test_case]
 fn test_mount_unmount() {
-    use alloc::boxed::Box;
-    use rustos::library::filesystem::FileSystem;
-    use rustos::library::filesystem::vfs::test_fs::TestFs;
-    use rustos::library::filesystem::vfs::Vfs;
-    use rustos::library::filesystem::flags::MountFlags;
-    use rustos::library::filesystem::FsId;
-    let fs = Box::new(TestFs::from(19.into()));
+    let fs = Box::new(EmptyFileSystem::from(19.into()));
     let vfs = Vfs::new(FsId::from(0));
     assert_eq!(0, vfs.mount_count());
 
@@ -80,13 +76,7 @@ fn test_mount_unmount() {
 
 #[test_case]
 fn test_unmount_wrong_dir() {
-    use alloc::boxed::Box;
-    use rustos::library::filesystem::FileSystem;
-    use rustos::library::filesystem::vfs::test_fs::TestFs;
-    use rustos::library::filesystem::vfs::Vfs;
-    use rustos::library::filesystem::flags::MountFlags;
-    use rustos::library::filesystem::FsId;
-    let fs = Box::new(TestFs::from(19.into()));
+    let fs = Box::new(EmptyFileSystem::from(19.into()));
     let vfs = Vfs::new(FsId::from(0));
     assert_eq!(0, vfs.mount_count());
 
@@ -101,4 +91,18 @@ fn test_unmount_wrong_dir() {
 
     assert_eq!(Err(Errno::EINVAL), vfs.unmount("/"));
     assert_eq!(0, vfs.mount_count());
+}
+
+#[test_case]
+fn test_mount_and_open() {
+    let fs = Box::new(EmptyFileSystem::from(2.into()));
+    let vfs = Vfs::new(FsId::from(11));
+
+    assert!(vfs.mount("/", fs, MountFlags::NONE).is_ok());
+
+    let f_res = vfs.open("/foo/bar.file", Mode::from(0), OpenFlags::O_RDWR);
+    assert!(f_res.is_ok());
+
+    let f = f_res.unwrap();
+    assert_eq!("/foo/bar.file", f.absolute_path());
 }

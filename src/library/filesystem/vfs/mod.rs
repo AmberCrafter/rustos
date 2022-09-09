@@ -1,19 +1,18 @@
+use alloc::boxed::Box;
 use alloc::collections::BTreeMap;
 use alloc::sync::Arc;
-use alloc::boxed::Box;
 use spin::Mutex;
 
 use crate::library::syscall::error::Errno;
 
 use self::mount::Mount;
 
-use super::flags::{MountFlags, Mode, OpenFlags};
+use super::flags::{Mode, MountFlags, OpenFlags};
 
-use super::{FileSystem, FsId, file_descriptor::FileDescriptor};
+use super::{file_descriptor::FileDescriptor, FileSystem, FsId};
 
 pub mod mount;
 pub mod test_fs;
-
 
 pub fn init() {}
 
@@ -24,11 +23,23 @@ pub struct Vfs {
 
 impl Vfs {
     pub fn new(fsid: FsId) -> Self {
-        Self { fsid, mounts: Mutex::new(BTreeMap::<&str, Mount>::new()) }
+        Self {
+            fsid,
+            mounts: Mutex::new(BTreeMap::<&str, Mount>::new()),
+        }
     }
 
-    pub fn mount(&self, path: &'static str, file_system: Box<dyn FileSystem>, _flags: MountFlags) -> Result<(), Errno> {
-        match self.mounts.lock().insert(path, Mount::new(path, file_system)) {
+    pub fn mount(
+        &self,
+        path: &'static str,
+        file_system: Box<dyn FileSystem>,
+        _flags: MountFlags,
+    ) -> Result<(), Errno> {
+        match self
+            .mounts
+            .lock()
+            .insert(path, Mount::new(path, file_system))
+        {
             None => Ok(()),
             Some(_) => Err(Errno::EINVAL),
         }
@@ -41,7 +52,7 @@ impl Vfs {
     pub fn unmount(&self, path: &str) -> Result<(), Errno> {
         match self.mounts.lock().remove(path) {
             None => Err(Errno::EINVAL),
-            Some(_) => Ok(())
+            Some(_) => Ok(()),
         }
     }
 
@@ -67,7 +78,12 @@ impl FileSystem for Vfs {
         true
     }
 
-    fn open(&self, path: &str, mode: Mode, flags: OpenFlags) -> Result<FileDescriptor, Errno> {
+    fn open(
+        &self,
+        path: &'static str,
+        mode: Mode,
+        flags: OpenFlags,
+    ) -> Result<Box<dyn FileDescriptor>, Errno> {
         match self.find_file_system_for_path(path) {
             Some(fs) => fs.clone().open(path, mode, flags),
             None => Err(Errno::ENOENT),
