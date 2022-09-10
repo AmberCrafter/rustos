@@ -14,7 +14,9 @@ pub const INODE_INDEX_START: usize = 1;
 pub const ROOT_INODE_INDEX: usize = 2;
 
 use core::sync::atomic::{AtomicUsize, Ordering::Relaxed};
+use std::cell::RefCell;
 use std::collections::HashMap;
+use std::sync::Arc;
 
 pub use bitmap::Bitmap;
 pub use directory::{Dentry, DentryMap};
@@ -30,7 +32,7 @@ use super::{FileSystem, FileID};
 use super::{
     little_endian_wrap_16, little_endian_wrap_32, little_endian_wrap_64, little_endian_wrap_8,
 };
-use crate::Disk;
+use crate::{Disk, format_print};
 use crate::interface::ext2::directory::DentryFiletype;
 use crate::{little_endian, vector};
 
@@ -40,7 +42,7 @@ pub struct Ext2 {
     pub superblock: SuperBlock,
     pub groupdescriptortable: BlockGroupDescriptorTable,
     pub grouptable: GroupTable,
-    pub dentrymap: DentryMap,
+    pub dentrymap: Option<Arc<RefCell<DentryMap>>>,
 }
 
 impl Ext2 {
@@ -51,7 +53,7 @@ impl Ext2 {
             superblock: SuperBlock::default(),
             groupdescriptortable: BlockGroupDescriptorTable::new(),
             grouptable: GroupTable::new(),
-            dentrymap: DentryMap::new(),
+            dentrymap: Some(Arc::new(RefCell::new(DentryMap::new()))),
         }
     }
 
@@ -234,7 +236,7 @@ impl Ext2 {
         self.load_dentrymap(None, &data);
     }
 
-    pub fn load_dentrymap(&mut self, root: Option<&mut Dentry>, data: &Vec<u8>) {
+    pub fn load_dentrymap(&mut self, root: Option<Arc<RefCell<&Dentry>>>, data: &Vec<u8>) {
         // crate::format_print(data);
         let mut base = 0;
         // let mut dentrymap = Some(self.dentrymap);
@@ -250,9 +252,9 @@ impl Ext2 {
         // }
 
         let mut dentrymap = if root.is_none() {
-            Some(&mut self.dentrymap)
+            self.dentrymap.clone()
         } else {
-            root.unwrap().dentrymap.as_mut()
+            root.as_ref().unwrap().borrow().dentrymap.clone()
         };
 
         while base < data.len() {
@@ -268,8 +270,8 @@ impl Ext2 {
             base += rec_len as usize;
 
             // println!("dentry: {:#?}", dentry);
-
-            match dentrymap.as_mut().unwrap().append(dentry) {
+            if inode_index==0 {continue;}
+            match dentrymap.as_ref().unwrap().borrow_mut().append(dentry) {
                 Ok(()) => {},
                 Err(err) => println!("[Error] {:?}", err),
             }
@@ -303,8 +305,8 @@ impl Ext2 {
 }
 
 pub struct VFS {
-    disk: Ext2,
-    map: HashMap<FileID, Dentry>
+    pub disk: Ext2,
+    pub map: HashMap<FileID, Dentry>
 }
 
 impl VFS {
@@ -318,16 +320,36 @@ impl FileSystem for VFS {
     fn open(&mut self, path: &str) -> Option<FileID> {
         static FILE_ID: AtomicUsize = AtomicUsize::new(0);
         let fid = FileID(FILE_ID.fetch_add(1, Relaxed));
-
         self.list_dir(path);
-        println!("{:#?}", self.disk.dentrymap);
+        // println!("{:#?}", self.disk.dentrymap);
         if let Ok(paths) = self.parse_path(path) {
+            let root_entrymap = self.disk.dentrymap.as_ref().unwrap();
+            let mut entrymap = root_entrymap.clone();
+            for p in paths[1..paths.len()-1].iter() {
+                // entrymap = entrymap.as_ref().unwrap().borrow().get(p).unwrap().dentrymap.clone();
+                let map = entrymap.borrow().clone();
+                let inode = map.get(p).unwrap().clone();
+                entrymap = inode.dentrymap.as_ref().unwrap().clone();
+            }
+            let map = entrymap.borrow().clone();
+            let entry = map.get(&paths.last().unwrap());
+            println!("map: {:#?}", map);
+            println!("dentry: {:?}", entry);
+
+            if let Some(entry) = entry {
+                let index = entry.inode_index as usize;
+                let mut buf = self.disk.get_data(0, index);
+                // format_print(&buf);
+                self.map.insert(fid.clone(), entry.clone());
+            } else {
+                println!("[Error] File not exist: {:?}", path);
+            }
 
         } else {
             println!("[Error] Path not exist: {:?}", path);
             return None;
         }
-
+        
         Some(fid)
     }
 
@@ -352,10 +374,11 @@ impl FileSystem for VFS {
                 // let root_inode = self.grouptable.get(0).unwrap().inode_table.get(2).unwrap();
                 // println!("Table: {:?}", root_inode);
                 if paths[0] == "/" {
-                    let mut dentrymap = self.disk.dentrymap.clone();
+                    let root_entrymap = self.disk.dentrymap.clone();
+                    let dentrymap = root_entrymap.as_ref().unwrap().borrow();
                     for p in paths[1..].iter() {
                         if p.len()==0 {continue;}
-                        if let Some(dentry) = dentrymap.get_mut(p) {
+                        if let Some(dentry) = dentrymap.get(p) {
                             // if dentry.dentrymap.is_some() {
                             //     dentrymap = dentry.dentrymap.as_ref().unwrap().clone();
                             // } else {
@@ -365,7 +388,7 @@ impl FileSystem for VFS {
                             let inode_filetype = &dentry.file_type;
                             if inode_filetype==&DentryFiletype::DirecotryFile {
                                 let data = self.disk.get_data(0, dentry.inode_index as usize);
-                                self.disk.load_dentrymap(Some(dentry), &data)
+                                self.disk.load_dentrymap(Some(Arc::new(RefCell::new(dentry))), &data)
                             }
                         } else {
                             println!("[Error]: Entry not found: {:?}", path);

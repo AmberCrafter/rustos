@@ -35,6 +35,7 @@ pub trait FileSystem {
     }
 }
 
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct FileID(usize);
 
 #[derive(Debug)]

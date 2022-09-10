@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, sync::Arc, cell::RefCell};
 
 #[derive(Debug, Clone)]
 pub struct Dentry {
@@ -8,7 +8,7 @@ pub struct Dentry {
     pub file_type: DentryFiletype,
     pub name: String,
     // this is used to descript the directory under this inode
-    pub dentrymap: Option<DentryMap>,
+    pub dentrymap: Option<Arc<RefCell<DentryMap>>>,
 }
 
 impl Default for Dentry {
@@ -34,7 +34,7 @@ impl Dentry {
     ) -> Self {
         let file_type: DentryFiletype = file_type.into();
         match file_type {
-            DentryFiletype::DirecotryFile => Self { inode_index, rec_len, name_len, file_type, name, dentrymap: Some(DentryMap::new()) },
+            DentryFiletype::DirecotryFile => Self { inode_index, rec_len, name_len, file_type, name, dentrymap: Some(Arc::new(RefCell::new(DentryMap::new()))) },
             _ => Self { inode_index, rec_len, name_len, file_type, name, dentrymap: None }
         }
         
@@ -45,7 +45,7 @@ impl Dentry {
     }
 
     pub fn update_dentrymap(&mut self, dentrymap: DentryMap) {
-        self.dentrymap = Some(dentrymap);
+        *self.dentrymap.as_ref().unwrap().borrow_mut() = dentrymap;
     }
 }
 

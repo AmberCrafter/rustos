@@ -44,7 +44,7 @@ fn main() -> Result<()> {
     // let cur = fs.cursor(block_num, 2 * 512);
     // format_print(cur);
 
-    // println!("Root: {:#?}", fs.dentrymap);
+    println!("Root: {:#?}", fs.dentrymap);
 
 
     let mut vfs = VFS::new(fs);
@@ -55,7 +55,10 @@ fn main() -> Result<()> {
     // vfs.list_dir("/lost+found/");
     // vfs.list_dir("/folder1");
     
-    // vfs.open("/folder1/file1.txt");
+    vfs.open("/folder1/file1_1.txt");
+
+    // println!("Root: {:#?}", vfs.disk.dentrymap);
+    println!("Root: {:#?}", vfs.map);
     println!("Hello, world!");
 
     Ok(())
