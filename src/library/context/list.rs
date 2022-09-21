@@ -1,10 +1,10 @@
-use alloc::{collections::BTreeMap, sync::Arc};
+use alloc::{collections::BTreeMap, sync::Rc};
 use spin::Mutex;
 
 use super::{ContextId, Context};
 
 pub struct ContextList {
-    map: BTreeMap<ContextId, Arc<Mutex<Context>>>
+    map: BTreeMap<ContextId, Rc<Mutex<Context>>>
 }
 
 impl ContextList {
@@ -14,11 +14,11 @@ impl ContextList {
         }
     }
 
-    pub fn new_context(&mut self) -> Result<&Arc<Mutex<Context>>, ()> {
+    pub fn new_context(&mut self) -> Result<&Rc<Mutex<Context>>, ()> {
         let context = Context::new();
         let context_id = context.id;
         assert!(!self.map.contains_key(&context_id));
-        assert!(self.map.insert(context_id, Arc::new(Mutex::new(context))).is_none());
+        assert!(self.map.insert(context_id, Rc::new(Mutex::new(context))).is_none());
         Ok(self.map.get(&context_id).expect("unable to insert context"))
     }
 }

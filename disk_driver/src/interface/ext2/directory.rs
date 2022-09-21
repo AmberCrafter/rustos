@@ -1,4 +1,4 @@
-use std::{collections::BTreeMap, sync::Arc, cell::RefCell};
+use std::{collections::BTreeMap, cell::RefCell, rc::Rc};
 
 #[derive(Debug, Clone)]
 pub struct Dentry {
@@ -8,7 +8,7 @@ pub struct Dentry {
     pub file_type: DentryFiletype,
     pub name: String,
     // this is used to descript the directory under this inode
-    pub dentrymap: Option<Arc<RefCell<DentryMap>>>,
+    pub dentrymap: Option<Rc<RefCell<DentryMap>>>,
 }
 
 impl Default for Dentry {
@@ -34,7 +34,7 @@ impl Dentry {
     ) -> Self {
         let file_type: DentryFiletype = file_type.into();
         match file_type {
-            DentryFiletype::DirecotryFile => Self { inode_index, rec_len, name_len, file_type, name, dentrymap: Some(Arc::new(RefCell::new(DentryMap::new()))) },
+            DentryFiletype::DirecotryFile => Self { inode_index, rec_len, name_len, file_type, name, dentrymap: Some(Rc::new(RefCell::new(DentryMap::new()))) },
             _ => Self { inode_index, rec_len, name_len, file_type, name, dentrymap: None }
         }
         
@@ -50,7 +50,7 @@ impl Dentry {
 }
 
 #[derive(Debug, Default, Clone)]
-pub struct DentryMap(BTreeMap<String, Dentry>);
+pub struct DentryMap(BTreeMap<String, Rc<RefCell<Dentry>>>);
 
 impl DentryMap {
     pub fn new() -> Self {
@@ -62,16 +62,16 @@ impl DentryMap {
             if self.0.contains_key(name) {
                 return Err(DentryMapErr::FileExist);
             }
-            self.0.insert(name.to_owned(), dentry);
+            self.0.insert(name.to_owned(), Rc::new(RefCell::new(dentry)));
         } else {
             return Err(DentryMapErr::InvalidName);
         }
         Ok(())
     }
-    pub fn get(&self, name: &str) -> Option<&Dentry> {
+    pub fn get(&self, name: &str) -> Option<&Rc<RefCell<Dentry>>> {
         self.0.get(name)
     }
-    pub fn get_mut(&mut self, name: &str) -> Option<&mut Dentry> {
+    pub fn get_mut(&mut self, name: &str) -> Option<&mut Rc<RefCell<Dentry>>> {
         self.0.get_mut(name)
     }
     pub fn remove(&mut self, name: &str) -> Result<(), DentryMapErr> {
@@ -98,7 +98,7 @@ pub enum DentryMapErr {
     FileNotExist,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum DentryFiletype {
     Unknown = 0,

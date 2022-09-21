@@ -30,6 +30,10 @@ impl GroupTable {
     pub fn get(&self, idx: usize) -> Option<&Group> {
         self.0.get(idx)
     }
+
+    pub fn get_mut(&mut self, idx: usize) -> Option<&mut Group> {
+        self.0.get_mut(idx)
+    }
 }
 
 pub struct GroupTableIter<'a> {

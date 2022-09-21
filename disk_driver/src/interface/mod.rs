@@ -14,7 +14,7 @@ use self::ext2::Inode;
 pub trait FileSystem {
     fn create(&mut self, path: &str); // directory: /..../  ;  file: /....
     fn open(&mut self, path: &str) -> Option<FileID>;
-    fn read(&self, file_id: FileID) -> &[u8];
+    fn read(&self, file_id: FileID) -> Vec<u8>;
     fn write(&mut self, file_id: FileID, ctx: &[u8]);
     fn list_dir(&mut self, path: &str);
 

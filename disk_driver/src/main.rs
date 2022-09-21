@@ -1,16 +1,21 @@
 use std::{fs::File, io::Read};
 
 use anyhow::Result;
-use disk_driver::{interface::{ext2::{Ext2, VFS}, FileSystem}, Disk};
 use disk_driver::format_print;
+use disk_driver::{
+    interface::{
+        ext2::{Ext2, VFS},
+        FileSystem,
+    },
+    Disk,
+};
 
 fn main() -> Result<()> {
     let path = "disk_driver/ext2fs_01/disk.img";
     let mut f = File::open(path)?;
 
-    let mut disk: Disk = vec![0; 1024*1024];
+    let mut disk: Disk = vec![0; 1024 * 1024];
     f.read_exact(&mut disk);
-    
 
     let mut fs = Ext2::new(disk);
     // fs.read_bootsector();
@@ -25,7 +30,6 @@ fn main() -> Result<()> {
     // println!("fs gdt: {:#?}", fs.groupdescriptortable);
     // println!("fs gt: {:?}", fs.grouptable);
     // println!("fs it: {:?}", fs.grouptable.get(0).unwrap().inode_table.get(12).unwrap());
-
 
     // // test file structure
     // let nums = 16;
@@ -44,8 +48,7 @@ fn main() -> Result<()> {
     // let cur = fs.cursor(block_num, 2 * 512);
     // format_print(cur);
 
-    println!("Root: {:#?}", fs.dentrymap);
-
+    // println!("Root: {:#?}", fs.dentrymap);
 
     let mut vfs = VFS::new(fs);
 
@@ -54,12 +57,20 @@ fn main() -> Result<()> {
     // vfs.list_dir("/foo/bar.txt");
     // vfs.list_dir("/lost+found/");
     // vfs.list_dir("/folder1");
-    
-    vfs.open("/folder1/file1_1.txt");
+
+    let fid = vfs.open("/folder1/file1_1.txt").expect("File not exist");
+    println!("{:?}", fid);
+    let data = vfs.read(fid);
+    println!("{:?}", String::from_utf8(data).unwrap());
+
+        
+
+    // vfs.disk.alloc_block(0);
+
 
     // println!("Root: {:#?}", vfs.disk.dentrymap);
-    println!("Root: {:#?}", vfs.map);
-    println!("Hello, world!");
+    // println!("Root: {:#?}", vfs.map);
+    // println!("Hello, world!");
 
     Ok(())
 }

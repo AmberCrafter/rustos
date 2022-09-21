@@ -1,6 +1,6 @@
 use alloc::boxed::Box;
 use alloc::collections::BTreeMap;
-use alloc::sync::Arc;
+use alloc::sync::Rc;
 use spin::Mutex;
 
 use crate::library::syscall::error::Errno;
@@ -56,7 +56,7 @@ impl Vfs {
         }
     }
 
-    fn find_file_system_for_path(&self, path: &str) -> Option<Arc<Box<dyn FileSystem>>> {
+    fn find_file_system_for_path(&self, path: &str) -> Option<Rc<Box<dyn FileSystem>>> {
         self.mounts
             .lock()
             .iter()
