@@ -13,7 +13,7 @@ pub mod gdt;
 pub mod memory;
 
 pub mod task;
-pub mod context;
-pub mod syscall;
+// pub mod context;
+// pub mod syscall;
 
-pub mod filesystem;
+// pub mod filesystem;

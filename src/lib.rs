@@ -6,6 +6,8 @@
 
 #![feature(abi_x86_interrupt)]
 #![feature(alloc_error_handler)]
+#![feature(asm_sym)]
+#![feature(naked_functions)]
 
 #![feature(thread_local)]
 
@@ -33,13 +35,12 @@ pub fn init(boot_info: &'static mut BootInfo) {
     
     unsafe {
         init_memory_map(physical_memory_offset, &mut boot_info.memory_regions);
-    }
-
-    
+    }    
     // library::task::init();
-    library::context::init();
     
-    library::filesystem::vfs::init();
+    // library::context::init();
+    
+    // library::filesystem::vfs::init();
     serial_println!("Finished init");
 }
 

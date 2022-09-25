@@ -1,3 +1,5 @@
+#![feature(slice_as_chunks)]
+
 pub mod driver;
 
 #[macro_use]

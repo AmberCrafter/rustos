@@ -1,4 +1,4 @@
-use alloc::{collections::BTreeMap, sync::Rc};
+use alloc::{collections::BTreeMap, rc::Rc};
 use spin::Mutex;
 
 use super::{ContextId, Context};

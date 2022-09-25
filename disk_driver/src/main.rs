@@ -1,3 +1,4 @@
+use std::io::{Write, Seek};
 use std::{fs::File, io::Read};
 
 use anyhow::Result;
@@ -10,9 +11,12 @@ use disk_driver::{
     Disk,
 };
 
+use byteorder::{ByteOrder, LittleEndian};
+
 fn main() -> Result<()> {
     let path = "disk_driver/ext2fs_01/disk.img";
-    let mut f = File::open(path)?;
+    // let mut f = File::open(path)?;
+    let mut f = File::options().read(true).write(true).open(path)?;
 
     let mut disk: Disk = vec![0; 1024 * 1024];
     f.read_exact(&mut disk);
@@ -61,16 +65,43 @@ fn main() -> Result<()> {
     let fid = vfs.open("/folder1/file1_1.txt").expect("File not exist");
     println!("{:?}", fid);
     let data = vfs.read(fid);
+    println!("{:?}", data);
     println!("{:?}", String::from_utf8(data).unwrap());
 
-        
+    // let mut ctx = [0_u8; 1024];
+    // // [102, 105, 108, 101, 32, 49, 45, 49, 32, 99, 111, 110, 116, 101, 120, 116, 46, 10]
+    // for (i, &byte) in "Write by my vfs.\nHello world.\n".as_bytes().iter().enumerate() {
+    // // for (i, &byte) in [102, 105, 108, 101, 32, 49, 45, 49, 32, 99, 111, 110, 116, 101, 120, 116, 46, 10].iter().enumerate() {
+    //     ctx[i] = byte;
+    // }
+    // // vfs.disk.write(40, ctx);
+    let ctx = "Write by my vfs.\nHello world.\n".as_bytes();
+
+    vfs.write(fid, ctx);
+
+    let data = vfs.read(fid);
+    println!("{:?}", data);
+    println!("{:?}", String::from_utf8(data).unwrap());
 
     // vfs.disk.alloc_block(0);
-
 
     // println!("Root: {:#?}", vfs.disk.dentrymap);
     // println!("Root: {:#?}", vfs.map);
     // println!("Hello, world!");
+
+    let tmp = vfs.disk.get_inode(0, 14).unwrap().borrow().clone();
+    let tmp: [u8; 128] = tmp.into();
+    println!("{:?}", tmp);
+
+
+    flsuh_disk(&mut f, &vfs);
+
+
+    // let val = 123456789_u32;
+    // let mut buf = [0; 4];
+    // LittleEndian::write_u32(&mut buf, val);
+
+    // println!("u32: {:x?}", buf);
 
     Ok(())
 }
@@ -82,3 +113,9 @@ fn main() -> Result<()> {
 //     }
 //     println!();
 // }
+
+
+fn flsuh_disk(f: &mut File, vfs: &VFS) {
+    f.rewind();
+    let res = f.write(vfs.disk.as_slice());
+}

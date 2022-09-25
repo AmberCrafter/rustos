@@ -125,3 +125,99 @@ macro_rules! vector {
         }
     };
 }
+
+#[doc(hidden)]
+#[allow(unused)]
+fn encode_little_endian_u8(var: &u8) -> [u8; 1] {
+    [*var]
+}
+
+#[doc(hidden)]
+#[allow(unused)]
+fn encode_little_endian_u16(var: &u16) -> [u8; 2] {
+    [(*var) as u8, ((*var)>>8) as u8]
+}
+
+#[doc(hidden)]
+#[allow(unused)]
+fn encode_little_endian_u32(var: &u32) -> [u8; 4] {
+    [
+        (*var) as u8, 
+        ((*var)>>8) as u8,
+        ((*var)>>16) as u8,
+        ((*var)>>24) as u8,
+    ]
+}
+
+#[doc(hidden)]
+#[allow(unused)]
+fn encode_little_endian_u64(var: &u64) -> [u8; 8] {
+    [
+        (*var) as u8, 
+        ((*var)>>8) as u8,
+        ((*var)>>16) as u8,
+        ((*var)>>24) as u8,
+        ((*var)>>32) as u8,
+        ((*var)>>40) as u8,
+        ((*var)>>48) as u8,
+        ((*var)>>56) as u8,
+    ]
+}
+
+#[doc(hidden)]
+#[allow(unused)]
+fn encode_little_endian_u128(var: &u128) -> [u8; 16] {
+    [
+        (*var) as u8, 
+        ((*var)>>8) as u8,
+        ((*var)>>16) as u8,
+        ((*var)>>24) as u8,
+        ((*var)>>32) as u8,
+        ((*var)>>40) as u8,
+        ((*var)>>48) as u8,
+        ((*var)>>56) as u8,
+        ((*var)>>64) as u8,
+        ((*var)>>72) as u8,
+        ((*var)>>80) as u8,
+        ((*var)>>88) as u8,
+        ((*var)>>96) as u8,
+        ((*var)>>104) as u8,
+        ((*var)>>112) as u8,
+        ((*var)>>120) as u8,
+    ]
+}
+
+#[doc(hidden)]
+#[allow(unused)]
+fn encode_little_endian_arbitrary<const N: usize>(var: &[u8]) -> [u8; N] {
+    let mut iter = var.iter();
+    let mut buf = [0_u8; N];
+    let mut idx = 0;
+    while let Some(&v) = iter.next() {
+        buf[idx] = v;
+        idx += 1;
+    }
+    buf
+}
+
+#[macro_export]
+macro_rules! encode_little_endian {
+    ($var:expr, 1) => {
+        crate::interface::encode_little_endian_u8(&$var)
+    };
+    ($var:expr, 2) => {
+        crate::interface::encode_little_endian_u16(&$var)
+    };
+    ($var:expr, 4) => {
+        crate::interface::encode_little_endian_u32(&$var)
+    };
+    ($var:expr, 8) => {
+        crate::interface::encode_little_endian_u64(&$var)
+    };
+    ($var:expr, 16) => {
+        crate::interface::encode_little_endian_u128(&$var)
+    };
+    ($var:expr, $nums:expr) => {
+        crate::interface::encode_little_endian_arbitrary::<$nums>(&$var)
+    }
+}

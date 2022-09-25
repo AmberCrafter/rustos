@@ -1,6 +1,6 @@
 use alloc::boxed::Box;
 use alloc::collections::BTreeMap;
-use alloc::sync::Rc;
+use alloc::rc::Rc;
 use spin::Mutex;
 
 use crate::library::syscall::error::Errno;

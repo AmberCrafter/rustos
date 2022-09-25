@@ -1,6 +1,6 @@
 use core::task::{Context, Poll, Waker};
 
-use alloc::{collections::BTreeMap, sync::Rc, task::Wake};
+use alloc::{collections::BTreeMap, sync::Arc, task::Wake};
 use crossbeam_queue::ArrayQueue;
 
 use super::{Task, TaskId};
@@ -9,12 +9,12 @@ const TASK_QUEUE_SIZE: usize = 100;
 
 struct TaskWaker {
     task_id: TaskId,
-    task_queue: Rc<ArrayQueue<TaskId>>,
+    task_queue: Arc<ArrayQueue<TaskId>>,
 }
 
 impl TaskWaker {
-    fn new(task_id: TaskId, task_queue: Rc<ArrayQueue<TaskId>>) -> Waker {
-        Waker::from(Rc::new(TaskWaker{
+    fn new(task_id: TaskId, task_queue: Arc<ArrayQueue<TaskId>>) -> Waker {
+        Waker::from(Arc::new(TaskWaker{
             task_id, task_queue
         }))
     }
@@ -28,18 +28,18 @@ impl TaskWaker {
 
 // These implements will be trigger by poll (StateMachine)
 impl Wake for TaskWaker {
-    fn wake(self: Rc<Self>) {
+    fn wake(self: Arc<Self>) {
         self.wake_task();
     }
 
-    fn wake_by_ref(self: &Rc<Self>) {
+    fn wake_by_ref(self: &Arc<Self>) {
         self.wake_task();
     }
 }
 
 pub struct Executor {
     tasks: BTreeMap<TaskId, Task>,
-    task_queue: Rc<ArrayQueue<TaskId>>,
+    task_queue: Arc<ArrayQueue<TaskId>>,
     waker_cache: BTreeMap<TaskId, Waker>,
 }
 
@@ -47,7 +47,7 @@ impl Executor {
     pub fn new() -> Self {
         Self {
             tasks: BTreeMap::new(),
-            task_queue: Rc::new(ArrayQueue::new(TASK_QUEUE_SIZE)),
+            task_queue: Arc::new(ArrayQueue::new(TASK_QUEUE_SIZE)),
             waker_cache: BTreeMap::new(),
         }
     }

@@ -245,7 +245,7 @@ impl Ext2 {
     pub fn load_root_dentry(&mut self) {
         let inode = self.grouptable.get(0).unwrap().inode_table.get(2).unwrap();
         let mut data = Vec::new();
-        for block_num in inode.block {
+        for block_num in inode.borrow().block {
             if block_num==0 {continue;}
             let tmp = self.cursor(block_num as usize, BLOCK_SIZE);
             for &value in tmp {
@@ -297,14 +297,14 @@ impl Ext2 {
         }
     }
 
-    pub fn get_inode(&self, idx_group: usize, idx_inode: usize) -> Option<&Inode> {
+    pub fn get_inode(&self, idx_group: usize, idx_inode: usize) -> Option<&Rc<RefCell<Inode>>> {
         self.grouptable.get(idx_group).unwrap().inode_table.get(idx_inode)
     }
 
     pub fn get_data(&self, idx_group: usize, idx_inode: usize) -> Vec<u8> {
         let inode = self.get_inode(idx_group, idx_inode).unwrap();
         let mut buffer = Vec::new();
-        for b in inode.block {
+        for b in inode.borrow().block {
             if b==0 {continue;}
             let base = b as usize * BLOCK_SIZE;
             for &byte in self.disk[base..base+BLOCK_SIZE].iter() {
@@ -322,7 +322,13 @@ impl Ext2 {
     }
 
     pub fn write(&mut self, block_num: usize, ctx: [u8; BLOCK_SIZE]) {
-        
+        for (i, &byte) in ctx.iter().enumerate() {
+            self.disk[block_num*BLOCK_SIZE + i] = byte;
+        }
+    }
+
+    pub fn as_slice(&self) -> &[u8] {
+        &self.disk
     }
 
     pub fn test(&self) {
@@ -340,7 +346,7 @@ impl VFS {
     pub fn new(disk: Ext2) -> Self {
         Self { disk, map: HashMap::new() }
     }
-    pub fn get_inode(&self, index: usize) -> Option<&Inode> {
+    pub fn get_inode(&self, index: usize) -> Option<&Rc<RefCell<Inode>>> {
         self.disk.get_inode(0, index)
     }
     pub fn get_data(&self, idx_inode: usize) -> Vec<u8> {
@@ -396,20 +402,43 @@ impl FileSystem for VFS {
     fn read(&self, file_id: FileID) -> Vec<u8> {
         let entry = self.map.get(&file_id).expect("Entry not exist").borrow();
         let idx_inode = entry.inode_index.try_into().unwrap();
-        let inode = self
-            .disk
-            .grouptable
-            .get(0)
-            .unwrap()
-            .inode_table
-            .get(idx_inode)
-            .expect("Unexcepted inode");
+        let inode = self.get_inode(idx_inode).expect("Unexcepted inode");;
         let data = self.get_data(idx_inode);
-        data[..inode.size as usize].to_vec()
+        data[..inode.borrow().size as usize].to_vec()
     }
 
     fn write(&mut self, file_id: FileID, ctx: &[u8]) {
-        todo!()
+        // TODO: support indirectly address
+        let entry = self.map.get(&file_id).expect("Entry not exist").borrow();
+        let idx_inode = entry.inode_index.try_into().unwrap();
+        let inode = self.get_inode(idx_inode).expect("Unexcepted inode");
+
+        let mut block = inode.clone().borrow().block;
+        let mut block_iter = block.iter();
+
+        let counts = ctx.len();
+        let mut iter = ctx.chunks(BLOCK_SIZE);
+        while let Some(package) = iter.next() {
+            if let Some(&idx_block) = block_iter.next() {
+                let ctx = package.as_chunks::<1024>();
+                let ctx = if ctx.0.len()==0 {
+                    let mut buf = [0_u8; 1024];
+                    for (i, &byte) in ctx.1.iter().enumerate() {
+                        buf[i] = byte;
+                    }
+                    buf
+                } else {
+                    ctx.0[0]
+                };
+                self.disk.write(idx_block as usize, ctx);
+            } else {
+                panic!("context too large!");
+            }
+        }
+
+        // update inode
+        let mut inode = self.get_inode(idx_inode).expect("Unexcepted inode");
+        inode.clone().borrow_mut().size = counts.try_into().unwrap();
     }
 
     fn create(&mut self, path: &str) {

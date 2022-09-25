@@ -1,4 +1,4 @@
-use alloc::{boxed::Box, sync::Rc};
+use alloc::{boxed::Box, rc::Rc};
 
 use crate::library::filesystem::FileSystem;
 

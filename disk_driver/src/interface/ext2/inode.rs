@@ -1,19 +1,24 @@
+use std::{rc::Rc, cell::RefCell};
+
 use bitflags::bitflags;
+use byteorder::{LittleEndian, ByteOrder};
+
+use crate::encode_little_endian;
 
 #[derive(Debug, Default)]
-pub struct InodeTable(Vec<Inode>);
+pub struct InodeTable(Vec<Rc<RefCell<Inode>>>);
 
 impl InodeTable {
     pub fn new() -> Self {
         Self::default()
     }
 
-    pub fn get(&self, index: usize) -> Option<&Inode> {
+    pub fn get(&self, index: usize) -> Option<&Rc<RefCell<Inode>>> {
         self.0.get(index)
     }
 
     pub fn append(&mut self, inode: Inode) {
-        self.0.push(inode);
+        self.0.push(Rc::new(RefCell::new(inode)));
     }
 }
 
@@ -23,7 +28,7 @@ pub struct InodeTableIter<'a> {
 }
 
 impl<'a> Iterator for InodeTableIter<'a> {
-    type Item = &'a Inode;
+    type Item = &'a Rc<RefCell<Inode>>;
     fn next(&mut self) -> Option<Self::Item> {
         self.index += 1;
         self.table.get(self.index - 1)
@@ -31,7 +36,7 @@ impl<'a> Iterator for InodeTableIter<'a> {
 }
 
 impl<'a> IntoIterator for &'a InodeTable {
-    type Item = &'a Inode;
+    type Item = &'a Rc<RefCell<Inode>>;
     type IntoIter = InodeTableIter<'a>;
     fn into_iter(self) -> Self::IntoIter {
         InodeTableIter {
@@ -41,7 +46,7 @@ impl<'a> IntoIterator for &'a InodeTable {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[repr(C)]
 pub struct Inode {
     pub mode: u16,
@@ -130,6 +135,35 @@ impl Inode {
             faddr,
             osd2,
         }
+    }
+}
+
+impl From<Inode> for [u8; 128] {
+    fn from(inode: Inode) -> Self {
+        let mut buf: Vec<u8> = Vec::with_capacity(128);
+        for byte in encode_little_endian!(inode.mode, 2) {buf.push(byte);}
+        for byte in encode_little_endian!(inode.uid, 2) {buf.push(byte);}
+        for byte in encode_little_endian!(inode.size, 4) {buf.push(byte);}
+        for byte in encode_little_endian!(inode.atime, 4) {buf.push(byte);}
+        for byte in encode_little_endian!(inode.ctime, 4) {buf.push(byte);}
+        for byte in encode_little_endian!(inode.mtime, 4) {buf.push(byte);}
+        for byte in encode_little_endian!(inode.dtime, 4) {buf.push(byte);}
+        for byte in encode_little_endian!(inode.gid, 2) {buf.push(byte);}
+        for byte in encode_little_endian!(inode.links_count, 2) {buf.push(byte);}
+        for byte in encode_little_endian!(inode.blocks, 4) {buf.push(byte);}
+        for byte in encode_little_endian!(inode.flags, 4) {buf.push(byte);}
+        for byte in encode_little_endian!(inode.osd1, 4) {buf.push(byte);}
+        for block in inode.block {
+            for byte in encode_little_endian!(block, 4) {buf.push(byte);}
+        }
+        for byte in encode_little_endian!(inode.generation, 4) {buf.push(byte);}
+        for byte in encode_little_endian!(inode.file_acl, 4) {buf.push(byte);}
+        for byte in encode_little_endian!(inode.dir_acl, 4) {buf.push(byte);}
+        for byte in encode_little_endian!(inode.faddr, 4) {buf.push(byte);}
+        for osd2 in inode.osd2 {
+            for byte in encode_little_endian!(osd2, 1) {buf.push(byte);}
+        }
+        buf.as_chunks::<128>().0[0]
     }
 }
 

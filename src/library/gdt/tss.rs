@@ -16,5 +16,27 @@ pub static TSS: Lazy<TaskStateSegment> = Lazy::new(|| {
         let stack_end = stack_start + STACK_SIZE;
         stack_end
     };
+
+
+    // tss.privilege_stack_table[0] = {
+    //     const STACK_SIZE: usize = 1024;
+    //     static STACK: [u8; STACK_SIZE] = [0; STACK_SIZE];
+    //     let stack_start = VirtAddr::from_ptr( unsafe {
+    //         &STACK
+    //     });
+    //     let stack_end = stack_start + STACK_SIZE;
+    //     stack_end
+    // };
+
+    // tss.privilege_stack_table[2] = {
+    //     const STACK_SIZE: usize = 1024;
+    //     static STACK: [u8; STACK_SIZE] = [0; STACK_SIZE];
+    //     let stack_start = VirtAddr::from_ptr( unsafe {
+    //         &STACK
+    //     });
+    //     let stack_end = stack_start + STACK_SIZE;
+    //     stack_end
+    // };
+    
     tss
 });

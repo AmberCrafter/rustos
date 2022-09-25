@@ -1,5 +1,6 @@
 use x86_64::structures::idt::InterruptStackFrame;
 use x86_64::structures::idt::PageFaultErrorCode;
+use core::arch::asm;
 
 use crate::hlt_loop;
 use crate::library::task;
@@ -93,4 +94,118 @@ pub extern "x86-interrupt" fn general_protection_fault_handler(
     serial_println!("e: {}", error_code & 1);
     serial_println!("{:#?}", stack_frame);
     hlt_loop()
+}
+
+pub extern "x86-interrupt" fn stack__segment_fault_handler(
+    stack_frame: InterruptStackFrame,
+    error_code: u64,
+) {
+    println!("\n[Interrupt] Exception: STACK SEGMENT FAULT");
+    println!("Error Code: {:?}", error_code);
+    println!("index: {}", (error_code >> 3) & ((1 << 14) - 1));
+    println!("tbl: {}", (error_code >> 1) & 0b11);
+    println!("e: {}", error_code & 1);
+    println!("{:#?}", stack_frame);
+    
+    serial_println!("\n[Interrupt] Exception: STACK SEGMENT FAULT");
+    serial_println!("Error Code: {:?}", error_code);
+    serial_println!("index: {}", (error_code >> 3) & ((1 << 14) - 1));
+    serial_println!("tbl: {}", (error_code >> 1) & 0b11);
+    serial_println!("e: {}", error_code & 1);
+    serial_println!("{:#?}", stack_frame);
+    hlt_loop()
+}
+
+
+
+/// ref. https://github.com/xfoxfu/rust-xos/blob/main/kernel/src/interrupts/handlers.rs
+/// rewarp calling convention with naked function
+
+#[repr(align(8), C)]
+#[derive(Debug)]
+pub struct Registers {
+    r15: usize,
+    r14: usize,
+    r13: usize,
+    r12: usize,
+    r11: usize,
+    r10: usize,
+    r9: usize,
+    r8: usize,
+    rdi: usize,
+    rsi: usize,
+    rdx: usize,
+    rcx: usize,
+    rbx: usize,
+    rax: usize,
+    rbp: usize,
+}
+
+macro_rules! wrap {
+    ($fn:ident => $wfn:ident) => {
+        #[naked]
+        pub unsafe extern "C" fn $wfn() -> ! {
+            unsafe {
+                core::arch::asm!(
+                    "
+                        push rbp
+                        push rax
+                        push rbx
+                        push rcx
+                        push rdx
+                        push rsi
+                        push rdi
+                        push r8
+                        push r9
+                        push r10
+                        push r11
+                        push r12
+                        push r13
+                        push r14
+                        push r15
+                        mov rsi, rsp    // second arg: register list
+                        mov rdi, rsp
+                        add rdi, 15*8   // first arg: interrupt frame
+                        call {}
+                        pop r15
+                        pop r14
+                        pop r13
+                        pop r12 
+                        pop r11
+                        pop r10
+                        pop r9
+                        pop r8
+                        pop rdi
+                        pop rsi
+                        pop rdx
+                        pop rcx
+                        pop rbx
+                        pop rax
+                        pop rbp
+                        iretq
+                    ",
+                    sym $fn,
+                    options(noreturn)
+                );
+            }
+        }
+    };
+}
+
+wrap!(syscall_handler_naked => syscall_handler_naked_wrap);
+
+pub extern "C" fn syscall_handler_naked(sf: &mut InterruptStackFrame, regs: &mut Registers) {
+    serial_println!(
+        "
+            rax: {:?}\n
+            rdi: {:?}\n
+            rsi: {:?}\n
+            rdx: {:?}
+        ",
+        regs.rax,
+        regs.rdi,
+        regs.rsi,
+        regs.rdx
+    );
+    serial_println!("syscall finished!");
 }
