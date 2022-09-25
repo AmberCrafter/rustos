@@ -117,6 +117,40 @@ pub extern "x86-interrupt" fn stack__segment_fault_handler(
 }
 
 
+pub extern "x86-interrupt" fn syscall_handler(_stack_frame: InterruptStackFrame) {
+    let mut rax: usize = 0;
+    let mut rdi: usize = 0;
+    let mut rsi: usize = 0;
+    let mut rdx: usize = 0;
+
+    unsafe {
+        asm!(
+            "
+                mov {0}, rax
+                mov {1}, rdi
+                mov {2}, rsi
+                mov {3}, rdx
+            ",
+            out(reg) rax, out(reg) rdi, out(reg) rsi, out(reg) rdx
+        );
+    }
+
+
+    serial_println!(
+        "
+            rax: {:?}\n
+            rdi: {:?}\n
+            rsi: {:?}\n
+            rdx: {:?}
+        ",
+        rax,
+        rdi,
+        rsi,
+        rdx
+    );
+    serial_println!("syscall finished!");
+}
+
 
 /// ref. https://github.com/xfoxfu/rust-xos/blob/main/kernel/src/interrupts/handlers.rs
 /// rewarp calling convention with naked function
