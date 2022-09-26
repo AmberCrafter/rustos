@@ -21,21 +21,12 @@ static IDT: Lazy<InterruptDescriptorTable> = Lazy::new(|| {
     }
     idt.page_fault.set_handler_fn(handler_interrupt::page_fault_handler);
     idt.general_protection_fault.set_handler_fn(handler_interrupt::general_protection_fault_handler);
-    idt.stack_segment_fault.set_handler_fn(handler_interrupt::stack__segment_fault_handler);
+    idt.stack_segment_fault.set_handler_fn(handler_interrupt::stack_segment_fault_handler);
 
     idt[InterruptIndex::Timer.as_usize()].set_handler_fn(handler_interrupt::timer_interrupt_handler);
     idt[InterruptIndex::Keyboard.as_usize()].set_handler_fn(handler_interrupt::keyboard_interrupt_handler);
 
-
-    // idt[0x80].set_handler_fn(handler_interrupt::syscall_handler);
-
-    unsafe {
-        idt[0x80]
-            .set_handler_fn(unsafe {
-                core::mem::transmute(handler_interrupt::syscall_handler_naked_wrap as *mut fn())
-            })
-            .set_stack_index(0);
-    }
+    idt[0x80].set_handler_fn(handler_interrupt::syscall_handler_naked_wrap);
 
     idt
 });

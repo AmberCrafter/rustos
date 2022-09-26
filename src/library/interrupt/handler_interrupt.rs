@@ -96,7 +96,7 @@ pub extern "x86-interrupt" fn general_protection_fault_handler(
     hlt_loop()
 }
 
-pub extern "x86-interrupt" fn stack__segment_fault_handler(
+pub extern "x86-interrupt" fn stack_segment_fault_handler(
     stack_frame: InterruptStackFrame,
     error_code: u64,
 ) {
@@ -115,41 +115,6 @@ pub extern "x86-interrupt" fn stack__segment_fault_handler(
     serial_println!("{:#?}", stack_frame);
     hlt_loop()
 }
-
-
-// pub extern "x86-interrupt" fn syscall_handler(_stack_frame: InterruptStackFrame) {
-//     let mut rax: usize = 0;
-//     let mut rdi: usize = 0;
-//     let mut rsi: usize = 0;
-//     let mut rdx: usize = 0;
-
-//     unsafe {
-//         asm!(
-//             "
-//                 mov {0}, rax
-//                 mov {1}, rdi
-//                 mov {2}, rsi
-//                 mov {3}, rdx
-//             ",
-//             out(reg) rax, out(reg) rdi, out(reg) rsi, out(reg) rdx
-//         );
-//     }
-
-
-//     serial_println!(
-//         "
-//             rax: {:?}\n
-//             rdi: {:?}\n
-//             rsi: {:?}\n
-//             rdx: {:?}
-//         ",
-//         rax,
-//         rdi,
-//         rsi,
-//         rdx
-//     );
-//     serial_println!("syscall finished!");
-// }
 
 
 /// ref. https://github.com/xfoxfu/rust-xos/blob/main/kernel/src/interrupts/handlers.rs
@@ -175,60 +140,54 @@ pub struct Registers {
     rbp: usize,
 }
 
-macro_rules! wrap {
-    ($fn:ident => $wfn:ident) => {
-        #[naked]
-        pub unsafe extern "C" fn $wfn() -> ! {
-            unsafe {
-                core::arch::asm!(
-                    "
-                        push rbp
-                        push rax
-                        push rbx
-                        push rcx
-                        push rdx
-                        push rsi
-                        push rdi
-                        push r8
-                        push r9
-                        push r10
-                        push r11
-                        push r12
-                        push r13
-                        push r14
-                        push r15
-                        mov rsi, rsp    // second arg: register list
-                        mov rdi, rsp
-                        add rdi, 15*8   // first arg: interrupt frame
-                        call {}
-                        pop r15
-                        pop r14
-                        pop r13
-                        pop r12 
-                        pop r11
-                        pop r10
-                        pop r9
-                        pop r8
-                        pop rdi
-                        pop rsi
-                        pop rdx
-                        pop rcx
-                        pop rbx
-                        pop rax
-                        pop rbp
-                        iretq
-                    ",
-                    sym $fn,
-                    options(noreturn)
-                );
-            }
-        }
-    };
+#[naked]
+pub extern "x86-interrupt" fn syscall_handler_naked_wrap() -> ! {
+    unsafe {
+        core::arch::asm!(
+            "
+                push rbp
+                push rax
+                push rbx
+                push rcx
+                push rdx
+                push rsi
+                push rdi
+                push r8
+                push r9
+                push r10
+                push r11
+                push r12
+                push r13
+                push r14
+                push r15
+                mov rsi, rsp    // second arg: register list
+                mov rdi, rsp
+                add rdi, 15*8   // first arg: interrupt frame
+                call {}
+                pop r15
+                pop r14
+                pop r13
+                pop r12 
+                pop r11
+                pop r10
+                pop r9
+                pop r8
+                pop rdi
+                pop rsi
+                pop rdx
+                pop rcx
+                pop rbx
+                pop rax
+                pop rbp
+                iretq
+            ",
+            sym syscall_handler,
+            options(noreturn)
+        );
+    }
 }
 
-wrap!(syscall_handler_naked => syscall_handler_naked_wrap);
-
-pub extern "C" fn syscall_handler_naked(sf: &mut InterruptStackFrame, regs: &mut Registers) {
+pub extern "C" fn syscall_handler(sf: &mut InterruptStackFrame, regs: &mut Registers) {
     // here can invoke syscall function
     // need to ensure enclosure with x86_64::instructions::interrupts::without_interrupts
     serial_println!(
