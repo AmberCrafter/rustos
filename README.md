@@ -1,5 +1,5 @@
 # rustos
-Experimental OS base on blog_os
+Experimental OS base on [blog_os](https://github.com/phil-opp/blog_os)
 
 Goal:
 1. Without all assembly and link file, depends on bootloader and x86_64 crate.
