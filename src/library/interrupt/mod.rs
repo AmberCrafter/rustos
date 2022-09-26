@@ -27,15 +27,16 @@ static IDT: Lazy<InterruptDescriptorTable> = Lazy::new(|| {
     idt[InterruptIndex::Keyboard.as_usize()].set_handler_fn(handler_interrupt::keyboard_interrupt_handler);
 
 
-    idt[0x80].set_handler_fn(handler_interrupt::syscall_handler);
+    // idt[0x80].set_handler_fn(handler_interrupt::syscall_handler);
 
-    // unsafe {
-    //     idt[0x80]
-    //         .set_handler_fn(unsafe {
-    //             core::mem::transmute(handler_interrupt::syscall_handler_naked_wrap as *mut fn())
-    //         })
-    //         .set_stack_index(0);
-    // }
+    unsafe {
+        idt[0x80]
+            .set_handler_fn(unsafe {
+                core::mem::transmute(handler_interrupt::syscall_handler_naked_wrap as *mut fn())
+            })
+            .set_stack_index(0);
+    }
+
     idt
 });
 

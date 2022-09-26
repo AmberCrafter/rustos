@@ -8,7 +8,7 @@ Goal:
 
 
 TODO LIST:
-1. - [ ] Convert TSS table into implementation with memory allocator
+1. - [ ] ~~Convert TSS table into implementation with memory allocator~~
 2. - [x] Fix render overflow
 3. - [x] Make textrenderer support cursor
 4. - [ ] Package TextWriter as editor and console
@@ -16,6 +16,8 @@ TODO LIST:
         - [ ] Editor
         - [ ] Console
         - [ ] Support Del?
+5. - [ ] Setup kernel process
+
 
 > Note.
 >
@@ -32,6 +34,10 @@ TODO LIST:
 
 ---
 # ChangeLog
+[2022-09-26]
+1. Setup syscall software interrupt
+2. Learn on ext2 filesystem
+
 [2022-08-31]
 1. Finished async implement
 

@@ -117,39 +117,39 @@ pub extern "x86-interrupt" fn stack__segment_fault_handler(
 }
 
 
-pub extern "x86-interrupt" fn syscall_handler(_stack_frame: InterruptStackFrame) {
-    let mut rax: usize = 0;
-    let mut rdi: usize = 0;
-    let mut rsi: usize = 0;
-    let mut rdx: usize = 0;
+// pub extern "x86-interrupt" fn syscall_handler(_stack_frame: InterruptStackFrame) {
+//     let mut rax: usize = 0;
+//     let mut rdi: usize = 0;
+//     let mut rsi: usize = 0;
+//     let mut rdx: usize = 0;
 
-    unsafe {
-        asm!(
-            "
-                mov {0}, rax
-                mov {1}, rdi
-                mov {2}, rsi
-                mov {3}, rdx
-            ",
-            out(reg) rax, out(reg) rdi, out(reg) rsi, out(reg) rdx
-        );
-    }
+//     unsafe {
+//         asm!(
+//             "
+//                 mov {0}, rax
+//                 mov {1}, rdi
+//                 mov {2}, rsi
+//                 mov {3}, rdx
+//             ",
+//             out(reg) rax, out(reg) rdi, out(reg) rsi, out(reg) rdx
+//         );
+//     }
 
 
-    serial_println!(
-        "
-            rax: {:?}\n
-            rdi: {:?}\n
-            rsi: {:?}\n
-            rdx: {:?}
-        ",
-        rax,
-        rdi,
-        rsi,
-        rdx
-    );
-    serial_println!("syscall finished!");
-}
+//     serial_println!(
+//         "
+//             rax: {:?}\n
+//             rdi: {:?}\n
+//             rsi: {:?}\n
+//             rdx: {:?}
+//         ",
+//         rax,
+//         rdi,
+//         rsi,
+//         rdx
+//     );
+//     serial_println!("syscall finished!");
+// }
 
 
 /// ref. https://github.com/xfoxfu/rust-xos/blob/main/kernel/src/interrupts/handlers.rs
@@ -229,6 +229,8 @@ macro_rules! wrap {
 wrap!(syscall_handler_naked => syscall_handler_naked_wrap);
 
 pub extern "C" fn syscall_handler_naked(sf: &mut InterruptStackFrame, regs: &mut Registers) {
+    // here can invoke syscall function
+    // need to ensure enclosure with x86_64::instructions::interrupts::without_interrupts
     serial_println!(
         "
             rax: {:?}\n
