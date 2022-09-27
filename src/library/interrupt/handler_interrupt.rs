@@ -141,7 +141,7 @@ pub struct Registers {
 }
 
 #[naked]
-pub extern "x86-interrupt" fn syscall_handler_naked_wrap() -> ! {
+pub extern "x86-interrupt" fn syscall_handler_naked_wrap(stack_frame: InterruptStackFrame) {
     unsafe {
         core::arch::asm!(
             "

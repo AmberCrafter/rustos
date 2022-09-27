@@ -43,17 +43,32 @@ fn alloc_error_handler(layout: alloc::alloc::Layout) ->! {
 // test case
 #[test_case]
 fn test_interrupt_syscall() {
+    let mut reg:u64 = 0;
     unsafe {
         asm!(
-            "mov rax, 0x01",
-            "mov rcx, 0x02",
-            "mov rdx, 0x03",
-            "int 0x80",
-            // "sysenter",
-            out("rax") _, out("rcx") _, out("rdx") _,
-        );
-        // x86_64::software_interrupt!(0x80);
+            "mov ecx, 0xC0000102",
+            "rdmsr",
+            "shl rdx, 32",
+            "or rax, rdx",
+            out("rax") reg
+        )
     }
+
+    serial_println!("\n>>>>>>>>>>>>\nrax: {:x?}", reg);
+
+
+
+    // unsafe {
+    //     asm!(
+    //         "mov rax, 0x01",
+    //         "mov rcx, 0x02",
+    //         "mov rdx, 0x03",
+    //         "int 0x80",
+    //         // "sysenter",
+    //         out("rax") _, out("rcx") _, out("rdx") _,
+    //     );
+    //     // x86_64::software_interrupt!(0x80);
+    // }
     serial_println!("After invoke syscall interrupt");
 }
 

@@ -41,7 +41,65 @@ pub fn init(boot_info: &'static mut BootInfo) {
     // library::context::init();
     
     // library::filesystem::vfs::init();
+
+    
     serial_println!("Finished init");
+    
+    set_user_mode();
+    user_space();
+    
+
+
+    serial_println!("Finished init");
+}
+
+
+#[naked]
+extern "C" fn set_user_mode() {
+    unsafe {
+        core::arch::asm!(
+            "
+                cli
+                // set ds
+                mov ax, (4 * 8) | 3
+                mov ds, ax
+                mov es, ax
+                mov fs, ax
+                mov gs, ax
+    
+                // setup the iret stack frame
+                mov rax, rsp
+                lea rbx, {}
+
+                push (4 * 8) | 3
+                push rax
+                pushf
+
+                // enable interrupt
+                pop rax
+                or rax, 0x200
+                push rax
+
+                push (3 * 8) | 3
+                push rbx
+                iretq
+            ",
+            sym user_space, 
+            options(noreturn)
+        )
+    }
+}
+
+#[naked]
+fn user_space() {
+    unsafe {
+        core::arch::asm!(
+            "
+                hlt
+            ", options(noreturn)
+        )
+    }
+    // hlt_loop();
 }
 
 unsafe fn init_memory_map(physical_memory_offset: VirtAddr, memory_regions: &'static mut MemoryRegions) {

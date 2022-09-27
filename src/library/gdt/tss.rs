@@ -19,7 +19,17 @@ pub static TSS: Lazy<TaskStateSegment> = Lazy::new(|| {
 
 
     // tss.privilege_stack_table[0] = {
-    //     const STACK_SIZE: usize = 1024;
+    //     const STACK_SIZE: usize = 4096 * 5;
+    //     static STACK: [u8; STACK_SIZE] = [0; STACK_SIZE];
+    //     let stack_start = VirtAddr::from_ptr( unsafe {
+    //         &STACK
+    //     });
+    //     let stack_end = stack_start + STACK_SIZE;
+    //     stack_end
+    // };
+
+    // tss.privilege_stack_table[1] = {
+    //     const STACK_SIZE: usize = 4096 * 5;
     //     static STACK: [u8; STACK_SIZE] = [0; STACK_SIZE];
     //     let stack_start = VirtAddr::from_ptr( unsafe {
     //         &STACK
@@ -29,7 +39,7 @@ pub static TSS: Lazy<TaskStateSegment> = Lazy::new(|| {
     // };
 
     // tss.privilege_stack_table[2] = {
-    //     const STACK_SIZE: usize = 1024;
+    //     const STACK_SIZE: usize = 4096 * 5;
     //     static STACK: [u8; STACK_SIZE] = [0; STACK_SIZE];
     //     let stack_start = VirtAddr::from_ptr( unsafe {
     //         &STACK

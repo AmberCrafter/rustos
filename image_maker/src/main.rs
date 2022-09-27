@@ -13,8 +13,9 @@ use std::{
 // const RUN_ARGS: &[&str] = &["--no-reboot"];
 
 // This use on non-UI environment
-const RUN_ARGS: &[&str] = &["--no-reboot", "-display", "none", "-serial", "stdio"];
+// const RUN_ARGS: &[&str] = &["--no-reboot", "-display", "none", "-serial", "stdio"];
 // const RUN_ARGS: &[&str] = &["--no-reboot", "-s", "-S", "-display", "none", "-serial", "stdio"];
+const RUN_ARGS: &[&str] = &["-d", "int", "--no-reboot", "-display", "none", "-serial", "stdio"];
 // const RUN_ARGS: &[&str] = &["-d", "int", "--no-reboot", "-s", "-S", "-display", "none", "-serial", "stdio"];
 // const RUN_ARGS: &[&str] = &["--no-reboot", "-s", "-display", "none", "-serial", "stdio"];
 // const RUN_ARGS: &[&str] = &["--no-reboot", "-s", "-display", "none", "-serial", "mon:stdio"];
