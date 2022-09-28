@@ -36,6 +36,7 @@ TODO LIST:
 # ChangeLog
 [2022-09-28]
 1. enter user mode
+2. syscall/sysretq
 
 [2022-09-26]
 1. Setup syscall software interrupt
