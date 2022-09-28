@@ -182,6 +182,11 @@ pub fn jump_to_user_space(user_stack: VirtAddr, user_entry_point: VirtAddr) {
 pub fn user_space_func() {
     unsafe {
         core::arch::asm!("nop", "nop", "nop");
+        core::arch::asm!(
+            "mov rax, 0x10", 
+            "mov rdi, 0x02", 
+            "syscall"
+        );
         core::arch::asm!("mov rax, 0x01", "mov rbx, 0x01", "mov rcx, 0x01");
     }
 }

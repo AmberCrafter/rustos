@@ -1,3 +1,5 @@
+// this mod used to create kernel heap
+
 // mod dummy_allocator;
 
 use linked_list_allocator::LockedHeap;

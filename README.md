@@ -34,6 +34,9 @@ TODO LIST:
 
 ---
 # ChangeLog
+[2022-09-28]
+1. enter user mode
+
 [2022-09-26]
 1. Setup syscall software interrupt
 2. Learn on ext2 filesystem
