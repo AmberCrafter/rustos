@@ -11,22 +11,22 @@ use x86_64::{structures::gdt::{GlobalDescriptorTable, Descriptor, SegmentSelecto
 
 use crate::println;
 
-static GDT: Lazy<(GlobalDescriptorTable, Selectors)> = Lazy::new(|| {
+pub static GDT: Lazy<(GlobalDescriptorTable, Selectors)> = Lazy::new(|| {
     let mut gdt = GlobalDescriptorTable::new();
     let kernel_cs = gdt.add_entry(Descriptor::kernel_code_segment());
     let kernel_ds = gdt.add_entry(Descriptor::kernel_data_segment());
-    let user_cs = gdt.add_entry(Descriptor::user_code_segment());
     let user_ds = gdt.add_entry(Descriptor::user_data_segment());
+    let user_cs = gdt.add_entry(Descriptor::user_code_segment());
 
     let tss_selector = gdt.add_entry(Descriptor::tss_segment(&TSS));
     (gdt, Selectors {kernel_cs, kernel_ds, user_cs, user_ds, tss_selector})
 });
 
-struct Selectors {
-    kernel_cs: SegmentSelector,
-    kernel_ds: SegmentSelector,
-    user_cs: SegmentSelector,
-    user_ds: SegmentSelector,
+pub struct Selectors {
+    pub kernel_cs: SegmentSelector,
+    pub kernel_ds: SegmentSelector,
+    pub user_cs: SegmentSelector,
+    pub user_ds: SegmentSelector,
     tss_selector: SegmentSelector
 }
 

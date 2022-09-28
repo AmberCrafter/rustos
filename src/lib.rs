@@ -21,6 +21,7 @@ use library::memory::{self ,frame_allocator::bootinfo_allocator::BootInfoFrameAl
 use x86_64::VirtAddr;
 #[macro_use]
 pub mod library;
+pub mod user;
 
 pub fn init(boot_info: &'static mut BootInfo) {
     serial_println!("Start init");
@@ -45,8 +46,8 @@ pub fn init(boot_info: &'static mut BootInfo) {
     
     serial_println!("Finished init");
     
-    set_user_mode();
-    user_space();
+    // set_user_mode();
+    // user_space();
     
 
 
@@ -54,53 +55,53 @@ pub fn init(boot_info: &'static mut BootInfo) {
 }
 
 
-#[naked]
-extern "C" fn set_user_mode() {
-    unsafe {
-        core::arch::asm!(
-            "
-                cli
-                // set ds
-                mov ax, (4 * 8) | 3
-                mov ds, ax
-                mov es, ax
-                mov fs, ax
-                mov gs, ax
+// #[naked]
+// extern "C" fn set_user_mode() {
+//     unsafe {
+//         core::arch::asm!(
+//             "
+//                 cli
+//                 // set ds
+//                 mov ax, (4 * 8) | 3
+//                 mov ds, ax
+//                 mov es, ax
+//                 mov fs, ax
+//                 mov gs, ax
     
-                // setup the iret stack frame
-                mov rax, rsp
-                lea rbx, {}
+//                 // setup the iret stack frame
+//                 mov rax, rsp
+//                 lea rbx, {}
 
-                push (4 * 8) | 3
-                push rax
-                pushf
+//                 push (4 * 8) | 3
+//                 push rax
+//                 pushf
 
-                // enable interrupt
-                pop rax
-                or rax, 0x200
-                push rax
+//                 // enable interrupt
+//                 pop rax
+//                 or rax, 0x200
+//                 push rax
 
-                push (3 * 8) | 3
-                push rbx
-                iretq
-            ",
-            sym user_space, 
-            options(noreturn)
-        )
-    }
-}
+//                 push (3 * 8) | 3
+//                 push rbx
+//                 iretq
+//             ",
+//             sym user_space, 
+//             options(noreturn)
+//         )
+//     }
+// }
 
-#[naked]
-fn user_space() {
-    unsafe {
-        core::arch::asm!(
-            "
-                hlt
-            ", options(noreturn)
-        )
-    }
-    // hlt_loop();
-}
+// #[naked]
+// fn user_space() {
+//     unsafe {
+//         core::arch::asm!(
+//             "
+//                 hlt
+//             ", options(noreturn)
+//         )
+//     }
+//     // hlt_loop();
+// }
 
 unsafe fn init_memory_map(physical_memory_offset: VirtAddr, memory_regions: &'static mut MemoryRegions) {
     // unsafe: need valid physical_memory_offset
@@ -111,6 +112,9 @@ unsafe fn init_memory_map(physical_memory_offset: VirtAddr, memory_regions: &'st
 
     // safe
     allocator::init_heap(&mut mapper, &mut frame_allocator).expect("Heap initialize failed");
+
+    // unsafe
+    crate::user::user_init(&mut mapper, &mut frame_allocator, physical_memory_offset).expect("User space initialisze failed");
 }
 
 pub fn hlt_loop() -> ! {
