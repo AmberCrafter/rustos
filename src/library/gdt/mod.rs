@@ -4,7 +4,7 @@ use spin::Lazy;
 
 // expose tss information
 use tss::TSS;
-pub use tss::DOUBLE_FAULT_IST_INDEX;
+pub use tss::{DOUBLE_FAULT_IST_INDEX, DEBUG_IST_INDEX, NON_MASKABLE_INTERRUPT_IST_INDEX};
 
 
 use x86_64::{structures::gdt::{GlobalDescriptorTable, Descriptor, SegmentSelector}, registers::segmentation::DS};

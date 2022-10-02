@@ -13,19 +13,119 @@ use crate::{serial_print, serial_println};
 use super::InterruptIndex;
 use super::PICS;
 
+// inspired by https://github.com/AmberCrafter/arrayJY_os/blob/master/os/src/interrupts/exception_handlers.rs
+macro_rules! def_handler_func {
+    ($name: tt, $info: expr) => {
+        pub extern "x86-interrupt" fn $name(stack_frame: InterruptStackFrame) -> ! {
+            panic!("\nEXCEPTION: {}\n{:#?}\n", $info, stack_frame);
+        }
+    };
+}
+
+macro_rules! def_handler_func_with_errorcode {
+    ($name: tt, $info: expr) => {
+        pub extern "x86-interrupt" fn $name(stack_frame: InterruptStackFrame, error_code: u64) -> ! {
+            panic!("\nEXCEPTION: {}\nErrorCode: {:x}\n{:#?}\n", $info, error_code, stack_frame);
+        }
+    };
+}
+
+
+def_handler_func!(divide_error_handler, "Divide Error");
+def_handler_func!(debug_handler, "Debug");
+def_handler_func!(overflow_handler, "Overflow");
+def_handler_func!(device_not_available_handler, "Device Not Available");
+def_handler_func!(non_maskable_interrupt_handler, "Non Maskable Interrupt");
+def_handler_func!(bound_range_exceeded_handler, "Bound Range Exceeded");
+def_handler_func!(invalid_opcode_handler, "Invalid Opcode");
+def_handler_func!(x87_floating_point_handler, "x87 Floating Point");
+def_handler_func!(machine_check_handler, "Machine Check");
+def_handler_func!(simd_floating_point_handler, "Simd Floating Point");
+def_handler_func!(virtualization_handler, "Virtualization");
+
+def_handler_func_with_errorcode!(double_fault_handler, "Double Fault");
+def_handler_func_with_errorcode!(page_fault_handler, "Page Fault");
+def_handler_func_with_errorcode!(invalid_tss_handler, "Invalid TSS");
+def_handler_func_with_errorcode!(alignment_check_handler, "Alignment Check");
+def_handler_func_with_errorcode!(segment_not_present_handler, "Segment Not Present");
+def_handler_func_with_errorcode!(stack_segment_fault_handler, "Stack Segment Fault");
+def_handler_func_with_errorcode!(security_exception_handler, "Security Exception");
+def_handler_func_with_errorcode!(general_protection_fault_handler, "General Protection Fault");
+
+// pub extern "x86-interrupt" fn double_fault_handler(
+//     stack_frame: InterruptStackFrame,
+//     _error_code: u64,
+// ) -> ! {
+//     panic!(
+//         "\n[Interrupt] Exception: DOUBLE_FAULT\n{:#?}\n",
+//         stack_frame
+//     );
+// }
+
+
+// pub extern "x86-interrupt" fn page_fault_handler(
+//     stack_frame: InterruptStackFrame,
+//     error_code: PageFaultErrorCode,
+// ) {
+//     //The CR2 register is automatically set by the CPU on a page fault and contains the accessed virtual address that caused the page fault.
+//     use x86_64::registers::control::Cr2;
+//     println!("\n[Interrupt] Exception: PAGE FAULT");
+//     println!("Accessed Address: {:?}", Cr2::read());
+//     println!("Error Code: {:?}", error_code);
+//     println!("{:#?}", stack_frame);
+
+//     serial_println!("\n[Interrupt] Exception: PAGE FAULT");
+//     serial_println!("Accessed Address: {:?}", Cr2::read());
+//     serial_println!("Error Code: {:?}", error_code);
+//     serial_println!("{:#?}", stack_frame);
+
+//     hlt_loop()
+// }
+
+// pub extern "x86-interrupt" fn general_protection_fault_handler(
+//     stack_frame: InterruptStackFrame,
+//     error_code: u64,
+// ) {
+//     println!("\n[Interrupt] Exception: GENERAL PROTECTION FAULT");
+//     println!("Error Code: {:?}", error_code);
+//     println!("index: {}", (error_code >> 3) & ((1 << 14) - 1));
+//     println!("tbl: {}", (error_code >> 1) & 0b11);
+//     println!("e: {}", error_code & 1);
+//     println!("{:#?}", stack_frame);
+    
+//     serial_println!("\n[Interrupt] Exception: GENERAL PROTECTION FAULT");
+//     serial_println!("Error Code: {:?}", error_code);
+//     serial_println!("index: {}", (error_code >> 3) & ((1 << 14) - 1));
+//     serial_println!("tbl: {}", (error_code >> 1) & 0b11);
+//     serial_println!("e: {}", error_code & 1);
+//     serial_println!("{:#?}", stack_frame);
+//     hlt_loop()
+// }
+
+// pub extern "x86-interrupt" fn stack_segment_fault_handler(
+//     stack_frame: InterruptStackFrame,
+//     error_code: u64,
+// ) {
+//     println!("\n[Interrupt] Exception: STACK SEGMENT FAULT");
+//     println!("Error Code: {:?}", error_code);
+//     println!("index: {}", (error_code >> 3) & ((1 << 14) - 1));
+//     println!("tbl: {}", (error_code >> 1) & 0b11);
+//     println!("e: {}", error_code & 1);
+//     println!("{:#?}", stack_frame);
+    
+//     serial_println!("\n[Interrupt] Exception: STACK SEGMENT FAULT");
+//     serial_println!("Error Code: {:?}", error_code);
+//     serial_println!("index: {}", (error_code >> 3) & ((1 << 14) - 1));
+//     serial_println!("tbl: {}", (error_code >> 1) & 0b11);
+//     serial_println!("e: {}", error_code & 1);
+//     serial_println!("{:#?}", stack_frame);
+//     hlt_loop()
+// }
+
+
 pub extern "x86-interrupt" fn breakpoint_handler(stack_frame: InterruptStackFrame) {
     println!("\n[Interrupt] Exception: BREAKPOINT\n{:#?}\n", stack_frame);
     serial_println!("\n[Interrupt] Exception: BREAKPOINT\n{:#?}\n", stack_frame);
-}
-
-pub extern "x86-interrupt" fn double_fault_handler(
-    stack_frame: InterruptStackFrame,
-    _error_code: u64,
-) -> ! {
-    panic!(
-        "\n[Interrupt] Exception: DOUBLE_FAULT\n{:#?}\n",
-        stack_frame
-    );
 }
 
 pub extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFrame) {
@@ -56,66 +156,6 @@ pub extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: Interrupt
             .notify_end_of_interrupt(InterruptIndex::Keyboard.as_u8());
     }
 }
-
-pub extern "x86-interrupt" fn page_fault_handler(
-    stack_frame: InterruptStackFrame,
-    error_code: PageFaultErrorCode,
-) {
-    //The CR2 register is automatically set by the CPU on a page fault and contains the accessed virtual address that caused the page fault.
-    use x86_64::registers::control::Cr2;
-    println!("\n[Interrupt] Exception: PAGE FAULT");
-    println!("Accessed Address: {:?}", Cr2::read());
-    println!("Error Code: {:?}", error_code);
-    println!("{:#?}", stack_frame);
-
-    serial_println!("\n[Interrupt] Exception: PAGE FAULT");
-    serial_println!("Accessed Address: {:?}", Cr2::read());
-    serial_println!("Error Code: {:?}", error_code);
-    serial_println!("{:#?}", stack_frame);
-
-    hlt_loop()
-}
-
-pub extern "x86-interrupt" fn general_protection_fault_handler(
-    stack_frame: InterruptStackFrame,
-    error_code: u64,
-) {
-    println!("\n[Interrupt] Exception: GENERAL PROTECTION FAULT");
-    println!("Error Code: {:?}", error_code);
-    println!("index: {}", (error_code >> 3) & ((1 << 14) - 1));
-    println!("tbl: {}", (error_code >> 1) & 0b11);
-    println!("e: {}", error_code & 1);
-    println!("{:#?}", stack_frame);
-    
-    serial_println!("\n[Interrupt] Exception: GENERAL PROTECTION FAULT");
-    serial_println!("Error Code: {:?}", error_code);
-    serial_println!("index: {}", (error_code >> 3) & ((1 << 14) - 1));
-    serial_println!("tbl: {}", (error_code >> 1) & 0b11);
-    serial_println!("e: {}", error_code & 1);
-    serial_println!("{:#?}", stack_frame);
-    hlt_loop()
-}
-
-pub extern "x86-interrupt" fn stack_segment_fault_handler(
-    stack_frame: InterruptStackFrame,
-    error_code: u64,
-) {
-    println!("\n[Interrupt] Exception: STACK SEGMENT FAULT");
-    println!("Error Code: {:?}", error_code);
-    println!("index: {}", (error_code >> 3) & ((1 << 14) - 1));
-    println!("tbl: {}", (error_code >> 1) & 0b11);
-    println!("e: {}", error_code & 1);
-    println!("{:#?}", stack_frame);
-    
-    serial_println!("\n[Interrupt] Exception: STACK SEGMENT FAULT");
-    serial_println!("Error Code: {:?}", error_code);
-    serial_println!("index: {}", (error_code >> 3) & ((1 << 14) - 1));
-    serial_println!("tbl: {}", (error_code >> 1) & 0b11);
-    serial_println!("e: {}", error_code & 1);
-    serial_println!("{:#?}", stack_frame);
-    hlt_loop()
-}
-
 
 /// ref. https://github.com/xfoxfu/rust-xos/blob/main/kernel/src/interrupts/handlers.rs
 /// rewarp calling convention with naked function
