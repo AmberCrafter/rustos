@@ -16,6 +16,18 @@ use super::PICS;
 // inspired by https://github.com/AmberCrafter/arrayJY_os/blob/master/os/src/interrupts/exception_handlers.rs
 macro_rules! def_handler_func {
     ($name: tt, $info: expr) => {
+        pub extern "x86-interrupt" fn $name(stack_frame: InterruptStackFrame) {
+            panic!("\nEXCEPTION: {}\n{:#?}\n", $info, stack_frame);
+        }
+    };
+
+    ($name: tt, $info: expr, false) => {
+        pub extern "x86-interrupt" fn $name(stack_frame: InterruptStackFrame) {
+            panic!("\nEXCEPTION: {}\n{:#?}\n", $info, stack_frame);
+        }
+    };
+
+    ($name: tt, $info: expr, true) => {
         pub extern "x86-interrupt" fn $name(stack_frame: InterruptStackFrame) -> ! {
             panic!("\nEXCEPTION: {}\n{:#?}\n", $info, stack_frame);
         }
@@ -24,12 +36,29 @@ macro_rules! def_handler_func {
 
 macro_rules! def_handler_func_with_errorcode {
     ($name: tt, $info: expr) => {
+        pub extern "x86-interrupt" fn $name(stack_frame: InterruptStackFrame, error_code: u64) {
+            panic!("\nEXCEPTION: {}\nErrorCode: {:x}\n{:#?}\n", $info, error_code, stack_frame);
+        }
+    };
+
+    ($name: tt, $info: expr, PageFaultErrorCode) => {
+        pub extern "x86-interrupt" fn $name(stack_frame: InterruptStackFrame, error_code: PageFaultErrorCode) {
+            panic!("\nEXCEPTION: {}\nErrorCode: {:?}\n{:#?}\n", $info, error_code, stack_frame);
+        }
+    };
+
+    ($name: tt, $info: expr, false) => {
+        pub extern "x86-interrupt" fn $name(stack_frame: InterruptStackFrame, error_code: u64) {
+            panic!("\nEXCEPTION: {}\nErrorCode: {:x}\n{:#?}\n", $info, error_code, stack_frame);
+        }
+    };
+
+    ($name: tt, $info: expr, true) => {
         pub extern "x86-interrupt" fn $name(stack_frame: InterruptStackFrame, error_code: u64) -> ! {
             panic!("\nEXCEPTION: {}\nErrorCode: {:x}\n{:#?}\n", $info, error_code, stack_frame);
         }
     };
 }
-
 
 def_handler_func!(divide_error_handler, "Divide Error");
 def_handler_func!(debug_handler, "Debug");
@@ -39,12 +68,12 @@ def_handler_func!(non_maskable_interrupt_handler, "Non Maskable Interrupt");
 def_handler_func!(bound_range_exceeded_handler, "Bound Range Exceeded");
 def_handler_func!(invalid_opcode_handler, "Invalid Opcode");
 def_handler_func!(x87_floating_point_handler, "x87 Floating Point");
-def_handler_func!(machine_check_handler, "Machine Check");
+def_handler_func!(machine_check_handler, "Machine Check", true);
 def_handler_func!(simd_floating_point_handler, "Simd Floating Point");
 def_handler_func!(virtualization_handler, "Virtualization");
 
-def_handler_func_with_errorcode!(double_fault_handler, "Double Fault");
-def_handler_func_with_errorcode!(page_fault_handler, "Page Fault");
+def_handler_func_with_errorcode!(double_fault_handler, "Double Fault", true);
+def_handler_func_with_errorcode!(page_fault_handler, "Page Fault", PageFaultErrorCode);
 def_handler_func_with_errorcode!(invalid_tss_handler, "Invalid TSS");
 def_handler_func_with_errorcode!(alignment_check_handler, "Alignment Check");
 def_handler_func_with_errorcode!(segment_not_present_handler, "Segment Not Present");
