@@ -3,29 +3,34 @@
 #![feature(custom_test_frameworks)]
 #![test_runner(crate::library::unittest::test_runner)]
 #![reexport_test_harness_main = "test_main"]
-
 #![feature(abi_x86_interrupt)]
 #![feature(alloc_error_handler)]
 #![feature(asm_sym)]
 #![feature(naked_functions)]
-
 #![feature(thread_local)]
 
 extern crate alloc;
 
-
 use bootloader::boot_info::MemoryRegions;
 #[allow(unused)]
-use bootloader::{BootInfo, entry_point};
-use library::memory::{self ,frame_allocator::bootinfo_allocator::BootInfoFrameAllocator, allocator};
+use bootloader::{entry_point, BootInfo};
+use conquer_once::spin::OnceCell;
+use library::memory::{
+    self, allocator,
+    frame_allocator::{self, bootinfo_allocator::BootInfoFrameAllocator},
+};
 use x86_64::VirtAddr;
 #[macro_use]
 pub mod library;
 pub mod user;
 
+static PHYSICAL_MEMORY_OFFSET: OnceCell<VirtAddr> = OnceCell::uninit();
+
 pub fn init(boot_info: &'static mut BootInfo) {
     serial_println!("Start init");
-    let physical_memory_offset = VirtAddr::new(boot_info.physical_memory_offset.into_option().unwrap());
+    PHYSICAL_MEMORY_OFFSET
+        .init_once(|| VirtAddr::new(boot_info.physical_memory_offset.into_option().unwrap()));
+    // let physical_memory_offset = VirtAddr::new(boot_info.physical_memory_offset.into_option().unwrap());
     let framebuffer = boot_info.framebuffer.as_mut().take();
 
     library::renderer::init(framebuffer);
@@ -33,27 +38,23 @@ pub fn init(boot_info: &'static mut BootInfo) {
     library::interrupt::init_idt();
     library::interrupt::init_pic();
     library::interrupt::enable_hardware_interrupt(); // enable pic
-    
+
     unsafe {
-        init_memory_map(physical_memory_offset, &mut boot_info.memory_regions);
-    }    
+        init_memory_map(&mut boot_info.memory_regions);
+    }
     // library::task::init();
-    
+
     // library::context::init();
-    
+
     // library::filesystem::vfs::init();
 
-    
     serial_println!("Finished init");
-    
+
     // set_user_mode();
     // user_space();
-    
-
 
     serial_println!("Finished init");
 }
-
 
 // #[naked]
 // extern "C" fn set_user_mode() {
@@ -67,7 +68,7 @@ pub fn init(boot_info: &'static mut BootInfo) {
 //                 mov es, ax
 //                 mov fs, ax
 //                 mov gs, ax
-    
+
 //                 // setup the iret stack frame
 //                 mov rax, rsp
 //                 lea rbx, {}
@@ -85,7 +86,7 @@ pub fn init(boot_info: &'static mut BootInfo) {
 //                 push rbx
 //                 iretq
 //             ",
-//             sym user_space, 
+//             sym user_space,
 //             options(noreturn)
 //         )
 //     }
@@ -103,18 +104,24 @@ pub fn init(boot_info: &'static mut BootInfo) {
 //     // hlt_loop();
 // }
 
-unsafe fn init_memory_map(physical_memory_offset: VirtAddr, memory_regions: &'static mut MemoryRegions) {
+unsafe fn init_memory_map(
+    // physical_memory_offset: VirtAddr,
+    memory_regions: &'static mut MemoryRegions,
+) {
     // unsafe: need valid physical_memory_offset
-    let mut mapper = memory::init(physical_memory_offset);
-
-    // unsafe: need valid memory_region
-    let mut frame_allocator = BootInfoFrameAllocator::init(memory_regions);
-
-    // safe
-    allocator::init_heap(&mut mapper, &mut frame_allocator).expect("Heap initialize failed");
-
-    // unsafe
-    crate::user::user_init(&mut mapper, &mut frame_allocator, physical_memory_offset).expect("User space initialisze failed");
+    if let Some(physical_memory_offset) = PHYSICAL_MEMORY_OFFSET.get() {
+        // unsafe: need valid memory_region
+        // let mut frame_allocator = BootInfoFrameAllocator::init(memory_regions);
+        frame_allocator::init(memory_regions);
+        
+        // let mut mapper = memory::init();
+        // let mut mapper = library::memory::PAGEMAPPER.lock();
+        // safe
+        allocator::init_heap().expect("Heap initialize failed");
+        // unsafe
+        crate::user::user_init()
+            .expect("User space initialisze failed");
+    }
 }
 
 pub fn hlt_loop() -> ! {
@@ -128,9 +135,9 @@ entry_point!(tests::main);
 
 #[cfg(test)]
 mod tests {
-    use core::panic::PanicInfo;
-    use super::BootInfo;
     use super::serial_println;
+    use super::BootInfo;
+    use core::panic::PanicInfo;
 
     pub fn main(boot_info: &'static mut BootInfo) -> ! {
         super::init(boot_info);
@@ -139,14 +146,13 @@ mod tests {
         super::hlt_loop()
     }
 
-
     #[panic_handler]
     fn panic(info: &PanicInfo) -> ! {
         crate::library::handler_panic::kernel_panic::panic_handler(info)
     }
 
     #[alloc_error_handler]
-    fn alloc_error_handler(layout: alloc::alloc::Layout) ->! {
+    fn alloc_error_handler(layout: alloc::alloc::Layout) -> ! {
         rustos::library::handler_panic::kernel_panic::alloc_error_handler(layout)
     }
 }
