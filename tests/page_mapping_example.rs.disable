@@ -45,11 +45,11 @@ fn panic(info: &PanicInfo) -> ! {
 
 // test case
 fn test_mapping_example(physical_memory_offset: VirtAddr) {
-    use rustos::library::memory::frame_allocator::bootinfo_allocator::FRAMEALLOCATORL;
+    use rustos::library::memory::frame_allocator::bootinfo_allocator::FRAME_ALLOCATORL;
     // get mapper(Page manager) and frame_allocator
     let mut mapper = unsafe {rustos::library::memory::init(physical_memory_offset)};
     let mut frame_allocator = rustos::library::memory::frame_allocator::empty_allocator::EmptyAllocator;
-    // if let Some (mut frame_allocator) = FRAMEALLOCATORL.get() {
+    // if let Some (mut frame_allocator) = FRAME_ALLOCATORL.get() {
     //     let frame_allocator = frame_allocator.lock();
     // };
     // choose a unused page

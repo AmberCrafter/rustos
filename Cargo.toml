@@ -43,3 +43,4 @@ physical-memory-offset = "0x0000_4000_0000_0000"  # default value: 0xS0000_0180_
 # map-page-table-recursively = true
 # recursive-index = 511
 kernel-stack-size = 0x000a_0000
+kernel-stack-address = 0x80_0000_0000

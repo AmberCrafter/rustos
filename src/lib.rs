@@ -17,7 +17,7 @@ use bootloader::{entry_point, BootInfo};
 use conquer_once::spin::OnceCell;
 use library::memory::{
     self, allocator,
-    frame_allocator::{self, bootinfo_allocator::BootInfoFrameAllocator},
+    frame_allocator::{self, bootinfo_allocator::BootInfoFrameAllocator}, page::init_process_kernel_stack,
 };
 use x86_64::VirtAddr;
 #[macro_use]
@@ -27,6 +27,7 @@ pub mod user;
 static PHYSICAL_MEMORY_OFFSET: OnceCell<VirtAddr> = OnceCell::uninit();
 
 pub fn init(boot_info: &'static mut BootInfo) {
+    // serial_println!("boot_info: {:#x?}", boot_info);
     serial_println!("Start init");
     PHYSICAL_MEMORY_OFFSET
         .init_once(|| VirtAddr::new(boot_info.physical_memory_offset.into_option().unwrap()));
@@ -118,9 +119,11 @@ unsafe fn init_memory_map(
         // let mut mapper = library::memory::PAGEMAPPER.lock();
         // safe
         allocator::init_heap().expect("Heap initialize failed");
+        init_process_kernel_stack();
+        serial_println!("kernel stack initialized")
         // unsafe
-        crate::user::user_init()
-            .expect("User space initialisze failed");
+        // crate::user::user_init()
+        //     .expect("User space initialisze failed");
     }
 }
 

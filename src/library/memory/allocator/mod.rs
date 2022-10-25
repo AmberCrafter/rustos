@@ -30,7 +30,7 @@ pub fn init_heap(
         Page::range_inclusive(heap_start_page, heap_end_page)
     };
 
-    let mut frame_allocator_guard = super::FRAMEALLOCATORL.lock();
+    let mut frame_allocator_guard = super::FRAME_ALLOCATORL.lock();
     let mut mapper = super::PAGEMAPPER.lock();
     if let frame_allocator = frame_allocator_guard.get_mut() {
         for page in page_range {

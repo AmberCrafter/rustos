@@ -8,7 +8,7 @@ use x86_64::structures::paging::{
 use x86_64::VirtAddr;
 
 use crate::library::memory::PAGEMAPPER;
-use crate::library::memory::frame_allocator::FRAMEALLOCATORL;
+use crate::library::memory::frame_allocator::FRAME_ALLOCATORL;
 #[allow(unused)]
 use crate::{print, println};
 #[allow(unused)]
@@ -91,7 +91,7 @@ pub fn user_init(
     // frame_allocator: &mut impl FrameAllocator<Size4KiB>,
     // physical_memory_offset: VirtAddr,
 ) -> Result<(), MapToError<Size4KiB>> {
-    let mut frame_allocator_guard = FRAMEALLOCATORL.lock();
+    let mut frame_allocator_guard = FRAME_ALLOCATORL.lock();
     let mut mapper = PAGEMAPPER.lock();
     if let frame_allocator = frame_allocator_guard.get_mut() {
         let user_stack_addr = init_user_stack(&mut mapper, frame_allocator);

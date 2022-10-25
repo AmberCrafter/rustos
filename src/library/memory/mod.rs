@@ -14,7 +14,8 @@ pub mod allocator;
 
 pub use x86_64::structures::paging::FrameAllocator;
 
-pub use frame_allocator::FRAMEALLOCATORL;
+pub use frame_allocator::FRAME_ALLOCATORL;
+pub use frame_allocator::alloc_frame;
 use crate::PHYSICAL_MEMORY_OFFSET;
 
 pub static PAGEMAPPER: Lazy<Mutex<OffsetPageTable<'static>>> = Lazy::new(|| {
@@ -30,3 +31,5 @@ pub static PAGEMAPPER: Lazy<Mutex<OffsetPageTable<'static>>> = Lazy::new(|| {
 //     let level4_table = page::get_level_4_table(physical_memory_offset);
 //     OffsetPageTable::new(level4_table, physical_memory_offset)
 // }
+
+
