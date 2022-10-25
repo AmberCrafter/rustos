@@ -1,11 +1,11 @@
 # rustos
 Experimental OS base on [blog_os](https://github.com/phil-opp/blog_os)
+Waiting for new version of [osdev/bootloader](https://github.com/rust-osdev/bootloader)
 
 Goal:
 1. Without all assembly and link file, depends on bootloader and x86_64 crate.
 2. Filesystem
 3. Network interface
-
 
 TODO LIST:
 1. - [ ] ~~Convert TSS table into implementation with memory allocator~~
@@ -17,7 +17,6 @@ TODO LIST:
         - [ ] Console
         - [ ] Support Del?
 5. - [ ] Setup kernel process
-
 
 > Note.
 >
