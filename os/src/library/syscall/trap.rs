@@ -149,6 +149,10 @@ pub extern "C" fn trap_return() {
     }
 }
 
+fn printer(reg: usize) {
+    serial_println!("reg: {:?}", reg);
+}
+
 #[naked]
 pub extern "C" fn save_registers() {
     unsafe {

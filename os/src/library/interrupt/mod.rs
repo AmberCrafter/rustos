@@ -62,3 +62,7 @@ pub fn init_pic() {
 pub fn enable_hardware_interrupt() {
     x86_64::instructions::interrupts::enable();
 }
+
+pub fn disable_hardware_interrupt() {
+    x86_64::instructions::interrupts::disable();
+}

@@ -43,6 +43,7 @@ impl ProcessControlBlockInner {
 impl ProcessControlBlock {
     pub fn new(elf_data: &[u8]) -> Self {
         let (memory_set, user_stack, entry_point) = MemorySet::from_elf(elf_data);
+        // serial_println!("entry_point: {:x?}", entry_point);
         let pid = alloc_pid();
         let kernel_stack = KernelStack::new(&pid);
         let mut trap_frame = TrapFrame::new();

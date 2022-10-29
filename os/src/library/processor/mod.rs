@@ -20,7 +20,7 @@ use super::{loader::get_app_data_by_name, memory::page::current_offset_page_tabl
 
 pub static PROCESSOR: Lazy<Processor> = Lazy::new(|| Processor::new());
 pub static INITPROC: Lazy<Arc<ProcessControlBlock>> = Lazy::new(|| {
-    serial_println!("INITPROC: ");
+    // serial_println!("INITPROC: ");
     Arc::new(ProcessControlBlock::new(
         get_app_data_by_name("initproc").unwrap(),
     ))

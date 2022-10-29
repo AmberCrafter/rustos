@@ -46,14 +46,13 @@ pub fn init(boot_info: &'static mut BootInfo) {
     library::interrupt::init_idt();
     library::interrupt::init_pic();
     library::interrupt::enable_hardware_interrupt(); // enable pic
+    // library::interrupt::disable_hardware_interrupt();
 
     unsafe {
         init_memory_map(&mut boot_info.memory_regions);
     }
     // library::task::init();
-
     // library::context::init();
-
     // library::filesystem::vfs::init();
 
     serial_println!("Finished init");

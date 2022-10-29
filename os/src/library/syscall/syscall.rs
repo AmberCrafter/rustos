@@ -21,7 +21,6 @@ pub fn sys_read(buffer: *mut u8, len: usize) -> isize {
                 c = ch;
             }
         });
-        // serial_println!("pass: {:?}", c);
         if c == 0 {
             suspend_current_and_run_next();
             continue;
@@ -80,12 +79,14 @@ pub fn sys_exec(app_name: *const u8) -> isize {
 }
 
 pub fn sys_yield() -> isize {
+    // serial_println!("yield");
     use crate::library::processor::suspend_current_and_run_next;
     suspend_current_and_run_next();
     0
 }
 
 pub fn sys_waitpid(pid: isize, exit_code_ptr: *mut isize) -> isize {
+    // serial_println!("wait_pid: PID: {:?}", pid);
     use crate::library::processor::current_process;
     let proc = current_process().unwrap();
     let mut inner = proc.inner_lock();
@@ -93,8 +94,10 @@ pub fn sys_waitpid(pid: isize, exit_code_ptr: *mut isize) -> isize {
         .find(|p| (pid==-1) || (pid as usize == p.getpid()))
         .is_none()
     {
+        // not owner
         return -1;
     }
+    // exit case
     let r = inner
         .children
         .iter()
@@ -110,6 +113,7 @@ pub fn sys_waitpid(pid: isize, exit_code_ptr: *mut isize) -> isize {
         };
         pid as isize
     } else {
+        // keep running
         -2
     }
 }

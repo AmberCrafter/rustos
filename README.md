@@ -33,6 +33,10 @@ TODO LIST:
 
 ---
 # ChangeLog
+[2022-10-30]
+1. FIXBUG: Context switch will be arbitrary crushed, due to idt overflow
+ > Add a guard stack when step up tss table
+
 [2022-10-29]
 1. Implement process and context switch
 2. BUG: STDIN

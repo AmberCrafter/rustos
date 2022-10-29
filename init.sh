@@ -7,4 +7,4 @@ rustup component add llvm-tools-preview
 
 # install qemu
 sudo apt-get update
-audo apt-get install -y qemu-system-x86
+audo apt-get install -y qemu-system-x86 gdb

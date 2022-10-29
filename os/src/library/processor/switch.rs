@@ -56,7 +56,6 @@ pub extern "C" fn switch_to(current: *const usize, target: usize) {
             pop r11
             pop rbx
             pop rbp
-
             ret
         ", options(noreturn));
     }

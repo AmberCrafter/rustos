@@ -8,8 +8,10 @@ use user::{fork, exec, yield_, wait, read};
 #[no_mangle]
 unsafe fn main() -> i32 {
     if fork() == 0 {
+        // children process
         exec("user_shell\0");
     } else {
+        // parent process
         loop {
             let mut exit_code: isize = 0;
             let pid = wait(&mut exit_code);

@@ -183,12 +183,13 @@ pub extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: Interrupt
 
     let mut port = Port::new(0x60);
     let scancode: u8 = unsafe { port.read() };
-    println!("Scancode: {:?}", scancode);
+    // println!("Scancode: {:?}", scancode);
+    // serial_println!("Scancode: {:?}", scancode);
     // pc_keyboard_interface::execute(scancode);
     {
         STDIN_BUFFER.lock().push_back(scancode);
     }
-    task::keyboard::add_scancode(scancode);
+    // task::keyboard::add_scancode(scancode);
 
     unsafe {
         PICS.lock()

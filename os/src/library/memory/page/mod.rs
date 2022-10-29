@@ -125,7 +125,7 @@ pub fn kernel_mapped_new_page_table() -> OffsetPageTable<'static> {
         Page::<Size4KiB>::range(start_page, end_page)
     };
 
-    // kernel space of physical memory (OffsetTable)
+    // user space of physical memory (OffsetTable)
     let offset_page_range = {
         const MEMORY_SIZE: u64 = 0x800_0000; // 128 MiB
         let start_addr = phys_offset.clone();

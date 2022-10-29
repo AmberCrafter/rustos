@@ -38,7 +38,8 @@ impl SimpleSyscall {
 
 fn syscall_handler(trap_frame: &TrapFrame) -> isize {
     // serial_println!("Call syscall: {:?}", SimpleSyscall::new(trap_frame.rax as usize));
-    syscall_wrap(
+    // serial_println!("Before:\n{:?}", trap_frame);
+    let res = syscall_wrap(
         SimpleSyscall::new(trap_frame.rax as usize), 
         [
             trap_frame.rdi as usize,
@@ -48,7 +49,10 @@ fn syscall_handler(trap_frame: &TrapFrame) -> isize {
             // trap_frame.r8,
             // trap_frame.r9,
         ]
-    )
+    );
+    // serial_println!("After:\n{:?}", trap_frame);
+    // serial_println!("res:\n{:?}", res);
+    res
 }
 
 pub fn syscall_wrap(syscall_id: SimpleSyscall, args: [usize; 3]) -> isize {
