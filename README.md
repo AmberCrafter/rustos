@@ -33,9 +33,12 @@ TODO LIST:
 
 ---
 # ChangeLog
+[2022-10-29]
+1. Implement process and context switch
+2. BUG: STDIN
+
 [2022-10-27]
 1. Error: syscall jmp to 0x0H in user mode
-
 
 [2022-09-28]
 1. enter user mode
