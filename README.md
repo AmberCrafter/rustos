@@ -33,6 +33,10 @@ TODO LIST:
 
 ---
 # ChangeLog
+[2022-10-27]
+1. Error: syscall jmp to 0x0H in user mode
+
+
 [2022-09-28]
 1. enter user mode
 2. syscall/sysretq

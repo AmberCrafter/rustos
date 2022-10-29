@@ -1,0 +1,7 @@
+[build]
+target = "x86_64-rustos-none.json"
+
+[target.x86_64-rustos-none]
+rustflags = [
+    "-Clink-args=-Tsrc/linker.ld",
+]
