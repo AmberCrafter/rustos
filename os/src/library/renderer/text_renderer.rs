@@ -240,7 +240,9 @@ impl TextWriter {
 
     fn render_cursor(&mut self) {
         // ignore rendered_char value, only get 
-        for y in 0..CURSOR_HEIGHT {
+        // Note: Due to cursor (render at next byte position) could overflow on framebuffer, 
+        // we will ignore bottom line of cursor to prevent it.
+        for y in 0..CURSOR_HEIGHT-1 {
             for x in 0..BITMAP_LETTER_WIDTH {
                 self.inverse_pixel(self.x_position + x, self.y_position + y);
             }

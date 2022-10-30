@@ -3,11 +3,11 @@ Experimental OS base on [blog_os](https://github.com/phil-opp/blog_os)
 Waiting for new version of [osdev/bootloader](https://github.com/rust-osdev/bootloader)
 
 Goal:
-1. Without all assembly and link file, depends on bootloader and x86_64 crate.
+1. ~~Without all assembly and link file, depends on bootloader and x86_64 crate.~~
 2. Filesystem
 3. Network interface
 
-TODO LIST:
+TODO LIST && Known BUG:
 1. - [ ] ~~Convert TSS table into implementation with memory allocator~~
 2. - [x] Fix render overflow
 3. - [x] Make textrenderer support cursor
@@ -16,7 +16,8 @@ TODO LIST:
         - [ ] Editor
         - [ ] Console
         - [ ] Support Del?
-5. - [ ] Setup kernel process
+5. - [x] Setup kernel process
+6. - [x] `print` and `println` not work, need to check framebuffer and textwritter
 
 > Note.
 >
@@ -31,15 +32,14 @@ TODO LIST:
  - [ ] Learn E820 (memory controller?)
 
 ---
-# Known BUG
- - [ ] `print` and `println` not work, need to check framebuffer and textwritter
-
-
----
 # ChangeLog
 [2022-10-30]
 1. FIXBUG: Context switch will be arbitrary crushed, due to idt overflow
  > Add a guard stack when step up tss table
+2. FIXBUG -- STDIN: children process framebuffer render not work 
+ > Add framebuffer memory_set copy into `memory.page.mod.kernel_mapped_new_page_table`
+3. FIXBUG: framebuffer writer will crash at last byte
+ > FIX cursor render
 
 [2022-10-29]
 1. Implement process and context switch
