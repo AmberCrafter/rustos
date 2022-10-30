@@ -6,6 +6,7 @@ extern crate user;
 
 #[no_mangle]
 unsafe fn main() -> i32 {
-    println!("Hello world!");
+    println!("Hello kernel, I'm children process!");
+    println!("Excute `Hello world` in subprocess!");
     0
 }

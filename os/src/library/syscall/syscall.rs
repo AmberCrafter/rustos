@@ -1,10 +1,13 @@
 use alloc::sync::Arc;
 
+use crate::print;
+
 pub fn sys_write(buffer: *const u8, len: usize) -> isize {
     let slice = unsafe {
         core::slice::from_raw_parts(buffer, len)
     };
     let str = core::str::from_utf8(slice).unwrap();
+    print!("{}", str);
     serial_print!("{}", str);
     len as isize
 }

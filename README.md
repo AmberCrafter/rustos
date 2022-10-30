@@ -1,12 +1,41 @@
 # rustos
-Experimental OS base on [blog_os](https://github.com/phil-opp/blog_os)
-Waiting for new version of [osdev/bootloader](https://github.com/rust-osdev/bootloader)
+Experimental OS base on 
+ - [blog_os](https://github.com/phil-opp/blog_os)
+ - [xfoxfu/rust_xos](https://github.com/xfoxfu/rust-xos)
+ - [arrayJY/os](https://github.com/arrayJY/os)
+ - [rcore-os/rCore](https://github.com/rcore-os/rCore-Tutorial-v3)
 
 Goal:
 1. ~~Without all assembly and link file, depends on bootloader and x86_64 crate.~~
 2. Filesystem
 3. Network interface
 
+### User shell
+Date: 2022-10-30
+![UserShell](./images/User_shell.png)
+
+---
+# Install
+
+1. install toolchain
+```bash
+./init.sh
+```
+
+2. build user programe
+```bash
+cd user
+make
+```
+
+3. build and run kernel
+```bash
+cd os
+cargo clean && cargo krun
+```
+
+
+---
 TODO LIST && Known BUG:
 1. - [ ] ~~Convert TSS table into implementation with memory allocator~~
 2. - [x] Fix render overflow
@@ -18,6 +47,7 @@ TODO LIST && Known BUG:
         - [ ] Support Del?
 5. - [x] Setup kernel process
 6. - [x] `print` and `println` not work, need to check framebuffer and textwritter
+7. - [ ] clean warning
 
 > Note.
 >
@@ -30,16 +60,19 @@ TODO LIST && Known BUG:
  - [x] Make cargo ktest work
  - [ ] Implement APIC (current use 8259 PIC)
  - [ ] Learn E820 (memory controller?)
+ - [ ] Waiting for new version of [osdev/bootloader](https://github.com/rust-osdev/bootloader) and rewrite
 
 ---
 # ChangeLog
 [2022-10-30]
-1. FIXBUG: Context switch will be arbitrary crushed, due to idt overflow
+1. BUGFIX: Context switch will be arbitrary crushed, due to idt overflow
  > Add a guard stack when step up tss table
-2. FIXBUG -- STDIN: children process framebuffer render not work 
+2. BUGFIX -- STDIN: children process framebuffer render not work 
  > Add framebuffer memory_set copy into `memory.page.mod.kernel_mapped_new_page_table`
-3. FIXBUG: framebuffer writer will crash at last byte
- > FIX cursor render
+3. BUGFIX: framebuffer writer will crash at last byte
+ > Fix cursor render
+4. BUGFIX: Print key typing in framebuffer
+5. MODIFY: user_shell improve
 
 [2022-10-29]
 1. Implement process and context switch

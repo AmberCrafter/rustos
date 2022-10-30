@@ -162,8 +162,6 @@ pub extern "x86-interrupt" fn breakpoint_handler(stack_frame: InterruptStackFram
 }
 
 pub extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFrame) {
-    print!(".");
-    serial_print!(">>>>>>>>>>>>>>>>>>>>>> .");
     unsafe {
         PICS.lock()
             .notify_end_of_interrupt(InterruptIndex::Timer.as_u8());
@@ -180,19 +178,19 @@ pub static STDIN_BUFFER: Lazy<Mutex<VecDeque<u8>>> = Lazy::new(|| {
 });
 pub extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStackFrame) {
     use x86_64::instructions::port::Port;
-    // use crate::library::renderer::pc_keyboard_interface;
+    use crate::library::renderer::pc_keyboard_interface;
     
     let mut port: PortGeneric<u8, ReadWriteAccess> = Port::new(0x60);
     let scancode: u8 = unsafe { port.read() };
-    println!("Scancode: {:?}", scancode);
-    serial_println!("Scancode: {:?}", scancode);
-    // pc_keyboard_interface::execute(scancode);
-    {
-        STDIN_BUFFER.lock().push_back(scancode);
-    }
+    // println!("Scancode: {:?}", scancode);
+    // serial_println!("Scancode: {:?}", scancode);
+    pc_keyboard_interface::execute(scancode);
+    // {
+    //     STDIN_BUFFER.lock().push_back(scancode);
+    // }
     // task::keyboard::add_scancode(scancode);
 
-    serial_println!("keyboard:  {:?}", InterruptIndex::Keyboard.as_u8());
+    // serial_println!("keyboard:  {:?}", InterruptIndex::Keyboard.as_u8());
 
     unsafe {
         PICS.lock()

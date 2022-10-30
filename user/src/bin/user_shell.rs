@@ -18,6 +18,7 @@ unsafe fn main() -> i32 {
         let c = getchar();
         match c {
             LF => {
+                println!("\n");
                 line[len] = 0;
                 let path = core::str::from_utf8(&line[..=len]).unwrap();
                 let pid = fork();

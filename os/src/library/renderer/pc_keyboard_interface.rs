@@ -2,7 +2,7 @@ use pc_keyboard::{ layouts::Us104Key, ScancodeSet1, HandleControl::Ignore, Decod
 use spin::{Mutex, Lazy};
 use x86_64::instructions::interrupts::without_interrupts;
 
-use crate::print;
+use crate::{print, library::interrupt::STDIN_BUFFER};
 
 use super::TEXTWRITER;
 
@@ -89,8 +89,9 @@ pub fn execute(scancode: u8) {
                     match key {
                         DecodedKey::Unicode(charactor) => {
                             if charactor.is_ascii() {
-                                print!("{:}", charactor);
+                                // print!("{:}", charactor);
                                 serial_print!("{:}", charactor);
+                                STDIN_BUFFER.lock().push_back(charactor as u8);
                             } else {
                                 print!("{:?}", key);
                                 serial_print!("{:?}", key);
