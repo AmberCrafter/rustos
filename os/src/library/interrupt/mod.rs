@@ -53,8 +53,6 @@ static IDT: Lazy<InterruptDescriptorTable> = Lazy::new(|| {
 
 pub fn init_idt() {
     IDT.load();
-    serial_println!("IDT: {:?}", IDT.as_mut_ptr() as usize);
-    serial_println!("IDT size: {:?}", core::mem::size_of::<InterruptDescriptorTable>());
 }
 
 pub fn init_pic() {

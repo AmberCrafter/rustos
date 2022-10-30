@@ -106,6 +106,15 @@ pub fn kernel_mapped_new_page_table() -> OffsetPageTable<'static> {
         Page::<Size4KiB>::range(start_page, end_page)
     };
 
+    // bootloader framebuffer
+    let bootloader_framebuffer = {
+        let start_addr = VirtAddr::new(0x100_0000_0000);
+        let end_addr = VirtAddr::new(0x100_0000_0000 + 0x0016_0000);
+        let start_page = Page::containing_address(start_addr);
+        let end_page = Page::containing_address(end_addr);
+        Page::<Size4KiB>::range(start_page, end_page)
+    };
+
     // bootloader memory_regions
     let bootloader_memory_regions = {
         let start_addr = VirtAddr::new(0x180_0000_0000);
@@ -151,6 +160,17 @@ pub fn kernel_mapped_new_page_table() -> OffsetPageTable<'static> {
 
     // Map kernel stack
     for page in kernel_stack_range {
+        if let TranslateResult::Mapped { frame, offset, flags } = translator.translate(page.start_address()) {
+            if let MappedFrame::Size4KiB(frame) = frame {
+                unsafe {new_offset_page_table.map_to(page, frame, flags, frame_allocator)}
+                    .expect("map kernel page failed")
+                    .flush()
+            }
+        }
+    }
+
+    // Map bootloader framebuffer
+    for page in bootloader_framebuffer {
         if let TranslateResult::Mapped { frame, offset, flags } = translator.translate(page.start_address()) {
             if let MappedFrame::Size4KiB(frame) = frame {
                 unsafe {new_offset_page_table.map_to(page, frame, flags, frame_allocator)}

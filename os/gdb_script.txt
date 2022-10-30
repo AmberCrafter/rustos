@@ -1,11 +1,7 @@
 file target/x86_64-rustos-none/debug/rustos
 target remote :1234
 del breakpoint
-b src/library/processor/mod.rs: 86
-b os/src/lib.rs: 62
-b src/library/processor/switch.rs: 39
-b src/library/interrupt/handler_interrupt.rs: 164
-b src/library/interrupt/handler_interrupt.rs: 184
+b os/src/library/processor/mod.rs: 86
 
 layout split
 c

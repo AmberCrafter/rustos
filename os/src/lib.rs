@@ -48,8 +48,6 @@ pub fn init(boot_info: &'static mut BootInfo) {
     library::interrupt::enable_hardware_interrupt(); // enable pic
     // library::interrupt::disable_hardware_interrupt();
 
-    serial_println!("idt ptr: {:?}", idt_ptr());    
-
     unsafe {
         init_memory_map(&mut boot_info.memory_regions);
     }
@@ -57,6 +55,7 @@ pub fn init(boot_info: &'static mut BootInfo) {
     // library::context::init();
     // library::filesystem::vfs::init();
 
+    println!("Finished init");
     serial_println!("Finished init");
 
     trigger_keyboard();

@@ -30,6 +30,10 @@ TODO LIST:
  - [ ] Implement APIC (current use 8259 PIC)
  - [ ] Learn E820 (memory controller?)
 
+---
+# Known BUG
+ - [ ] `print` and `println` not work, need to check framebuffer and textwritter
+
 
 ---
 # ChangeLog

@@ -31,6 +31,11 @@ page
 |                     ---> bootloader kernel stack top
 0x0000 0080 000a 0000 
 |
+0x0000 0100 0000 0000 ---> bootloader framebuffer start
+|
+|                     ---> bootloader framebuffer end
+0x0000 0100 0016 0000
+|
 0x0000 0180 0000 0000 ---> bootloader memory region start
 |                     ---> bootloader memory region end
 |

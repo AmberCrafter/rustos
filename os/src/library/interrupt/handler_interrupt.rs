@@ -162,7 +162,7 @@ pub extern "x86-interrupt" fn breakpoint_handler(stack_frame: InterruptStackFram
 }
 
 pub extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFrame) {
-    // print!(".");
+    print!(".");
     serial_print!(">>>>>>>>>>>>>>>>>>>>>> .");
     unsafe {
         PICS.lock()
@@ -184,7 +184,7 @@ pub extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: Interrupt
     
     let mut port: PortGeneric<u8, ReadWriteAccess> = Port::new(0x60);
     let scancode: u8 = unsafe { port.read() };
-    // println!("Scancode: {:?}", scancode);
+    println!("Scancode: {:?}", scancode);
     serial_println!("Scancode: {:?}", scancode);
     // pc_keyboard_interface::execute(scancode);
     {
