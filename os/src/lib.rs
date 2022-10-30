@@ -24,7 +24,7 @@ use library::memory::{
 };
 use x86_64::VirtAddr;
 
-use crate::library::{loader::{self, list_app}, processor, gdt::init_trap};
+use crate::library::{loader::{self, list_app}, processor, gdt::init_trap, interrupt::idt_ptr};
 #[macro_use]
 pub mod library;
 pub mod user;
@@ -48,6 +48,8 @@ pub fn init(boot_info: &'static mut BootInfo) {
     library::interrupt::enable_hardware_interrupt(); // enable pic
     // library::interrupt::disable_hardware_interrupt();
 
+    serial_println!("idt ptr: {:?}", idt_ptr());    
+
     unsafe {
         init_memory_map(&mut boot_info.memory_regions);
     }
@@ -56,6 +58,8 @@ pub fn init(boot_info: &'static mut BootInfo) {
     // library::filesystem::vfs::init();
 
     serial_println!("Finished init");
+
+    trigger_keyboard();
 
     list_app();
     init_trap();
@@ -89,6 +93,17 @@ unsafe fn init_memory_map(
         //     .expect("User space initialisze failed");
     }
 }
+
+#[naked]
+extern "C" fn trigger_keyboard() {
+    unsafe {
+        core::arch::asm!("
+            int 33
+            ret
+        ", options(noreturn));
+    }
+}
+
 
 pub fn hlt_loop() -> ! {
     loop {

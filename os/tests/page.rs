@@ -89,12 +89,12 @@ fn test_mapper(physical_memory_offset: VirtAddr) {
     let p4 = unsafe {get_level_4_table(physical_memory_offset)};
     // serial_println!("p4[0]: {:?}", p4[0]);
     // show_entries(p4);
-    let p3: &mut PageTable = unsafe { &mut *(physical_memory_offset + p4[3].addr().as_u64()).as_mut_ptr() };
+    let p3: &mut PageTable = unsafe { &mut *(physical_memory_offset + p4[128].addr().as_u64()).as_mut_ptr() };
     // serial_println!("p3[0]: {:?}", p3[0]);
     // show_entries(p3);
-    let p2: &mut PageTable = unsafe { &mut *(physical_memory_offset + p3[0].addr().as_u64()).as_mut_ptr() };
+    let p2: &mut PageTable = unsafe { &mut *(physical_memory_offset + p3[2].addr().as_u64()).as_mut_ptr() };
     // serial_println!("p2[0]: {:?}", p2[0]);
-    // show_entries(p2);
+    show_entries(p2);
     let p1: &mut PageTable = unsafe { &mut *(physical_memory_offset + p2[0].addr().as_u64()).as_mut_ptr() };
     // serial_println!("p1[16]: {:?}", p1[16]);
     show_entries(p1);
@@ -113,6 +113,8 @@ fn test_mapper(physical_memory_offset: VirtAddr) {
     //     0xb8000,
     //     // some code page
     //     0x201008,
+
+    //     0x29B9B0,
     //     // some stack page
     //     0x0100_0020_1a10,
     //     // some code page
@@ -122,19 +124,19 @@ fn test_mapper(physical_memory_offset: VirtAddr) {
     //     physical_memory_offset.as_u64() + 4*1024*1024*1024-1,
     //     // heap start
     //     0x4444_4444_0000,
-    //     buffer.as_ptr() as u64,
-    //     1*1024*1024-1,
-    //     data_ptr.as_u64(),
+    //     // buffer.as_ptr() as u64,
+    //     // 1*1024*1024-1,
+    //     // data_ptr.as_u64(),
     // ];
 
 
-    // // let mapper = unsafe {
-    // //     memory::init(physical_memory_offset)
-    // // };
+    // // // let mapper = unsafe {
+    // // //     memory::init(physical_memory_offset)
+    // // // };
     // use memory::PAGEMAPPER;
 
     // for &address in &addresses {
-    // for address in (0x0..0xffff_ffff).step_by(4096) {
+    // // for address in (0x0..0xffff_ffff).step_by(4096) {
     //     let virt = VirtAddr::new(physical_memory_offset.as_u64() + address);
     //     let phys = unsafe { PAGEMAPPER.lock().translate_addr(virt) };
     //     if phys.is_none() {continue;}

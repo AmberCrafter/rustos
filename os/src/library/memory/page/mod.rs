@@ -91,7 +91,7 @@ pub fn kernel_mapped_new_page_table() -> OffsetPageTable<'static> {
     // kernel stack: 0x70_0000 ~ 0x7a_0000
     let page_range = {
         let start_addr = VirtAddr::new(0x0);
-        let end_addr = VirtAddr::new(0x100_0000);
+        let end_addr = VirtAddr::new(0x300_0000);
         let start_page = Page::containing_address(start_addr);
         let end_page = Page::containing_address(end_addr);
         Page::<Size4KiB>::range(start_page, end_page)
