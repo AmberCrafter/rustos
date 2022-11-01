@@ -6,10 +6,7 @@
 // 
 
 use std::{fs::{Metadata, File, OpenOptions, DirBuilder, ReadDir, self, DirEntry}, path::{PathBuf, Path}, io::Result};
-
 use crate::{VMetadata, VPath, VFS};
-
-
 
 pub struct PhysicalFS{}
 impl VFS for PhysicalFS {
@@ -59,6 +56,9 @@ impl VPath for PathBuf {
     }
     fn file_name(&self) -> Option<String> {
         <Path>::file_name(self).map(|name| name.to_string_lossy().into_owned())
+    }
+    fn extension(&self) -> Option<String> {
+        <Path>::extension(self).map(|name| name.to_string_lossy().into_owned())
     }
     fn push<'a, T>(&mut self, path: T)
         where
@@ -114,5 +114,12 @@ mod tests {
         let src = PathBuf::from("./src");
         let entries: Vec<String> = src.read_dir().unwrap().collect();
         println!("{:#?}", entries);
+    }
+    
+    #[test]
+    fn file_name() {
+        let src = PathBuf::from("./src/lib.rs");
+        assert_eq!(src.file_name(), Some("lib.rs".to_string()));
+        assert_eq!(src.extension(), Some("rs".to_string()));
     }
 }

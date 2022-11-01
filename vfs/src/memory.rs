@@ -295,6 +295,21 @@ impl VPath for MemoryPath {
         Some(self.decompose_path().1)
     }
 
+    fn extension(&self) -> Option<String> {
+        if let Some(name) = self.file_name() {
+            // rsplit is reverse array
+            let mut spliter = name.rsplit('.');
+            let suffix = spliter.next().unwrap();
+            if name.len()!=suffix.len() {
+                Some(suffix.to_string())
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    }
+
     fn push<'a, T>(&mut self, path: T)
         where
             T: Into<&'a str> {
@@ -504,5 +519,14 @@ mod tests {
             "/foo/bar".to_owned(),
             "/foo/baz.txt".to_owned(),
         ]);
+    }
+
+    #[test]
+    fn file_name() {
+        let fs = MemoryFS::new();
+        let path = fs.path("/foo/bar.txt");
+        assert_eq!(path.file_name(), Some("bar.txt".to_string()));
+        assert_eq!(path.extension(), Some("txt".to_string()));
+        assert_eq!(path.parent().unwrap().extension(), None);
     }
 }

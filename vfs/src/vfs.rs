@@ -26,6 +26,7 @@ pub trait VPath: Clone + Debug {
     fn mkdir(&self) -> Result<()>;
     fn parent(&self) -> Option<Self>;
     fn file_name(&self) -> Option<String>;
+    fn extension(&self) -> Option<String>;
     fn push<'a, T>(&mut self, path: T)
     where
         T: Into<&'a str>;

@@ -2,6 +2,12 @@
 name = "rustos"
 version = "0.1.0"
 edition = "2021"
+description = "Experience OS based on https://github.com/phil-opp/blog_os"
+readme = "README.md"
+keywords = [
+    "x86-64",
+    "os kernel",
+]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
