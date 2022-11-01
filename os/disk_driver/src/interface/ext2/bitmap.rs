@@ -24,8 +24,8 @@ impl Bitmap {
         let mut map_iter = self.0.iter();
         while let Some(byte) = map_iter.next() {
             for i in 0..8 {
-                if (byte & 1<<i)==0 {
-                    return Ok(index + i)
+                if (byte & 1 << i) == 0 {
+                    return Ok(index + i);
                 } else {
                     index += 1;
                 }
@@ -36,8 +36,8 @@ impl Bitmap {
 
     pub fn alloc(&mut self) -> Result<usize, BitmapError> {
         let index = self.search_empty()?;
-        let nbyte = index/8;
-        self.0[nbyte] |= 1<<index%8;
+        let nbyte = index / 8;
+        self.0[nbyte] |= 1 << index % 8;
         Ok(index)
     }
 
@@ -49,5 +49,5 @@ impl Bitmap {
 #[derive(Debug, PartialEq, Eq)]
 pub enum BitmapError {
     NoEmpty,
-    Invalid
+    Invalid,
 }

@@ -5,7 +5,6 @@
 #![feature(custom_test_frameworks)]
 #![test_runner(rustos::library::unittest::test_runner)]
 #![reexport_test_harness_main = "test_main"]
-
 #![feature(alloc_error_handler)]
 
 extern crate alloc;
@@ -34,7 +33,7 @@ fn panic(info: &PanicInfo) -> ! {
 }
 
 #[alloc_error_handler]
-fn alloc_error_handler(layout: alloc::alloc::Layout) ->! {
+fn alloc_error_handler(layout: alloc::alloc::Layout) -> ! {
     rustos::library::handler_panic::kernel_panic::alloc_error_handler(layout)
 }
 
@@ -44,6 +43,12 @@ fn test_framebuffer_print() {
     serial_print!("Hello");
     serial_println!(" World!");
 
-    serial_println!("int: {}, float: {}, char: {}, str: {}", 1, 1.0/3.0, 'c', "words");
-    assert_eq!(0,0);
+    serial_println!(
+        "int: {}, float: {}, char: {}, str: {}",
+        1,
+        1.0 / 3.0,
+        'c',
+        "words"
+    );
+    assert_eq!(0, 0);
 }

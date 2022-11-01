@@ -2,9 +2,7 @@ use super::color::{Color, ColorRGB};
 
 use core::fmt::{Arguments, Write};
 
-use bootloader::{
-    boot_info::{FrameBufferInfo, PixelFormat, FrameBuffer},
-};
+use bootloader::boot_info::{FrameBuffer, FrameBufferInfo, PixelFormat};
 use noto_sans_mono_bitmap::{get_bitmap, get_bitmap_width, BitmapChar, BitmapHeight, FontWeight};
 
 use conquer_once::spin::OnceCell;
@@ -44,7 +42,12 @@ pub struct TextWriter {
 }
 
 impl TextWriter {
-    pub fn new(framebuffer: &'static mut [u8], info: FrameBufferInfo, foreground_color: ColorRGB, background_color: ColorRGB) -> Self {
+    pub fn new(
+        framebuffer: &'static mut [u8],
+        info: FrameBufferInfo,
+        foreground_color: ColorRGB,
+        background_color: ColorRGB,
+    ) -> Self {
         let mut writer = Self {
             framebuffer,
             info,
@@ -86,13 +89,13 @@ impl TextWriter {
         self.x_position = 0;
         self.render_cursor();
     }
-    
+
     fn newline(&mut self) {
         self.carriage_return();
         self.render_cursor();
         self.y_position += CURSOR_HEIGHT + LINE_SPACING;
 
-        if self.y_position >= (self.height() - CURSOR_HEIGHT -1) {
+        if self.y_position >= (self.height() - CURSOR_HEIGHT - 1) {
             // self.clear();
             self.shift_frame(1);
             self.cursor_last_line();
@@ -113,7 +116,7 @@ impl TextWriter {
     }
     pub fn cursor_down(&mut self) {
         self.render_cursor();
-        if self.y_position < (self.height() - CURSOR_HEIGHT -1) {
+        if self.y_position < (self.height() - CURSOR_HEIGHT - 1) {
             self.y_position += CURSOR_HEIGHT;
         }
         self.render_cursor();
@@ -127,7 +130,7 @@ impl TextWriter {
     }
     pub fn cursor_right(&mut self) {
         self.render_cursor();
-        if self.x_position < self.info.stride-1 {
+        if self.x_position < self.info.stride - 1 {
             self.x_position += BITMAP_LETTER_WIDTH;
         }
         self.render_cursor();
@@ -164,17 +167,18 @@ impl TextWriter {
             '\r' => self.carriage_return(),
             // TODO: Need to filter invalid charactors
             c @ ' '..='~' => {
-                if self.x_position >= self.info.stride-1 {
+                if self.x_position >= self.info.stride - 1 {
                     self.newline();
                 }
                 let bitmap_char = get_bitmap(c, FontWeight::Regular, BitmapHeight::Size16).unwrap();
                 self.write_rendered_char(bitmap_char);
-            },
+            }
             _ => {
-                if self.x_position >= self.info.stride-1 {
+                if self.x_position >= self.info.stride - 1 {
                     self.newline();
                 }
-                let bitmap_char = get_bitmap(INVALID_CHAR, FontWeight::Regular, BitmapHeight::Size16).unwrap();
+                let bitmap_char =
+                    get_bitmap(INVALID_CHAR, FontWeight::Regular, BitmapHeight::Size16).unwrap();
                 self.write_rendered_char(bitmap_char);
             }
         }
@@ -191,37 +195,41 @@ impl TextWriter {
     }
 
     fn write_pixel(&mut self, x: usize, y: usize, intensity: u8) {
-        fn color_convert<'a>(intensity: u8, foreground_color: &'a ColorRGB, background_color: &'a ColorRGB) -> ColorRGB {
-                // ColorRGB { 
-                //     red: (intensity as i32 * foreground_color.red as i32 / 255) as u8, 
-                //     green: (intensity as i32 * foreground_color.green as i32 / 255) as u8, 
-                //     blue: (intensity as i32 * foreground_color.blue as i32 / 255) as u8,  
+        fn color_convert<'a>(
+            intensity: u8,
+            foreground_color: &'a ColorRGB,
+            background_color: &'a ColorRGB,
+        ) -> ColorRGB {
+            // ColorRGB {
+            //     red: (intensity as i32 * foreground_color.red as i32 / 255) as u8,
+            //     green: (intensity as i32 * foreground_color.green as i32 / 255) as u8,
+            //     blue: (intensity as i32 * foreground_color.blue as i32 / 255) as u8,
+            // }
+
+            // assume intensity below and equal 75 is background
+            match intensity {
+                0..=50 => ColorRGB {
+                    red: background_color.red,
+                    green: background_color.green,
+                    blue: background_color.blue,
+                },
+                // 51..=100 => ColorRGB {
+                //     red: (intensity as i32 * background_color.red as i32 / 255) as u8,
+                //     green: (intensity as i32 * background_color.green as i32 / 255) as u8,
+                //     blue: (intensity as i32 * background_color.blue as i32 / 255) as u8,
+                // },
+                // _ => ColorRGB {
+                //     red: (intensity as i32 * foreground_color.red as i32 / 255) as u8,
+                //     green: (intensity as i32 * foreground_color.green as i32 / 255) as u8,
+                //     blue: (intensity as i32 * foreground_color.blue as i32 / 255) as u8,
                 // }
-    
-                // assume intensity below and equal 75 is background
-                match intensity {
-                    0..=50 => ColorRGB { 
-                        red: background_color.red, 
-                        green: background_color.green,
-                        blue: background_color.blue
-                    },
-                    // 51..=100 => ColorRGB { 
-                    //     red: (intensity as i32 * background_color.red as i32 / 255) as u8, 
-                    //     green: (intensity as i32 * background_color.green as i32 / 255) as u8, 
-                    //     blue: (intensity as i32 * background_color.blue as i32 / 255) as u8,  
-                    // },
-                    // _ => ColorRGB { 
-                    //     red: (intensity as i32 * foreground_color.red as i32 / 255) as u8, 
-                    //     green: (intensity as i32 * foreground_color.green as i32 / 255) as u8, 
-                    //     blue: (intensity as i32 * foreground_color.blue as i32 / 255) as u8,  
-                    // }
-                    _ => ColorRGB { 
-                        red: foreground_color.red,
-                        green: foreground_color.green,
-                        blue: foreground_color.blue,
-                    }
-                }
+                _ => ColorRGB {
+                    red: foreground_color.red,
+                    green: foreground_color.green,
+                    blue: foreground_color.blue,
+                },
             }
+        }
 
         let pixel_offset = y * self.info.stride + x;
         let color_rgb = color_convert(intensity, &self.foreground_color, &self.background_color);
@@ -239,10 +247,10 @@ impl TextWriter {
     }
 
     fn render_cursor(&mut self) {
-        // ignore rendered_char value, only get 
-        // Note: Due to cursor (render at next byte position) could overflow on framebuffer, 
+        // ignore rendered_char value, only get
+        // Note: Due to cursor (render at next byte position) could overflow on framebuffer,
         // we will ignore bottom line of cursor to prevent it.
-        for y in 0..CURSOR_HEIGHT-1 {
+        for y in 0..CURSOR_HEIGHT - 1 {
             for x in 0..BITMAP_LETTER_WIDTH {
                 self.inverse_pixel(self.x_position + x, self.y_position + y);
             }
@@ -254,7 +262,7 @@ impl TextWriter {
         let bytes_pre_pixel = self.info.bytes_per_pixel;
         let byte_offset = pixel_offset * bytes_pre_pixel;
         for i in 0..bytes_pre_pixel {
-            self.framebuffer[byte_offset+i] = u8::MAX - self.framebuffer[byte_offset+i];
+            self.framebuffer[byte_offset + i] = u8::MAX - self.framebuffer[byte_offset + i];
         }
         let _ = unsafe { core::ptr::read_volatile(&self.framebuffer[byte_offset]) };
     }

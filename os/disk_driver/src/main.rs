@@ -1,4 +1,4 @@
-use std::io::{Write, Seek};
+use std::io::{Seek, Write};
 use std::{fs::File, io::Read};
 
 use anyhow::Result;
@@ -93,9 +93,7 @@ fn main() -> Result<()> {
     let tmp: [u8; 128] = tmp.into();
     println!("{:?}", tmp);
 
-
     flsuh_disk(&mut f, &vfs);
-
 
     // let val = 123456789_u32;
     // let mut buf = [0; 4];
@@ -113,7 +111,6 @@ fn main() -> Result<()> {
 //     }
 //     println!();
 // }
-
 
 fn flsuh_disk(f: &mut File, vfs: &VFS) {
     f.rewind();

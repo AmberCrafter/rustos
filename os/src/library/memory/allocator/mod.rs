@@ -3,7 +3,12 @@
 // mod dummy_allocator;
 
 use linked_list_allocator::LockedHeap;
-use x86_64::{structures::paging::{Mapper, Size4KiB, FrameAllocator, mapper::MapToError, Page, PageTableFlags}, VirtAddr};
+use x86_64::{
+    structures::paging::{
+        mapper::MapToError, FrameAllocator, Mapper, Page, PageTableFlags, Size4KiB,
+    },
+    VirtAddr,
+};
 
 use super::frame_allocator;
 
@@ -13,22 +18,18 @@ use super::frame_allocator;
 // static ALLOCATOR: Dummy = Dummy;
 static ALLOCATOR: LockedHeap = LockedHeap::empty();
 
-
 pub const HEAP_START: usize = 0x4444_4444_0000;
-pub const HEAP_SIZE: usize = 100*1024;  // 100 KiB
+pub const HEAP_SIZE: usize = 100 * 1024; // 100 KiB
 
-pub fn init_heap(
-    // mapper: &mut impl Mapper<Size4KiB>,
+pub fn init_heap(// mapper: &mut impl Mapper<Size4KiB>,
     // frame_allocator: &mut impl FrameAllocator<Size4KiB>
 ) -> Result<(), MapToError<Size4KiB>> {
     let heap_start = VirtAddr::new(HEAP_START as u64);
-    let heap_end = heap_start + HEAP_SIZE as u64 -1u64; 
+    let heap_end = heap_start + HEAP_SIZE as u64 - 1u64;
     let heap_start_page = Page::containing_address(heap_start);
     let heap_end_page = Page::containing_address(heap_end);
 
-    let page_range = {
-        Page::range_inclusive(heap_start_page, heap_end_page)
-    };
+    let page_range = { Page::range_inclusive(heap_start_page, heap_end_page) };
 
     let mut frame_allocator_guard = super::FRAME_ALLOCATORL.lock();
     let mut mapper = super::PAGEMAPPER.lock();

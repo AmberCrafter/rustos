@@ -1,4 +1,4 @@
-use x86_64::{VirtAddr, structures::paging::PageTableFlags};
+use x86_64::{structures::paging::PageTableFlags, VirtAddr};
 
 use crate::library::memory::{
     memory_set::KERNEL_SPACE,
@@ -22,13 +22,12 @@ impl KernelStack {
     pub fn new(pid_handle: &PidHandle) -> Self {
         let pid = pid_handle.0;
         let (bottom, top) = kernel_stack_address(pid);
-        KERNEL_SPACE
-            .lock()
-            .insert(
-                VirtAddr::new(bottom), 
-                VirtAddr::new(top), 
-                PageTableFlags::PRESENT | PageTableFlags::WRITABLE, None
-            );
+        KERNEL_SPACE.lock().insert(
+            VirtAddr::new(bottom),
+            VirtAddr::new(top),
+            PageTableFlags::PRESENT | PageTableFlags::WRITABLE,
+            None,
+        );
         Self { pid }
     }
     pub fn get_top(&self) -> usize {
@@ -36,9 +35,9 @@ impl KernelStack {
         let (_, top) = kernel_stack_address(self.pid);
         top as usize
     }
-    pub fn push_to_top<T>(&self, data:T, offset:usize) -> *mut T 
+    pub fn push_to_top<T>(&self, data: T, offset: usize) -> *mut T
     where
-        T: Sized
+        T: Sized,
     {
         let top = self.get_top() - offset;
         // serial_println!("[Debug] kerenl stack top: {:?}", top);
@@ -53,6 +52,8 @@ impl KernelStack {
 impl Drop for KernelStack {
     fn drop(&mut self) {
         let (bottom, _) = kernel_stack_address(self.pid);
-        KERNEL_SPACE.lock().remove_area_with_start_addr(VirtAddr::new(bottom));
+        KERNEL_SPACE
+            .lock()
+            .remove_area_with_start_addr(VirtAddr::new(bottom));
     }
 }

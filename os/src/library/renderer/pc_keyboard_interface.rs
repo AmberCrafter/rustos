@@ -1,17 +1,18 @@
-use pc_keyboard::{ layouts::Us104Key, ScancodeSet1, HandleControl::Ignore, DecodedKey, KeyCode, KeyState, KeyEvent, Keyboard };
-use spin::{Mutex, Lazy};
+use pc_keyboard::{
+    layouts::Us104Key, DecodedKey, HandleControl::Ignore, KeyCode, KeyEvent, KeyState, Keyboard,
+    ScancodeSet1,
+};
+use spin::{Lazy, Mutex};
 use x86_64::instructions::interrupts::without_interrupts;
 
-use crate::{print, library::interrupt::STDIN_BUFFER};
+use crate::{library::interrupt::STDIN_BUFFER, print};
 
 use super::TEXTWRITER;
 
 pub fn execute(scancode: u8) {
     static KEYBOARD: Lazy<Mutex<Keyboard<Us104Key, ScancodeSet1>>> = Lazy::new(|| {
-        let keyboard = pc_keyboard::Keyboard::new(
-            Us104Key, ScancodeSet1, Ignore
-        );
-        Mutex::new(keyboard) 
+        let keyboard = pc_keyboard::Keyboard::new(Us104Key, ScancodeSet1, Ignore);
+        Mutex::new(keyboard)
     });
 
     let mut keyboard = KEYBOARD.lock();
@@ -22,67 +23,47 @@ pub fn execute(scancode: u8) {
             KeyEvent {
                 code: KeyCode::Delete,
                 state: KeyState::Down,
-            } => { },
+            } => {}
             KeyEvent {
                 code: KeyCode::Backspace,
                 state: KeyState::Down,
             } => {
                 if let Some(writer) = TEXTWRITER.get() {
-                    without_interrupts(|| {
-                        writer
-                            .lock()
-                            .cursor_left()
-                    })
+                    without_interrupts(|| writer.lock().cursor_left())
                 }
-            },
+            }
             KeyEvent {
                 code: KeyCode::ArrowLeft,
                 state: KeyState::Down,
             } => {
                 if let Some(writer) = TEXTWRITER.get() {
-                    without_interrupts(|| {
-                        writer
-                            .lock()
-                            .cursor_left()
-                    })
+                    without_interrupts(|| writer.lock().cursor_left())
                 }
-            },
+            }
             KeyEvent {
                 code: KeyCode::ArrowRight,
                 state: KeyState::Down,
             } => {
                 if let Some(writer) = TEXTWRITER.get() {
-                    without_interrupts(|| {
-                        writer
-                            .lock()
-                            .cursor_right()
-                    })
+                    without_interrupts(|| writer.lock().cursor_right())
                 }
-            },
+            }
             KeyEvent {
                 code: KeyCode::ArrowUp,
                 state: KeyState::Down,
             } => {
                 if let Some(writer) = TEXTWRITER.get() {
-                    without_interrupts(|| {
-                        writer
-                            .lock()
-                            .cursor_up()
-                    })
+                    without_interrupts(|| writer.lock().cursor_up())
                 }
-            },
+            }
             KeyEvent {
                 code: KeyCode::ArrowDown,
                 state: KeyState::Down,
             } => {
                 if let Some(writer) = TEXTWRITER.get() {
-                    without_interrupts(|| {
-                        writer
-                            .lock()
-                            .cursor_down()
-                    })
+                    without_interrupts(|| writer.lock().cursor_down())
                 }
-            },
+            }
             _ => {
                 if let Some(key) = keyboard.process_keyevent(event) {
                     // println!("Key: {:?}", key);
@@ -96,11 +77,11 @@ pub fn execute(scancode: u8) {
                                 print!("{:?}", key);
                                 serial_print!("{:?}", key);
                             }
-                        },
+                        }
                         DecodedKey::RawKey(key) => {
                             print!("{:?}", key);
                             serial_print!("{:?}", key);
-                        },
+                        }
                     }
                 }
             }

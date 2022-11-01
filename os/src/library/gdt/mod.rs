@@ -1,13 +1,14 @@
 mod tss;
 use spin::Lazy;
 
-
 // expose tss information
 use tss::TSS;
-pub use tss::{DOUBLE_FAULT_IST_INDEX, DEBUG_IST_INDEX, NON_MASKABLE_INTERRUPT_IST_INDEX};
+pub use tss::{DEBUG_IST_INDEX, DOUBLE_FAULT_IST_INDEX, NON_MASKABLE_INTERRUPT_IST_INDEX};
 
-
-use x86_64::{structures::gdt::{GlobalDescriptorTable, Descriptor, SegmentSelector}, registers::segmentation::DS};
+use x86_64::{
+    registers::segmentation::DS,
+    structures::gdt::{Descriptor, GlobalDescriptorTable, SegmentSelector},
+};
 
 use crate::println;
 
@@ -21,7 +22,16 @@ pub static GDT: Lazy<(GlobalDescriptorTable, Selectors)> = Lazy::new(|| {
     let user_cs = gdt.add_entry(Descriptor::user_code_segment());
 
     let tss_selector = gdt.add_entry(Descriptor::tss_segment(&TSS));
-    (gdt, Selectors {kernel_cs, kernel_ds, user_cs, user_ds, tss_selector})
+    (
+        gdt,
+        Selectors {
+            kernel_cs,
+            kernel_ds,
+            user_cs,
+            user_ds,
+            tss_selector,
+        },
+    )
 });
 
 pub struct Selectors {
@@ -29,12 +39,12 @@ pub struct Selectors {
     pub kernel_ds: SegmentSelector,
     pub user_cs: SegmentSelector,
     pub user_ds: SegmentSelector,
-    pub tss_selector: SegmentSelector
+    pub tss_selector: SegmentSelector,
 }
 
 pub fn init_gdt() {
+    use x86_64::instructions::segmentation::{Segment, CS, SS};
     use x86_64::instructions::tables::load_tss;
-    use x86_64::instructions::segmentation::{SS, CS, Segment};
 
     GDT.0.load();
     unsafe {
@@ -53,7 +63,7 @@ pub fn init_trap() {
 
 fn init_syscall_msr(selector: &Selectors) {
     // current not work
-    use x86_64::registers::model_specific::{Star, LStar, SFMask,  Efer, EferFlags};
+    use x86_64::registers::model_specific::{Efer, EferFlags, LStar, SFMask, Star};
     use x86_64::registers::rflags::RFlags;
 
     use crate::library::syscall::trap::trap_start;
@@ -67,20 +77,34 @@ fn init_syscall_msr(selector: &Selectors) {
     unsafe {
         let eflag = Efer::read();
         Efer::write(eflag | EferFlags::SYSTEM_CALL_EXTENSIONS);
-        
-        Star::write(selector.user_cs, selector.user_ds, selector.kernel_cs, selector.kernel_ds).unwrap();
-        
+
+        Star::write(
+            selector.user_cs,
+            selector.user_ds,
+            selector.kernel_cs,
+            selector.kernel_ds,
+        )
+        .unwrap();
+
         // let syscall_ptr = syscall as *const u64 as *mut u64;
-        
+
         // let syscall_ptr = syscall as *const fn() as u64;
         let syscall_ptr = trap_start as *const fn() as u64;
         let syscall_addr = x86_64::VirtAddr::new(syscall_ptr);
         LStar::write(syscall_addr);
         SFMask::write(
-            RFlags::CARRY_FLAG | RFlags::PARITY_FLAG | RFlags::AUXILIARY_CARRY_FLAG |
-            RFlags::ZERO_FLAG | RFlags::SIGN_FLAG | RFlags::TRAP_FLAG |
-            RFlags::IOPL_LOW | RFlags::IOPL_HIGH |RFlags::NESTED_TASK | RFlags::RESUME_FLAG |
-            RFlags::ALIGNMENT_CHECK | RFlags::ID
+            RFlags::CARRY_FLAG
+                | RFlags::PARITY_FLAG
+                | RFlags::AUXILIARY_CARRY_FLAG
+                | RFlags::ZERO_FLAG
+                | RFlags::SIGN_FLAG
+                | RFlags::TRAP_FLAG
+                | RFlags::IOPL_LOW
+                | RFlags::IOPL_HIGH
+                | RFlags::NESTED_TASK
+                | RFlags::RESUME_FLAG
+                | RFlags::ALIGNMENT_CHECK
+                | RFlags::ID,
         )
     }
 }
@@ -111,7 +135,7 @@ fn init_syscall_msr(selector: &Selectors) {
 //                 pop r15
 //                 pop r14
 //                 pop r13
-//                 pop r12 
+//                 pop r12
 //                 pop r11
 //                 pop r10
 //                 pop r9
@@ -124,7 +148,7 @@ fn init_syscall_msr(selector: &Selectors) {
 //                 pop rax
 //                 pop rbp
 //                 sysretq
-//             ", 
+//             ",
 //             sym syscall_handler,
 //             options(noreturn));
 //     }

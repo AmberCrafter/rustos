@@ -1,10 +1,10 @@
 use alloc::collections::VecDeque;
-use spin::Lazy;
+use core::arch::asm;
 use spin::mutex::Mutex;
-use x86_64::instructions::port::{ReadWriteAccess, PortGeneric};
+use spin::Lazy;
+use x86_64::instructions::port::{PortGeneric, ReadWriteAccess};
 use x86_64::structures::idt::InterruptStackFrame;
 use x86_64::structures::idt::PageFaultErrorCode;
-use core::arch::asm;
 
 use crate::hlt_loop;
 use crate::library::task;
@@ -41,25 +41,43 @@ macro_rules! def_handler_func {
 macro_rules! def_handler_func_with_errorcode {
     ($name: tt, $info: expr) => {
         pub extern "x86-interrupt" fn $name(stack_frame: InterruptStackFrame, error_code: u64) {
-            panic!("\nEXCEPTION: {}\nErrorCode: {:x}\n{:#?}\n", $info, error_code, stack_frame);
+            panic!(
+                "\nEXCEPTION: {}\nErrorCode: {:x}\n{:#?}\n",
+                $info, error_code, stack_frame
+            );
         }
     };
 
     ($name: tt, $info: expr, PageFaultErrorCode) => {
-        pub extern "x86-interrupt" fn $name(stack_frame: InterruptStackFrame, error_code: PageFaultErrorCode) {
-            panic!("\nEXCEPTION: {}\nErrorCode: {:?}\n{:#?}\n", $info, error_code, stack_frame);
+        pub extern "x86-interrupt" fn $name(
+            stack_frame: InterruptStackFrame,
+            error_code: PageFaultErrorCode,
+        ) {
+            panic!(
+                "\nEXCEPTION: {}\nErrorCode: {:?}\n{:#?}\n",
+                $info, error_code, stack_frame
+            );
         }
     };
 
     ($name: tt, $info: expr, false) => {
         pub extern "x86-interrupt" fn $name(stack_frame: InterruptStackFrame, error_code: u64) {
-            panic!("\nEXCEPTION: {}\nErrorCode: {:x}\n{:#?}\n", $info, error_code, stack_frame);
+            panic!(
+                "\nEXCEPTION: {}\nErrorCode: {:x}\n{:#?}\n",
+                $info, error_code, stack_frame
+            );
         }
     };
 
     ($name: tt, $info: expr, true) => {
-        pub extern "x86-interrupt" fn $name(stack_frame: InterruptStackFrame, error_code: u64) -> ! {
-            panic!("\nEXCEPTION: {}\nErrorCode: {:x}\n{:#?}\n", $info, error_code, stack_frame);
+        pub extern "x86-interrupt" fn $name(
+            stack_frame: InterruptStackFrame,
+            error_code: u64,
+        ) -> ! {
+            panic!(
+                "\nEXCEPTION: {}\nErrorCode: {:x}\n{:#?}\n",
+                $info, error_code, stack_frame
+            );
         }
     };
 }
@@ -95,7 +113,6 @@ def_handler_func_with_errorcode!(general_protection_fault_handler, "General Prot
 //     );
 // }
 
-
 // pub extern "x86-interrupt" fn page_fault_handler(
 //     stack_frame: InterruptStackFrame,
 //     error_code: PageFaultErrorCode,
@@ -125,7 +142,7 @@ def_handler_func_with_errorcode!(general_protection_fault_handler, "General Prot
 //     println!("tbl: {}", (error_code >> 1) & 0b11);
 //     println!("e: {}", error_code & 1);
 //     println!("{:#?}", stack_frame);
-    
+
 //     serial_println!("\n[Interrupt] Exception: GENERAL PROTECTION FAULT");
 //     serial_println!("Error Code: {:?}", error_code);
 //     serial_println!("index: {}", (error_code >> 3) & ((1 << 14) - 1));
@@ -145,7 +162,7 @@ def_handler_func_with_errorcode!(general_protection_fault_handler, "General Prot
 //     println!("tbl: {}", (error_code >> 1) & 0b11);
 //     println!("e: {}", error_code & 1);
 //     println!("{:#?}", stack_frame);
-    
+
 //     serial_println!("\n[Interrupt] Exception: STACK SEGMENT FAULT");
 //     serial_println!("Error Code: {:?}", error_code);
 //     serial_println!("index: {}", (error_code >> 3) & ((1 << 14) - 1));
@@ -154,7 +171,6 @@ def_handler_func_with_errorcode!(general_protection_fault_handler, "General Prot
 //     serial_println!("{:#?}", stack_frame);
 //     hlt_loop()
 // }
-
 
 pub extern "x86-interrupt" fn breakpoint_handler(stack_frame: InterruptStackFrame) {
     println!("\n[Interrupt] Exception: BREAKPOINT\n{:#?}\n", stack_frame);
@@ -173,13 +189,12 @@ pub extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptSta
 // need to read out the buffer, otherwise keyboard interrupt will be stuck
 // Use the pc-keyboard to decode it
 // add STDIN_BUFFER
-pub static STDIN_BUFFER: Lazy<Mutex<VecDeque<u8>>> = Lazy::new(|| {
-    Mutex::new(VecDeque::with_capacity(10))
-});
+pub static STDIN_BUFFER: Lazy<Mutex<VecDeque<u8>>> =
+    Lazy::new(|| Mutex::new(VecDeque::with_capacity(10)));
 pub extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStackFrame) {
-    use x86_64::instructions::port::Port;
     use crate::library::renderer::pc_keyboard_interface;
-    
+    use x86_64::instructions::port::Port;
+
     let mut port: PortGeneric<u8, ReadWriteAccess> = Port::new(0x60);
     let scancode: u8 = unsafe { port.read() };
     // println!("Scancode: {:?}", scancode);

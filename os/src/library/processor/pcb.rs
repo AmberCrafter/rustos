@@ -1,15 +1,19 @@
-use alloc::sync::{Weak, Arc};
-use spin::{Mutex, MutexGuard};
+use alloc::sync::{Arc, Weak};
 use alloc::vec::Vec;
+use spin::{Mutex, MutexGuard};
 
 use crate::library::{memory::memory_set::MemorySet, syscall::trap::TrapFrame};
 
-use super::{kernel_stack::KernelStack, pid::{PidHandle, alloc_pid}, switch::ProcessContext};
+use super::{
+    kernel_stack::KernelStack,
+    pid::{alloc_pid, PidHandle},
+    switch::ProcessContext,
+};
 
 pub struct ProcessControlBlock {
     pub pid: PidHandle,
     pub kernel_stack: KernelStack,
-    inner: Mutex<ProcessControlBlockInner>
+    inner: Mutex<ProcessControlBlockInner>,
 }
 
 pub struct ProcessControlBlockInner {
@@ -18,14 +22,14 @@ pub struct ProcessControlBlockInner {
     pub process_context_ptr: usize,
     pub parent: Option<Weak<ProcessControlBlock>>,
     pub children: Vec<Arc<ProcessControlBlock>>,
-    pub exit_code: isize
+    pub exit_code: isize,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum ProcessStatus {
     Ready,
     Running,
-    Zombie
+    Zombie,
 }
 
 impl ProcessControlBlockInner {
@@ -36,7 +40,7 @@ impl ProcessControlBlockInner {
         &self.process_context_ptr as *const usize
     }
     pub fn is_zombie(&self) -> bool {
-        self.process_status==ProcessStatus::Zombie
+        self.process_status == ProcessStatus::Zombie
     }
 }
 
@@ -53,20 +57,21 @@ impl ProcessControlBlock {
         kernel_stack.push_to_top(trap_frame, 0);
         // Push process context
         let process_context_ptr = kernel_stack.push_to_top(
-            ProcessContext::return_from_trap(), 
-            core::mem::size_of::<TrapFrame>()
+            ProcessContext::return_from_trap(),
+            core::mem::size_of::<TrapFrame>(),
         );
         // serial_println!("process_context_ptr: {:?}", process_context_ptr as usize);
         let task_control_block = Self {
             pid,
             kernel_stack,
-            inner: Mutex::new(ProcessControlBlockInner { 
-                memory_set, 
-                process_status: ProcessStatus::Ready, 
-                process_context_ptr: process_context_ptr as usize, 
-                parent: None, 
-                children: Vec::new(), 
-                exit_code: 0 })
+            inner: Mutex::new(ProcessControlBlockInner {
+                memory_set,
+                process_status: ProcessStatus::Ready,
+                process_context_ptr: process_context_ptr as usize,
+                parent: None,
+                children: Vec::new(),
+                exit_code: 0,
+            }),
         };
         task_control_block
     }
@@ -85,9 +90,8 @@ impl ProcessControlBlock {
         let pid = alloc_pid();
         let kernel_stack = KernelStack::new(&pid);
         let trap_frame_size = core::mem::size_of::<TrapFrame>();
-        let process_context_ptr = kernel_stack.push_to_top(
-            ProcessContext::return_from_trap(), 
-            trap_frame_size);
+        let process_context_ptr =
+            kernel_stack.push_to_top(ProcessContext::return_from_trap(), trap_frame_size);
         let parent_trap_frame = self.get_trap_frame();
         kernel_stack.push_to_top(parent_trap_frame.clone(), 0);
         // serial_println!("parent TrapFrame:{:?}", parent_trap_frame as *const TrapFrame as usize);
@@ -96,13 +100,14 @@ impl ProcessControlBlock {
         let process_control_block = Arc::new(ProcessControlBlock {
             pid,
             kernel_stack,
-            inner: Mutex::new(ProcessControlBlockInner { 
-                memory_set, 
-                process_status: ProcessStatus::Ready, 
-                process_context_ptr: process_context_ptr as usize, 
-                parent: Some(Arc::downgrade(self)), 
-                children: Vec::new(), 
-                exit_code: 0 })
+            inner: Mutex::new(ProcessControlBlockInner {
+                memory_set,
+                process_status: ProcessStatus::Ready,
+                process_context_ptr: process_context_ptr as usize,
+                parent: Some(Arc::downgrade(self)),
+                children: Vec::new(),
+                exit_code: 0,
+            }),
         });
         parent_inner.children.push(process_control_block.clone());
         process_control_block

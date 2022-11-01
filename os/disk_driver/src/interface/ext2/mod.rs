@@ -29,13 +29,13 @@ use self::bitmap::BitmapError;
 
 #[allow(unused)]
 use super::vector_wrap;
-use super::{FileSystem, FileID};
 #[allow(unused)]
 use super::{
     little_endian_wrap_16, little_endian_wrap_32, little_endian_wrap_64, little_endian_wrap_8,
 };
-use crate::{Disk, format_print};
+use super::{FileID, FileSystem};
 use crate::interface::ext2::directory::DentryFiletype;
+use crate::{format_print, Disk};
 use crate::{little_endian, vector};
 
 pub struct Ext2 {
@@ -198,7 +198,7 @@ impl Ext2 {
         let inode_nums = self.superblock.inodes_per_group as usize;
 
         let mut indoe_table = InodeTable::new();
-        indoe_table.append(Inode::default());  // insert a empty inode
+        indoe_table.append(Inode::default()); // insert a empty inode
 
         for i in 0..inode_nums {
             let inode = Inode::new(
@@ -246,7 +246,9 @@ impl Ext2 {
         let inode = self.grouptable.get(0).unwrap().inode_table.get(2).unwrap();
         let mut data = Vec::new();
         for block_num in inode.borrow().block {
-            if block_num==0 {continue;}
+            if block_num == 0 {
+                continue;
+            }
             let tmp = self.cursor(block_num as usize, BLOCK_SIZE);
             for &value in tmp {
                 data.push(value);
@@ -289,25 +291,33 @@ impl Ext2 {
             base += rec_len as usize;
 
             // println!("dentry: {:#?}", dentry);
-            if inode_index==0 {continue;}
+            if inode_index == 0 {
+                continue;
+            }
             match dentrymap.as_ref().unwrap().borrow_mut().append(dentry) {
-                Ok(()) => {},
+                Ok(()) => {}
                 Err(err) => println!("[Error] {:?}", err),
             }
         }
     }
 
     pub fn get_inode(&self, idx_group: usize, idx_inode: usize) -> Option<&Rc<RefCell<Inode>>> {
-        self.grouptable.get(idx_group).unwrap().inode_table.get(idx_inode)
+        self.grouptable
+            .get(idx_group)
+            .unwrap()
+            .inode_table
+            .get(idx_inode)
     }
 
     pub fn get_data(&self, idx_group: usize, idx_inode: usize) -> Vec<u8> {
         let inode = self.get_inode(idx_group, idx_inode).unwrap();
         let mut buffer = Vec::new();
         for b in inode.borrow().block {
-            if b==0 {continue;}
+            if b == 0 {
+                continue;
+            }
             let base = b as usize * BLOCK_SIZE;
-            for &byte in self.disk[base..base+BLOCK_SIZE].iter() {
+            for &byte in self.disk[base..base + BLOCK_SIZE].iter() {
                 buffer.push(byte);
             }
         }
@@ -323,7 +333,7 @@ impl Ext2 {
 
     pub fn write(&mut self, block_num: usize, ctx: [u8; BLOCK_SIZE]) {
         for (i, &byte) in ctx.iter().enumerate() {
-            self.disk[block_num*BLOCK_SIZE + i] = byte;
+            self.disk[block_num * BLOCK_SIZE + i] = byte;
         }
     }
 
@@ -339,12 +349,15 @@ impl Ext2 {
 
 pub struct VFS {
     pub disk: Ext2,
-    pub map: HashMap<FileID, Rc<RefCell<Dentry>>>
+    pub map: HashMap<FileID, Rc<RefCell<Dentry>>>,
 }
 
 impl VFS {
     pub fn new(disk: Ext2) -> Self {
-        Self { disk, map: HashMap::new() }
+        Self {
+            disk,
+            map: HashMap::new(),
+        }
     }
     pub fn get_inode(&self, index: usize) -> Option<&Rc<RefCell<Inode>>> {
         self.disk.get_inode(0, index)
@@ -357,21 +370,20 @@ impl VFS {
     }
 }
 
-
 impl FileSystem for VFS {
     fn open(&mut self, path: &str) -> Option<FileID> {
         // FileID
         //   0 => stdin
         //   1 => stdout
         //   2 => stderr
-        static FILE_ID: AtomicUsize = AtomicUsize::new(3);  
+        static FILE_ID: AtomicUsize = AtomicUsize::new(3);
         let fid = FileID(FILE_ID.fetch_add(1, Relaxed));
         self.list_dir(path);
         // println!("{:#?}", self.disk.dentrymap);
         if let Ok(paths) = self.parse_path(path) {
             let root_entrymap = self.disk.dentrymap.as_ref().unwrap();
             let mut entrymap = root_entrymap.clone();
-            for p in paths[1..paths.len()-1].iter() {
+            for p in paths[1..paths.len() - 1].iter() {
                 // entrymap = entrymap.as_ref().unwrap().borrow().get(p).unwrap().dentrymap.clone();
                 let map = entrymap.borrow().clone();
                 let inode = map.get(p).unwrap().clone();
@@ -390,19 +402,18 @@ impl FileSystem for VFS {
             } else {
                 println!("[Error] File not exist: {:?}", path);
             }
-
         } else {
             println!("[Error] Path not exist: {:?}", path);
             return None;
         }
-        
+
         Some(fid)
     }
 
     fn read(&self, file_id: FileID) -> Vec<u8> {
         let entry = self.map.get(&file_id).expect("Entry not exist").borrow();
         let idx_inode = entry.inode_index.try_into().unwrap();
-        let inode = self.get_inode(idx_inode).expect("Unexcepted inode");;
+        let inode = self.get_inode(idx_inode).expect("Unexcepted inode");
         let data = self.get_data(idx_inode);
         data[..inode.borrow().size as usize].to_vec()
     }
@@ -421,7 +432,7 @@ impl FileSystem for VFS {
         while let Some(package) = iter.next() {
             if let Some(&idx_block) = block_iter.next() {
                 let ctx = package.as_chunks::<1024>();
-                let ctx = if ctx.0.len()==0 {
+                let ctx = if ctx.0.len() == 0 {
                     let mut buf = [0_u8; 1024];
                     for (i, &byte) in ctx.1.iter().enumerate() {
                         buf[i] = byte;
@@ -458,7 +469,9 @@ impl FileSystem for VFS {
                     let mut dentrymap = Some(root_entrymap.clone());
                     // println!("{:#?}", dentrymap);
                     for p in paths[1..].iter() {
-                        if p.len()==0 {continue;}
+                        if p.len() == 0 {
+                            continue;
+                        }
                         match dentrymap {
                             Some(map) => {
                                 let next = if let Some(dentry) = map.borrow().get(p) {
@@ -469,8 +482,11 @@ impl FileSystem for VFS {
                                     //     return;
                                     // }
                                     let inode_filetype = dentry.clone().borrow().file_type;
-                                    if inode_filetype==DentryFiletype::DirecotryFile {
-                                        let data = self.disk.get_data(0, dentry.clone().borrow().inode_index as usize);
+                                    if inode_filetype == DentryFiletype::DirecotryFile {
+                                        let data = self.disk.get_data(
+                                            0,
+                                            dentry.clone().borrow().inode_index as usize,
+                                        );
                                         self.disk.load_dentrymap(Some(dentry.clone()), &data);
                                         Some(dentry.borrow().dentrymap.as_ref().unwrap().clone())
                                     } else {
@@ -481,7 +497,7 @@ impl FileSystem for VFS {
                                     return;
                                 };
                                 dentrymap = next;
-                            },
+                            }
                             None => {}
                         }
                     }

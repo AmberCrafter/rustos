@@ -1,12 +1,12 @@
 use std::{
     cmp,
     collections::HashMap,
-    io::{Read, Result, Seek, SeekFrom, Write, Error, ErrorKind},
+    io::{Error, ErrorKind, Read, Result, Seek, SeekFrom, Write},
     ops::{Deref, DerefMut},
     sync::{Arc, RwLock},
 };
 
-use crate::{VMetadata, VFS, VPath};
+use crate::{VMetadata, VPath, VFS};
 
 pub type Filename = String;
 
@@ -156,7 +156,10 @@ impl Seek for MemoryFile {
         };
 
         if pos < 0 {
-            Err(Error::new(ErrorKind::InvalidInput, "Invalid seek to a negative position"))
+            Err(Error::new(
+                ErrorKind::InvalidInput,
+                "Invalid seek to a negative position",
+            ))
         } else {
             self.pos = pos as usize;
             Ok(self.pos as u64)
@@ -167,19 +170,19 @@ impl Seek for MemoryFile {
 #[derive(Debug, Clone)]
 pub struct MemoryPath {
     pub path: Filename,
-    fs: MemoryFSHandle
+    fs: MemoryFSHandle,
 }
 
 impl MemoryPath {
     pub fn new(fs: &MemoryFSHandle, path: Filename) -> Self {
         Self {
             path,
-            fs: fs.clone()
+            fs: fs.clone(),
         }
     }
-    fn with_node<R, F>(&self, f:F) -> Result<R>
+    fn with_node<R, F>(&self, f: F) -> Result<R>
     where
-        F: FnOnce(&mut FsNode) -> R
+        F: FnOnce(&mut FsNode) -> R,
     {
         let root = &mut self.fs.write().unwrap().root;
         let mut components: Vec<&str> = self.path.split('/').collect();
@@ -205,9 +208,9 @@ impl MemoryPath {
     }
 }
 
-fn traverse_with<R, F>(node: &mut FsNode, components: &mut Vec<&str>, f:F) -> Result<R>
+fn traverse_with<R, F>(node: &mut FsNode, components: &mut Vec<&str>, f: F) -> Result<R>
 where
-    F: FnOnce(&mut FsNode) -> R
+    F: FnOnce(&mut FsNode) -> R,
 {
     if let Some(component) = components.pop() {
         if component.is_empty() {
@@ -217,12 +220,10 @@ where
         if let Some(directory) = entry {
             traverse_with(directory, components, f)
         } else {
-            Err(
-                Error::new(
-                    ErrorKind::Other,
-                    format!("File not found: {:?}", component)
-                )
-            )
+            Err(Error::new(
+                ErrorKind::Other,
+                format!("File not found: {:?}", component),
+            ))
         }
     } else {
         Ok(f(node))
@@ -231,7 +232,8 @@ where
 
 fn traverse_mkdir(node: &mut FsNode, components: &mut Vec<&str>) -> Result<()> {
     if let Some(component) = components.pop() {
-        let directory = &mut node.children
+        let directory = &mut node
+            .children
             .entry(component.to_owned())
             .or_insert_with(FsNode::new_directory);
         traverse_mkdir(directory, components)
@@ -243,52 +245,43 @@ fn traverse_mkdir(node: &mut FsNode, components: &mut Vec<&str>) -> Result<()> {
 impl VPath for MemoryPath {
     type FS = MemoryFS;
     fn open(&self) -> Result<MemoryFile> {
-        let datahandle = self.with_node(
-            |node| node.data.clone()
-        ).unwrap();
-        Ok(
-            MemoryFile { data: datahandle, pos: 0 }
-        )
+        let datahandle = self.with_node(|node| node.data.clone()).unwrap();
+        Ok(MemoryFile {
+            data: datahandle,
+            pos: 0,
+        })
     }
 
     fn create(&self) -> Result<MemoryFile> {
         let parent_path = self.parent().unwrap();
-        let data = parent_path.with_node(
-            |node| {
-                let file_node = node.children
-                    .entry(self.file_name().unwrap())
-                    .or_insert_with(FsNode::new_file);
-                file_node.data.clone()
-            }
-        )?;
+        let data = parent_path.with_node(|node| {
+            let file_node = node
+                .children
+                .entry(self.file_name().unwrap())
+                .or_insert_with(FsNode::new_file);
+            file_node.data.clone()
+        })?;
         data.0.write().unwrap().clear();
-        Ok(MemoryFile {
-            data,
-            pos: 0
-        })
+        Ok(MemoryFile { data, pos: 0 })
     }
 
     fn append(&self) -> Result<MemoryFile> {
         let parent_path = self.parent().unwrap();
-        let data = parent_path.with_node(
-            |node| {
-                let file_node = node.children
-                    .entry(self.file_name().unwrap())
-                    .or_insert_with(FsNode::new_file);
-                file_node.data.clone()
-            }
-        )?;
+        let data = parent_path.with_node(|node| {
+            let file_node = node
+                .children
+                .entry(self.file_name().unwrap())
+                .or_insert_with(FsNode::new_file);
+            file_node.data.clone()
+        })?;
         let len = data.0.read().unwrap().len();
         Ok(MemoryFile { data, pos: len })
     }
-    
+
     fn parent(&self) -> Option<Self> {
-        self.decompose_path().0.map(
-            |parent| MemoryPath::new(
-                &self.fs.clone(), 
-                parent
-            )
-        )
+        self.decompose_path()
+            .0
+            .map(|parent| MemoryPath::new(&self.fs.clone(), parent))
     }
 
     fn file_name(&self) -> Option<String> {
@@ -300,7 +293,7 @@ impl VPath for MemoryPath {
             // rsplit is reverse array
             let mut spliter = name.rsplit('.');
             let suffix = spliter.next().unwrap();
-            if name.len()!=suffix.len() {
+            if name.len() != suffix.len() {
                 Some(suffix.to_string())
             } else {
                 None
@@ -311,8 +304,9 @@ impl VPath for MemoryPath {
     }
 
     fn push<'a, T>(&mut self, path: T)
-        where
-            T: Into<&'a str> {
+    where
+        T: Into<&'a str>,
+    {
         if !self.path.ends_with('/') {
             self.path.push('/');
         }
@@ -328,29 +322,27 @@ impl VPath for MemoryPath {
     }
 
     fn exits(&self) -> bool {
-        self.with_node(
-            |node| ()
-        ).is_ok()
+        self.with_node(|node| ()).is_ok()
     }
 
     fn metadata(&self) -> Result<MemoryMetadata> {
         self.with_node(FsNode::metadata)
     }
 
-    fn read_dir(&self) -> Result<Box<dyn Iterator<Item = String> + 'static >> {
-        self.with_node(
-            |node| {
-                let children: Vec<String> = node.children.keys().map(
-                    |name| {
-                        MemoryPath::new(
-                            &self.fs,
-                            self.path.clone() + "/" + name
-                        ).path.as_str().to_string()
-                    }
-                ).collect();
-                Box::new(children.into_iter()) as Box<dyn Iterator<Item = String>>
-            }
-        )
+    fn read_dir(&self) -> Result<Box<dyn Iterator<Item = String> + 'static>> {
+        self.with_node(|node| {
+            let children: Vec<String> = node
+                .children
+                .keys()
+                .map(|name| {
+                    MemoryPath::new(&self.fs, self.path.clone() + "/" + name)
+                        .path
+                        .as_str()
+                        .to_string()
+                })
+                .collect();
+            Box::new(children.into_iter()) as Box<dyn Iterator<Item = String>>
+        })
     }
 }
 
@@ -371,8 +363,9 @@ impl VFS for MemoryFS {
     type FILE = MemoryFile;
     type METADATA = MemoryMetadata;
     fn path<T>(&self, path: T) -> Self::PATH
-        where
-            T: Into<String> {
+    where
+        T: Into<String>,
+    {
         MemoryPath::new(&self.handle, path.into())
     }
 }
@@ -390,8 +383,11 @@ mod tests {
         path.mkdir().unwrap();
         assert!(path.exits(), "Path should exist");
         assert!(path.metadata().unwrap().is_dir(), "Path should be dir");
-        assert!(!path.metadata().unwrap().is_file(), "Path should not be file");
-        assert!(path.metadata().unwrap().len()==0, "Path size should be 0");
+        assert!(
+            !path.metadata().unwrap().is_file(),
+            "Path should not be file"
+        );
+        assert!(path.metadata().unwrap().len() == 0, "Path size should be 0");
         println!("{:#?}", path);
     }
 
@@ -515,10 +511,10 @@ mod tests {
         path3.create().unwrap();
         let mut entries = path.read_dir().unwrap().collect::<Vec<_>>();
         entries.sort();
-        assert_eq!(entries, vec![
-            "/foo/bar".to_owned(),
-            "/foo/baz.txt".to_owned(),
-        ]);
+        assert_eq!(
+            entries,
+            vec!["/foo/bar".to_owned(), "/foo/baz.txt".to_owned(),]
+        );
     }
 
     #[test]

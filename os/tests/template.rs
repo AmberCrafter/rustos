@@ -3,7 +3,6 @@
 #![feature(custom_test_frameworks)]
 #![test_runner(rustos::library::unittest::test_runner)]
 #![reexport_test_harness_main = "test_main"]
-
 #![feature(alloc_error_handler)]
 
 extern crate alloc;
@@ -33,11 +32,10 @@ fn panic(info: &PanicInfo) -> ! {
 }
 
 #[alloc_error_handler]
-fn alloc_error_handler(layout: alloc::alloc::Layout) ->! {
+fn alloc_error_handler(layout: alloc::alloc::Layout) -> ! {
     rustos::library::handler_panic::kernel_panic::alloc_error_handler(layout)
 }
 
 // test case
 #[test_case]
-fn test_template() {
-}
+fn test_template() {}

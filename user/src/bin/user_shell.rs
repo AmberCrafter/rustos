@@ -4,8 +4,8 @@
 #[macro_use]
 extern crate user;
 
-use user::{fork, exec, waitpid};
 use user::console::getchar;
+use user::{exec, fork, waitpid};
 
 const LF: u8 = '\n' as u8;
 

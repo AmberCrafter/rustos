@@ -3,7 +3,6 @@
 #![feature(custom_test_frameworks)]
 #![test_runner(rustos::library::unittest::test_runner)]
 #![reexport_test_harness_main = "test_main"]
-
 #![feature(alloc_error_handler)]
 
 extern crate alloc;
@@ -32,7 +31,7 @@ fn panic(info: &PanicInfo) -> ! {
 }
 
 #[alloc_error_handler]
-fn alloc_error_handler(layout: alloc::alloc::Layout) ->! {
+fn alloc_error_handler(layout: alloc::alloc::Layout) -> ! {
     rustos::library::handler_panic::kernel_panic::alloc_error_handler(layout)
 }
 
@@ -43,7 +42,10 @@ fn test_syscall_syscallno() {
     assert_eq!(syscall::Syscall::Read, 0_usize.try_into().unwrap());
     assert_eq!(syscall::Syscall::Write, 1_usize.try_into().unwrap());
     assert_eq!(syscall::Syscall::Getpid, 39_usize.try_into().unwrap());
-    assert_eq!(syscall::Syscall::GetThreadArea, 211_usize.try_into().unwrap());
+    assert_eq!(
+        syscall::Syscall::GetThreadArea,
+        211_usize.try_into().unwrap()
+    );
     assert_eq!(syscall::Syscall::FinitModule, 313_usize.try_into().unwrap());
 
     assert!(TryInto::<syscall::Syscall>::try_into(314_usize).is_err());

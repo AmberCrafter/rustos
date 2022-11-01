@@ -1,5 +1,5 @@
-pub mod trap;
 pub mod error;
+pub mod trap;
 // mod syscall;
 
 use error::Result;
@@ -31,7 +31,7 @@ impl SimpleSyscall {
             5 => Self::Fork,
             6 => Self::Exec,
             7 => Self::WaitPid,
-            idx => panic!("Unsupport syscall function: {}", idx)
+            idx => panic!("Unsupport syscall function: {}", idx),
         }
     }
 }
@@ -40,7 +40,7 @@ fn syscall_handler(trap_frame: &TrapFrame) -> isize {
     // serial_println!("Call syscall: {:?}", SimpleSyscall::new(trap_frame.rax as usize));
     // serial_println!("Before:\n{:?}", trap_frame);
     let res = syscall_wrap(
-        SimpleSyscall::new(trap_frame.rax as usize), 
+        SimpleSyscall::new(trap_frame.rax as usize),
         [
             trap_frame.rdi as usize,
             trap_frame.rsi as usize,
@@ -48,7 +48,7 @@ fn syscall_handler(trap_frame: &TrapFrame) -> isize {
             // trap_frame.rcx,
             // trap_frame.r8,
             // trap_frame.r9,
-        ]
+        ],
     );
     // serial_println!("After:\n{:?}", trap_frame);
     // serial_println!("res:\n{:?}", res);
@@ -103,7 +103,7 @@ macro_rules! generate_try_from {
             fn try_from(v: $typ) -> Result<Self, Self::Error> {
                 match v {
                     $(x if x == $name::$vname as $typ => Ok($name::$vname),)*
-                    _ => Err(()) 
+                    _ => Err(())
                 }
             }
         }

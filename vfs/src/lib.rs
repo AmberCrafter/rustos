@@ -2,12 +2,7 @@
 #![allow(unused_variables)]
 
 pub mod vfs;
-pub use vfs::{
-    VPath,
-    VFile,
-    VMetadata,
-    VFS
-};
+pub use vfs::{VFile, VMetadata, VPath, VFS};
 
 pub mod physical;
 

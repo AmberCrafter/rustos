@@ -14,8 +14,9 @@ struct TaskWaker {
 
 impl TaskWaker {
     fn new(task_id: TaskId, task_queue: Arc<ArrayQueue<TaskId>>) -> Waker {
-        Waker::from(Arc::new(TaskWaker{
-            task_id, task_queue
+        Waker::from(Arc::new(TaskWaker {
+            task_id,
+            task_queue,
         }))
     }
 
@@ -67,7 +68,6 @@ impl Executor {
             self.run_ready_tasks();
             self.sleep_if_idle();
         }
-
     }
 
     fn sleep_if_idle(&self) {

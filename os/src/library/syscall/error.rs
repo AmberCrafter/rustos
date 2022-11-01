@@ -1,6 +1,6 @@
 use core::result;
 
-pub type Result<T, E=Errno> = result::Result<T, E>;
+pub type Result<T, E = Errno> = result::Result<T, E>;
 
 impl From<Errno> for usize {
     fn from(e: Errno) -> Self {
@@ -103,7 +103,7 @@ pub enum Errno {
     EL2NSYNC = 45,
     // Level 3 halted
     EL3HLT = 46,
-    // Level 3 reset 
+    // Level 3 reset
     EL3RST = 47,
     // Link number out of range
     ELNRNG = 48,
@@ -117,11 +117,11 @@ pub enum Errno {
     EBADE = 52,
     // Invalid request descriptor
     EBADR = 53,
-    // Exchange full 
+    // Exchange full
     EXFULL = 54,
     // No anode
     ENOANO = 55,
-    // Invalid request code 
+    // Invalid request code
     EBADRQC = 56,
     // Invalid slot
     EBADSLT = 57,
@@ -159,13 +159,13 @@ pub enum Errno {
     EDOTDOT = 73,
     // Not a data messgae
     EBADMSG = 74,
-    // Value too large for defined data type 
+    // Value too large for defined data type
     EOVERFLOW = 75,
     // Name not unique on network
     ENOTUNIQ = 76,
     // File descriptor in bad state
     EBADFD = 77,
-    // Remote address changed 
+    // Remote address changed
     EREMCHG = 78,
     // Can not access a needed shared library
     ELIBACC = 79,
@@ -272,7 +272,7 @@ pub enum Errno {
     // Owner died
     EOWNERDEAD = 130,
     // State not recoverable
-    ENOTRECOVERABLE = 131
+    ENOTRECOVERABLE = 131,
 }
 
 // impl TryInto<usize> for Errno {

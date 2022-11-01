@@ -20,11 +20,17 @@ use bootloader::{entry_point, BootInfo};
 use conquer_once::spin::OnceCell;
 use library::memory::{
     self, allocator,
-    frame_allocator::{self, bootinfo_allocator::BootInfoFrameAllocator}, page::init_process_kernel_stack,
+    frame_allocator::{self, bootinfo_allocator::BootInfoFrameAllocator},
+    page::init_process_kernel_stack,
 };
 use x86_64::VirtAddr;
 
-use crate::library::{loader::{self, list_app}, processor, gdt::init_trap, interrupt::idt_ptr};
+use crate::library::{
+    gdt::init_trap,
+    interrupt::idt_ptr,
+    loader::{self, list_app},
+    processor,
+};
 #[macro_use]
 pub mod library;
 pub mod user;
@@ -46,7 +52,7 @@ pub fn init(boot_info: &'static mut BootInfo) {
     library::interrupt::init_idt();
     library::interrupt::init_pic();
     library::interrupt::enable_hardware_interrupt(); // enable pic
-    // library::interrupt::disable_hardware_interrupt();
+                                                     // library::interrupt::disable_hardware_interrupt();
 
     unsafe {
         init_memory_map(&mut boot_info.memory_regions);
@@ -80,7 +86,7 @@ unsafe fn init_memory_map(
         // unsafe: need valid memory_region
         // let mut frame_allocator = BootInfoFrameAllocator::init(memory_regions);
         frame_allocator::init(memory_regions);
-        
+
         // let mut mapper = memory::init();
         // let mut mapper = library::memory::PAGEMAPPER.lock();
         // safe
@@ -96,13 +102,15 @@ unsafe fn init_memory_map(
 #[naked]
 extern "C" fn trigger_keyboard() {
     unsafe {
-        core::arch::asm!("
+        core::arch::asm!(
+            "
             int 33
             ret
-        ", options(noreturn));
+        ",
+            options(noreturn)
+        );
     }
 }
-
 
 pub fn hlt_loop() -> ! {
     loop {

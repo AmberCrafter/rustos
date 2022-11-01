@@ -3,7 +3,6 @@
 #![feature(custom_test_frameworks)]
 #![test_runner(rustos::library::unittest::test_runner)]
 #![reexport_test_harness_main = "test_main"]
-
 #![feature(abi_x86_interrupt)]
 #![feature(alloc_error_handler)]
 
@@ -15,10 +14,9 @@ use core::panic::PanicInfo;
 
 use rustos;
 #[allow(unused)]
-use rustos::{serial_print, serial_println};
-#[allow(unused)]
 use rustos::{print, println};
-
+#[allow(unused)]
+use rustos::{serial_print, serial_println};
 
 entry_point!(main);
 pub fn main(boot_info: &'static mut BootInfo) -> ! {
@@ -34,10 +32,9 @@ fn panic(info: &PanicInfo) -> ! {
 }
 
 #[alloc_error_handler]
-fn alloc_error_handler(layout: alloc::alloc::Layout) ->! {
+fn alloc_error_handler(layout: alloc::alloc::Layout) -> ! {
     rustos::library::handler_panic::kernel_panic::alloc_error_handler(layout)
 }
-
 
 #[test_case]
 fn test_deadlock() {
@@ -46,4 +43,3 @@ fn test_deadlock() {
         serial_print!("-");
     }
 }
-

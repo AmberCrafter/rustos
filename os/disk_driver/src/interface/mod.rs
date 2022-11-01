@@ -1,10 +1,9 @@
 pub mod ext2;
-use std::collections::HashMap;
 use core::sync::atomic::AtomicUsize;
+use std::collections::HashMap;
 
-use crate::Disk;
 use self::ext2::Inode;
-
+use crate::Disk;
 
 // pub struct FileSystem {
 //     pwd: Vec<String>,
@@ -21,12 +20,12 @@ pub trait FileSystem {
     fn parse_path(&self, path: &str) -> Result<Vec<String>, FileSystemErr> {
         let mut res = Vec::new();
         if path.starts_with("/") {
-           res.push("/".to_string());
+            res.push("/".to_string());
         } else {
             return Err(FileSystemErr::InvalidPath);
         }
         for p in path.split('/') {
-            if p.len()!=0 {
+            if p.len() != 0 {
                 res.push(p.to_string());
             }
         }
@@ -135,17 +134,17 @@ fn encode_little_endian_u8(var: &u8) -> [u8; 1] {
 #[doc(hidden)]
 #[allow(unused)]
 fn encode_little_endian_u16(var: &u16) -> [u8; 2] {
-    [(*var) as u8, ((*var)>>8) as u8]
+    [(*var) as u8, ((*var) >> 8) as u8]
 }
 
 #[doc(hidden)]
 #[allow(unused)]
 fn encode_little_endian_u32(var: &u32) -> [u8; 4] {
     [
-        (*var) as u8, 
-        ((*var)>>8) as u8,
-        ((*var)>>16) as u8,
-        ((*var)>>24) as u8,
+        (*var) as u8,
+        ((*var) >> 8) as u8,
+        ((*var) >> 16) as u8,
+        ((*var) >> 24) as u8,
     ]
 }
 
@@ -153,14 +152,14 @@ fn encode_little_endian_u32(var: &u32) -> [u8; 4] {
 #[allow(unused)]
 fn encode_little_endian_u64(var: &u64) -> [u8; 8] {
     [
-        (*var) as u8, 
-        ((*var)>>8) as u8,
-        ((*var)>>16) as u8,
-        ((*var)>>24) as u8,
-        ((*var)>>32) as u8,
-        ((*var)>>40) as u8,
-        ((*var)>>48) as u8,
-        ((*var)>>56) as u8,
+        (*var) as u8,
+        ((*var) >> 8) as u8,
+        ((*var) >> 16) as u8,
+        ((*var) >> 24) as u8,
+        ((*var) >> 32) as u8,
+        ((*var) >> 40) as u8,
+        ((*var) >> 48) as u8,
+        ((*var) >> 56) as u8,
     ]
 }
 
@@ -168,22 +167,22 @@ fn encode_little_endian_u64(var: &u64) -> [u8; 8] {
 #[allow(unused)]
 fn encode_little_endian_u128(var: &u128) -> [u8; 16] {
     [
-        (*var) as u8, 
-        ((*var)>>8) as u8,
-        ((*var)>>16) as u8,
-        ((*var)>>24) as u8,
-        ((*var)>>32) as u8,
-        ((*var)>>40) as u8,
-        ((*var)>>48) as u8,
-        ((*var)>>56) as u8,
-        ((*var)>>64) as u8,
-        ((*var)>>72) as u8,
-        ((*var)>>80) as u8,
-        ((*var)>>88) as u8,
-        ((*var)>>96) as u8,
-        ((*var)>>104) as u8,
-        ((*var)>>112) as u8,
-        ((*var)>>120) as u8,
+        (*var) as u8,
+        ((*var) >> 8) as u8,
+        ((*var) >> 16) as u8,
+        ((*var) >> 24) as u8,
+        ((*var) >> 32) as u8,
+        ((*var) >> 40) as u8,
+        ((*var) >> 48) as u8,
+        ((*var) >> 56) as u8,
+        ((*var) >> 64) as u8,
+        ((*var) >> 72) as u8,
+        ((*var) >> 80) as u8,
+        ((*var) >> 88) as u8,
+        ((*var) >> 96) as u8,
+        ((*var) >> 104) as u8,
+        ((*var) >> 112) as u8,
+        ((*var) >> 120) as u8,
     ]
 }
 
@@ -219,5 +218,5 @@ macro_rules! encode_little_endian {
     };
     ($var:expr, $nums:expr) => {
         crate::interface::encode_little_endian_arbitrary::<$nums>(&$var)
-    }
+    };
 }

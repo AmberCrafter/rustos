@@ -4,7 +4,6 @@
 #![feature(custom_test_frameworks)]
 #![test_runner(rustos::library::unittest::test_runner)]
 #![reexport_test_harness_main = "test_main"]
-
 #![feature(abi_x86_interrupt)]
 #![feature(alloc_error_handler)]
 
@@ -38,14 +37,15 @@ fn panic(info: &PanicInfo) -> ! {
 }
 
 #[alloc_error_handler]
-fn alloc_error_handler(layout: alloc::alloc::Layout) ->! {
+fn alloc_error_handler(layout: alloc::alloc::Layout) -> ! {
     rustos::library::handler_panic::kernel_panic::alloc_error_handler(layout)
 }
 
 static TEST_IDT: Lazy<InterruptDescriptorTable> = Lazy::new(|| {
     let mut idt = InterruptDescriptorTable::new();
     unsafe {
-        idt.double_fault.set_handler_fn(test_double_fault_handler)
+        idt.double_fault
+            .set_handler_fn(test_double_fault_handler)
             .set_stack_index(rustos::library::gdt::DOUBLE_FAULT_IST_INDEX);
     }
     idt
@@ -53,9 +53,8 @@ static TEST_IDT: Lazy<InterruptDescriptorTable> = Lazy::new(|| {
 
 extern "x86-interrupt" fn test_double_fault_handler(
     _stack_frame: InterruptStackFrame,
-    _error_code: u64
-) -> !
-{
+    _error_code: u64,
+) -> ! {
     serial_println!("[OK]");
     exit_qemu(QemuExitCode::Success);
     // hlt_loop()

@@ -3,15 +3,14 @@ use spin::{Lazy, Mutex};
 
 use super::pcb::ProcessControlBlock;
 
-pub struct  ProcessManager {
+pub struct ProcessManager {
     ready_queue: VecDeque<Arc<ProcessControlBlock>>,
 }
-
 
 impl ProcessManager {
     pub fn new() -> Self {
         Self {
-            ready_queue: VecDeque::new()
+            ready_queue: VecDeque::new(),
         }
     }
     pub fn add(&mut self, process: Arc<ProcessControlBlock>) {
@@ -22,9 +21,8 @@ impl ProcessManager {
     }
 }
 
-pub static PROCESS_MANAGER: Lazy<Mutex<ProcessManager>> = Lazy::new(||
-    Mutex::new(ProcessManager::new())
-);
+pub static PROCESS_MANAGER: Lazy<Mutex<ProcessManager>> =
+    Lazy::new(|| Mutex::new(ProcessManager::new()));
 
 // public method
 pub fn add_process(process: Arc<ProcessControlBlock>) {

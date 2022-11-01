@@ -53,62 +53,34 @@ pub fn sys_write(buffer: &[u8]) -> isize {
             SystemCall::SysWrite,
             buffer.as_ptr() as usize,
             buffer.len(),
-            0
+            0,
         )
     }
 }
 
 pub fn sys_exit(exit_code: i32) -> isize {
-    unsafe {
-        system_call(
-            SystemCall::SysExit, 
-            exit_code as usize, 
-            0,
-            0
-        )
-    }
+    unsafe { system_call(SystemCall::SysExit, exit_code as usize, 0, 0) }
 }
 
 pub fn sys_yield() -> isize {
-    unsafe {
-        system_call(
-            SystemCall::SysYield, 
-            0, 
-            0,
-            0
-        )
-    }
+    unsafe { system_call(SystemCall::SysYield, 0, 0, 0) }
 }
 
 pub fn sys_fork() -> isize {
-    unsafe {
-        system_call(
-            SystemCall::SysFork, 
-            0, 
-            0,
-            0
-        )
-    }
+    unsafe { system_call(SystemCall::SysFork, 0, 0, 0) }
 }
 
 pub fn sys_exec(path: &str) -> isize {
-    unsafe {
-        system_call(
-            SystemCall::SysExec, 
-            path.as_ptr() as usize, 
-            0,
-            0
-        )
-    }
+    unsafe { system_call(SystemCall::SysExec, path.as_ptr() as usize, 0, 0) }
 }
 
 pub fn sys_waitpid(pid: isize, exit_code_ptr: *mut isize) -> isize {
     unsafe {
         system_call(
-            SystemCall::SysWaitPid, 
-            pid as usize, 
+            SystemCall::SysWaitPid,
+            pid as usize,
             exit_code_ptr as usize,
-            0
+            0,
         )
     }
 }

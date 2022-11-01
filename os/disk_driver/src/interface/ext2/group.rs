@@ -1,4 +1,4 @@
-use super::{ Bitmap, InodeTable };
+use super::{Bitmap, InodeTable};
 
 #[derive(Debug, Default)]
 #[repr(C)]

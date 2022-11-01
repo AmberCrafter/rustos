@@ -3,18 +3,16 @@
 #![feature(custom_test_frameworks)]
 #![test_runner(rustos::library::unittest::test_runner)]
 #![reexport_test_harness_main = "test_main"]
-
 #![feature(alloc_error_handler)]
 #![feature(asm_const)]
-
 
 extern crate alloc;
 
 // use alloc::collections::BTreeMap;
 use bootloader::{entry_point, BootInfo};
 // use spin::Mutex;
-use core::panic::PanicInfo;
 use core::arch::asm;
+use core::panic::PanicInfo;
 
 use rustos;
 #[allow(unused)]
@@ -36,14 +34,14 @@ fn panic(info: &PanicInfo) -> ! {
 }
 
 #[alloc_error_handler]
-fn alloc_error_handler(layout: alloc::alloc::Layout) ->! {
+fn alloc_error_handler(layout: alloc::alloc::Layout) -> ! {
     rustos::library::handler_panic::kernel_panic::alloc_error_handler(layout)
 }
 
 // test case
 #[test_case]
 fn test_interrupt_syscall() {
-    let mut reg:u64 = 0;
+    let mut reg: u64 = 0;
     unsafe {
         asm!(
             "mov ecx, 0xC0000102",
@@ -55,8 +53,6 @@ fn test_interrupt_syscall() {
     }
 
     serial_println!("\n>>>>>>>>>>>>\nrax: {:x?}", reg);
-
-
 
     // unsafe {
     //     asm!(

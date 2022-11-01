@@ -1,7 +1,7 @@
-use std::{rc::Rc, cell::RefCell};
+use std::{cell::RefCell, rc::Rc};
 
 use bitflags::bitflags;
-use byteorder::{LittleEndian, ByteOrder};
+use byteorder::{ByteOrder, LittleEndian};
 
 use crate::encode_little_endian;
 
@@ -141,27 +141,63 @@ impl Inode {
 impl From<Inode> for [u8; 128] {
     fn from(inode: Inode) -> Self {
         let mut buf: Vec<u8> = Vec::with_capacity(128);
-        for byte in encode_little_endian!(inode.mode, 2) {buf.push(byte);}
-        for byte in encode_little_endian!(inode.uid, 2) {buf.push(byte);}
-        for byte in encode_little_endian!(inode.size, 4) {buf.push(byte);}
-        for byte in encode_little_endian!(inode.atime, 4) {buf.push(byte);}
-        for byte in encode_little_endian!(inode.ctime, 4) {buf.push(byte);}
-        for byte in encode_little_endian!(inode.mtime, 4) {buf.push(byte);}
-        for byte in encode_little_endian!(inode.dtime, 4) {buf.push(byte);}
-        for byte in encode_little_endian!(inode.gid, 2) {buf.push(byte);}
-        for byte in encode_little_endian!(inode.links_count, 2) {buf.push(byte);}
-        for byte in encode_little_endian!(inode.blocks, 4) {buf.push(byte);}
-        for byte in encode_little_endian!(inode.flags, 4) {buf.push(byte);}
-        for byte in encode_little_endian!(inode.osd1, 4) {buf.push(byte);}
-        for block in inode.block {
-            for byte in encode_little_endian!(block, 4) {buf.push(byte);}
+        for byte in encode_little_endian!(inode.mode, 2) {
+            buf.push(byte);
         }
-        for byte in encode_little_endian!(inode.generation, 4) {buf.push(byte);}
-        for byte in encode_little_endian!(inode.file_acl, 4) {buf.push(byte);}
-        for byte in encode_little_endian!(inode.dir_acl, 4) {buf.push(byte);}
-        for byte in encode_little_endian!(inode.faddr, 4) {buf.push(byte);}
+        for byte in encode_little_endian!(inode.uid, 2) {
+            buf.push(byte);
+        }
+        for byte in encode_little_endian!(inode.size, 4) {
+            buf.push(byte);
+        }
+        for byte in encode_little_endian!(inode.atime, 4) {
+            buf.push(byte);
+        }
+        for byte in encode_little_endian!(inode.ctime, 4) {
+            buf.push(byte);
+        }
+        for byte in encode_little_endian!(inode.mtime, 4) {
+            buf.push(byte);
+        }
+        for byte in encode_little_endian!(inode.dtime, 4) {
+            buf.push(byte);
+        }
+        for byte in encode_little_endian!(inode.gid, 2) {
+            buf.push(byte);
+        }
+        for byte in encode_little_endian!(inode.links_count, 2) {
+            buf.push(byte);
+        }
+        for byte in encode_little_endian!(inode.blocks, 4) {
+            buf.push(byte);
+        }
+        for byte in encode_little_endian!(inode.flags, 4) {
+            buf.push(byte);
+        }
+        for byte in encode_little_endian!(inode.osd1, 4) {
+            buf.push(byte);
+        }
+        for block in inode.block {
+            for byte in encode_little_endian!(block, 4) {
+                buf.push(byte);
+            }
+        }
+        for byte in encode_little_endian!(inode.generation, 4) {
+            buf.push(byte);
+        }
+        for byte in encode_little_endian!(inode.file_acl, 4) {
+            buf.push(byte);
+        }
+        for byte in encode_little_endian!(inode.dir_acl, 4) {
+            buf.push(byte);
+        }
+        for byte in encode_little_endian!(inode.faddr, 4) {
+            buf.push(byte);
+        }
         for osd2 in inode.osd2 {
-            for byte in encode_little_endian!(osd2, 1) {buf.push(byte);}
+            for byte in encode_little_endian!(osd2, 1) {
+                buf.push(byte);
+            }
         }
         buf.as_chunks::<128>().0[0]
     }

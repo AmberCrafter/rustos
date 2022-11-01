@@ -3,7 +3,7 @@
 
 #[macro_use]
 extern crate user;
-use user::{fork, exec, yield_, wait, read};
+use user::{exec, fork, read, wait, yield_};
 
 #[no_mangle]
 unsafe fn main() -> i32 {
@@ -19,7 +19,10 @@ unsafe fn main() -> i32 {
                 yield_();
                 continue;
             }
-            println!("[initproc] Release a zombie process, pid={}, exit_code={}", pid, exit_code)
+            println!(
+                "[initproc] Release a zombie process, pid={}, exit_code={}",
+                pid, exit_code
+            )
         }
     }
     0

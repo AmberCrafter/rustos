@@ -33,11 +33,11 @@ pub trait VPath: Clone + Debug {
     fn exits(&self) -> bool;
 
     fn metadata(&self) -> Result<<Self::FS as VFS>::METADATA>;
-    fn read_dir(&self) -> Result<Box<dyn Iterator<Item = String> + 'static >>;
+    fn read_dir(&self) -> Result<Box<dyn Iterator<Item = String> + 'static>>;
 }
 
 pub trait VFile: Read + Write + Seek + Debug {}
-impl <T> VFile for T where T: Read + Write + Seek + Debug {}
+impl<T> VFile for T where T: Read + Write + Seek + Debug {}
 
 pub trait VMetadata {
     fn is_dir(&self) -> bool;

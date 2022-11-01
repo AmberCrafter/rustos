@@ -2,20 +2,25 @@
 // stdlib should provide
 // - Metadata
 // - Path Operation (PathBuf)
-// 
-// 
+//
+//
 
-use std::{fs::{Metadata, File, OpenOptions, DirBuilder, ReadDir, self, DirEntry}, path::{PathBuf, Path}, io::Result};
 use crate::{VMetadata, VPath, VFS};
+use std::{
+    fs::{self, DirBuilder, DirEntry, File, Metadata, OpenOptions, ReadDir},
+    io::Result,
+    path::{Path, PathBuf},
+};
 
-pub struct PhysicalFS{}
+pub struct PhysicalFS {}
 impl VFS for PhysicalFS {
     type PATH = PathBuf;
     type FILE = File;
     type METADATA = Metadata;
     fn path<T>(&self, path: T) -> PathBuf
-        where
-            T: Into<String> {
+    where
+        T: Into<String>,
+    {
         PathBuf::from(path.into())
     }
 }
@@ -41,15 +46,10 @@ impl VPath for PathBuf {
         File::create(self)
     }
     fn append(&self) -> Result<File> {
-        OpenOptions::new()
-            .write(true)
-            .append(true)
-            .open(self)
+        OpenOptions::new().write(true).append(true).open(self)
     }
     fn mkdir(&self) -> Result<()> {
-        DirBuilder::new()
-            .recursive(true)
-            .create(self)
+        DirBuilder::new().recursive(true).create(self)
     }
     fn parent(&self) -> Option<Self> {
         <Path>::parent(self).map(|path| path.to_path_buf())
@@ -61,8 +61,9 @@ impl VPath for PathBuf {
         <Path>::extension(self).map(|name| name.to_string_lossy().into_owned())
     }
     fn push<'a, T>(&mut self, path: T)
-        where
-            T: Into<&'a str> {
+    where
+        T: Into<&'a str>,
+    {
         <PathBuf>::push(self, path.into());
     }
     fn exits(&self) -> bool {
@@ -71,14 +72,13 @@ impl VPath for PathBuf {
     fn metadata(&self) -> Result<<Self::FS as crate::VFS>::METADATA> {
         <Path>::metadata(self)
     }
-    fn read_dir(&self) -> Result<Box<dyn Iterator<Item = String> + 'static >> {
+    fn read_dir(&self) -> Result<Box<dyn Iterator<Item = String> + 'static>> {
         // fs::read_dir(path) -> Result<ReadDir, Error>
         // ReadDir -> Result<DirEntry, Error>
         let read_dir = fs::read_dir(self.as_path())?;
         let iter = read_dir.map(|entry| entry.unwrap().path().to_string_lossy().to_string());
         Ok(Box::new(iter))
     }
-
 }
 
 #[cfg(test)]
@@ -115,7 +115,7 @@ mod tests {
         let entries: Vec<String> = src.read_dir().unwrap().collect();
         println!("{:#?}", entries);
     }
-    
+
     #[test]
     fn file_name() {
         let src = PathBuf::from("./src/lib.rs");

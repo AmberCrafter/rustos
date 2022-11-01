@@ -1,10 +1,7 @@
 use alloc::vec::Vec;
 use spin::{Lazy, Mutex};
 
-
-static PID_ALLOCATOR: Lazy<Mutex<PidAllocator>> = Lazy::new(|| {
-    Mutex::new(PidAllocator::new())
-});
+static PID_ALLOCATOR: Lazy<Mutex<PidAllocator>> = Lazy::new(|| Mutex::new(PidAllocator::new()));
 
 #[derive(Debug, Clone)]
 pub struct PidHandle(pub usize);
@@ -30,9 +27,12 @@ impl PidAllocator {
         }
     }
     pub fn dealloc(&mut self, pid: usize) {
-        assert!(pid<self.current);
+        assert!(pid < self.current);
         assert!(
-            self.recycled.iter().find(|&&re_pid| re_pid==pid).is_none(),
+            self.recycled
+                .iter()
+                .find(|&&re_pid| re_pid == pid)
+                .is_none(),
             "pid {} has been deallocated",
             pid
         );

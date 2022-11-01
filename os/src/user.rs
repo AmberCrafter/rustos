@@ -7,8 +7,8 @@ use x86_64::structures::paging::{
 };
 use x86_64::VirtAddr;
 
-use crate::library::memory::PAGEMAPPER;
 use crate::library::memory::frame_allocator::FRAME_ALLOCATORL;
+use crate::library::memory::PAGEMAPPER;
 #[allow(unused)]
 use crate::{print, println};
 #[allow(unused)]
@@ -86,8 +86,7 @@ pub fn user_entry_point(
     Ok(page.start_address() + offset)
 }
 
-pub fn user_init(
-    // mapper: &mut OffsetPageTable,
+pub fn user_init(// mapper: &mut OffsetPageTable,
     // frame_allocator: &mut impl FrameAllocator<Size4KiB>,
     // physical_memory_offset: VirtAddr,
 ) -> Result<(), MapToError<Size4KiB>> {

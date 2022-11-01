@@ -1,4 +1,4 @@
-use std::{collections::BTreeMap, cell::RefCell, rc::Rc};
+use std::{cell::RefCell, collections::BTreeMap, rc::Rc};
 
 #[derive(Debug, Clone)]
 pub struct Dentry {
@@ -25,19 +25,26 @@ impl Default for Dentry {
 }
 
 impl Dentry {
-    pub fn new(
-        inode_index: u32,
-        rec_len: u16,
-        name_len: u8,
-        file_type: u8,
-        name: String,
-    ) -> Self {
+    pub fn new(inode_index: u32, rec_len: u16, name_len: u8, file_type: u8, name: String) -> Self {
         let file_type: DentryFiletype = file_type.into();
         match file_type {
-            DentryFiletype::DirecotryFile => Self { inode_index, rec_len, name_len, file_type, name, dentrymap: Some(Rc::new(RefCell::new(DentryMap::new()))) },
-            _ => Self { inode_index, rec_len, name_len, file_type, name, dentrymap: None }
+            DentryFiletype::DirecotryFile => Self {
+                inode_index,
+                rec_len,
+                name_len,
+                file_type,
+                name,
+                dentrymap: Some(Rc::new(RefCell::new(DentryMap::new()))),
+            },
+            _ => Self {
+                inode_index,
+                rec_len,
+                name_len,
+                file_type,
+                name,
+                dentrymap: None,
+            },
         }
-        
     }
 
     pub fn padding_len(&self) -> usize {
@@ -54,15 +61,16 @@ pub struct DentryMap(BTreeMap<String, Rc<RefCell<Dentry>>>);
 
 impl DentryMap {
     pub fn new() -> Self {
-        Self( BTreeMap::new() )
+        Self(BTreeMap::new())
     }
     pub fn append(&mut self, dentry: Dentry) -> Result<(), DentryMapErr> {
         let name = &dentry.name;
-        if name.len()>0 {
+        if name.len() > 0 {
             if self.0.contains_key(name) {
                 return Err(DentryMapErr::FileExist);
             }
-            self.0.insert(name.to_owned(), Rc::new(RefCell::new(dentry)));
+            self.0
+                .insert(name.to_owned(), Rc::new(RefCell::new(dentry)));
         } else {
             return Err(DentryMapErr::InvalidName);
         }
@@ -78,7 +86,7 @@ impl DentryMap {
         let status = self.0.remove(name);
         match status {
             Some(_) => Ok(()),
-            None => Err(DentryMapErr::FileNotExist)
+            None => Err(DentryMapErr::FileNotExist),
         }
     }
 
@@ -89,7 +97,6 @@ impl DentryMap {
         self
     }
 }
-
 
 #[derive(Debug)]
 pub enum DentryMapErr {

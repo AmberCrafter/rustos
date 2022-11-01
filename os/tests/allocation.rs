@@ -3,7 +3,6 @@
 #![feature(custom_test_frameworks)]
 #![test_runner(rustos::library::unittest::test_runner)]
 #![reexport_test_harness_main = "test_main"]
-
 #![feature(alloc_error_handler)]
 
 extern crate alloc;
@@ -33,7 +32,7 @@ fn panic(info: &PanicInfo) -> ! {
 }
 
 #[alloc_error_handler]
-fn alloc_error_handler(layout: alloc::alloc::Layout) ->! {
+fn alloc_error_handler(layout: alloc::alloc::Layout) -> ! {
     rustos::library::handler_panic::kernel_panic::alloc_error_handler(layout)
 }
 
@@ -57,9 +56,15 @@ fn test_alloc_box() {
     // create a reference counted vector -> will be freed when count reaches 0
     let reference_counted = Rc::new(vec![1, 2, 3]);
     let cloned_reference = reference_counted.clone();
-    serial_println!("current reference count is {}", Rc::strong_count(&cloned_reference));
+    serial_println!(
+        "current reference count is {}",
+        Rc::strong_count(&cloned_reference)
+    );
     core::mem::drop(reference_counted);
-    serial_println!("reference count is {} now", Rc::strong_count(&cloned_reference));
+    serial_println!(
+        "reference count is {} now",
+        Rc::strong_count(&cloned_reference)
+    );
 
     serial_println!("Test BTreeMap");
     let mut map = BTreeMap::new();

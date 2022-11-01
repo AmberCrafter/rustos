@@ -3,9 +3,7 @@ use alloc::sync::Arc;
 use crate::print;
 
 pub fn sys_write(buffer: *const u8, len: usize) -> isize {
-    let slice = unsafe {
-        core::slice::from_raw_parts(buffer, len)
-    };
+    let slice = unsafe { core::slice::from_raw_parts(buffer, len) };
     let str = core::str::from_utf8(slice).unwrap();
     print!("{}", str);
     serial_print!("{}", str);
@@ -13,7 +11,7 @@ pub fn sys_write(buffer: *const u8, len: usize) -> isize {
 }
 
 pub fn sys_read(buffer: *mut u8, len: usize) -> isize {
-    assert_eq!(len, 1 ,"Only support read len 1");
+    assert_eq!(len, 1, "Only support read len 1");
     use crate::library::interrupt::STDIN_BUFFER;
     use crate::library::processor::suspend_current_and_run_next;
     use x86_64::instructions::interrupts::without_interrupts;
@@ -31,9 +29,7 @@ pub fn sys_read(buffer: *mut u8, len: usize) -> isize {
             break;
         }
     }
-    let buffer = unsafe {
-        core::slice::from_raw_parts_mut(buffer, len)
-    };
+    let buffer = unsafe { core::slice::from_raw_parts_mut(buffer, len) };
     buffer[0] = c;
     1
 }
@@ -68,9 +64,7 @@ pub fn sys_exec(app_name: *const u8) -> isize {
         }
         p += 1;
     }
-    let path_slice = unsafe {
-        core::slice::from_raw_parts(app_name, length)
-    };
+    let path_slice = unsafe { core::slice::from_raw_parts(app_name, length) };
     let path = core::str::from_utf8(path_slice).unwrap();
     if let Some(data) = get_app_data_by_name(path) {
         let proc = current_process().unwrap();
@@ -93,27 +87,26 @@ pub fn sys_waitpid(pid: isize, exit_code_ptr: *mut isize) -> isize {
     use crate::library::processor::current_process;
     let proc = current_process().unwrap();
     let mut inner = proc.inner_lock();
-    if inner.children.iter()
-        .find(|p| (pid==-1) || (pid as usize == p.getpid()))
+    if inner
+        .children
+        .iter()
+        .find(|p| (pid == -1) || (pid as usize == p.getpid()))
         .is_none()
     {
         // not owner
         return -1;
     }
     // exit case
-    let r = inner
-        .children
-        .iter()
-        .enumerate()
-        .find(|(idx, p)| p.inner_lock().is_zombie() && (pid==-1 || pid as usize == p.getpid()));
+    let r =
+        inner.children.iter().enumerate().find(|(idx, p)| {
+            p.inner_lock().is_zombie() && (pid == -1 || pid as usize == p.getpid())
+        });
     if let Some((idx, _)) = r {
         let child = inner.children.remove(idx);
         assert_eq!(Arc::strong_count(&child), 1);
         let pid = child.getpid();
         let exit_code = child.inner_lock().exit_code;
-        unsafe {
-            *exit_code_ptr = exit_code
-        };
+        unsafe { *exit_code_ptr = exit_code };
         pid as isize
     } else {
         // keep running

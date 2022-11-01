@@ -1,10 +1,10 @@
-use core::arch::asm;
 use super::syscall_handler;
+use core::arch::asm;
 
 use crate::library::processor::current_kernel_stack;
 
 #[repr(align(8), C)]
-#[derive(Debug,Clone)]
+#[derive(Debug, Clone)]
 pub struct TrapFrame {
     pub rax: u64,
     pub rbx: u64,
@@ -34,8 +34,8 @@ impl TrapFrame {
             rbp: 0,
             rsi: 0,
             rdi: 0,
-            r8:  0,
-            r9:  0,
+            r8: 0,
+            r9: 0,
             r10: 0,
             r11: 0,
             r12: 0,
@@ -122,7 +122,8 @@ pub extern "C" fn trap_start() {
 #[naked]
 pub extern "C" fn trap_return() {
     unsafe {
-        asm!("
+        asm!(
+            "
             // restore all registers
             pop rax
             pop rbx
@@ -143,8 +144,8 @@ pub extern "C" fn trap_return() {
             pop rsp             // restore stack pointer
             sysretq             // syscall return (32-bit: sysret; 64-bit: sysretq)
         ",
-        // sym restore_registers,
-        options(noreturn)
+            // sym restore_registers,
+            options(noreturn)
         )
     }
 }
@@ -156,7 +157,8 @@ fn printer(reg: usize) {
 #[naked]
 pub extern "C" fn save_registers() {
     unsafe {
-        asm!("
+        asm!(
+            "
             push r15
             push r14
             push r13
@@ -173,14 +175,17 @@ pub extern "C" fn save_registers() {
             push rbx
             push rax
             ret
-        ", options(noreturn));
+        ",
+            options(noreturn)
+        );
     }
 }
 
 #[naked]
 pub extern "C" fn restore_registers() {
     unsafe {
-        asm!("
+        asm!(
+            "
             pop rax
             pop rbx
             pop rcx
@@ -197,7 +202,9 @@ pub extern "C" fn restore_registers() {
             pop r14
             pop r15
             ret
-        ", options(noreturn));
+        ",
+            options(noreturn)
+        );
     }
 }
 

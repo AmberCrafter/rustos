@@ -5,7 +5,9 @@ use spin::Lazy;
 
 static APP_NAMES: Lazy<Vec<&'static str>> = Lazy::new(|| {
     let num_app = get_app_num();
-    extern "C" { fn _app_names(); }
+    extern "C" {
+        fn _app_names();
+    }
     let mut start = _app_names as usize as *const u8;
     let mut v = Vec::new();
     unsafe {
@@ -27,23 +29,21 @@ pub fn get_app_num() -> usize {
     extern "C" {
         fn _num_app();
     }
-    unsafe {
-        (_num_app as usize as *const usize).read_volatile()
-    }
+    unsafe { (_num_app as usize as *const usize).read_volatile() }
 }
 
 pub fn get_app_data(app_id: usize) -> &'static [u8] {
-    extern "C" { fn _num_app(); }
+    extern "C" {
+        fn _num_app();
+    }
     let num_app_ptr = _num_app as usize as *const usize;
     let num_app = get_app_num();
-    let app_start = unsafe {
-        core::slice::from_raw_parts(num_app_ptr.add(1), num_app+1)
-    };
-    assert!( app_id<num_app );
+    let app_start = unsafe { core::slice::from_raw_parts(num_app_ptr.add(1), num_app + 1) };
+    assert!(app_id < num_app);
     unsafe {
         core::slice::from_raw_parts(
-            app_start[app_id] as *const u8, 
-            app_start[app_id+1] - app_start[app_id]
+            app_start[app_id] as *const u8,
+            app_start[app_id + 1] - app_start[app_id],
         )
     }
 }

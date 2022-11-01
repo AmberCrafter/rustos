@@ -1,11 +1,14 @@
-use x86_64::{structures::paging::{OffsetPageTable, Translate, PageTable}, VirtAddr};
+use x86_64::{
+    structures::paging::{OffsetPageTable, PageTable, Translate},
+    VirtAddr,
+};
 
 use crate::PHYSICAL_MEMORY_OFFSET;
 
 use super::pcb::ProcessControlBlock;
 
 #[repr(C)]
-pub struct  ProcessContext {
+pub struct ProcessContext {
     r15: usize,
     r14: usize,
     r13: usize,
@@ -37,7 +40,8 @@ pub extern "C" fn switch_to(current: *const usize, target: usize) {
     // rdi: current: **mut ProcessContext
     // rsi: target: *mut ProcessContext
     unsafe {
-        core::arch::asm!("
+        core::arch::asm!(
+            "
             push rbp
             push rbx
             push r11
@@ -57,7 +61,9 @@ pub extern "C" fn switch_to(current: *const usize, target: usize) {
             pop rbx
             pop rbp
             ret
-        ", options(noreturn));
+        ",
+            options(noreturn)
+        );
     }
 }
 
@@ -65,16 +71,22 @@ pub extern "C" fn switch_to(current: *const usize, target: usize) {
 pub extern "C" fn switch_mm(target: usize) {
     // rdi: *mut OffsetPageTable
     unsafe {
-        core::arch::asm!("
+        core::arch::asm!(
+            "
             mov cr3, rdi
-        ", options(noreturn));
+        ",
+            options(noreturn)
+        );
     }
 }
 
 pub fn switch_page_table_ptr(current: &ProcessControlBlock, target: &ProcessControlBlock) -> usize {
     let physical_memory_offset = PHYSICAL_MEMORY_OFFSET.get().unwrap().clone();
     let translator = &mut current.inner_lock().memory_set.page_table;
-    let target_page_table_ptr: *const PageTable = target.inner_lock().memory_set.page_table.level_4_table();
-    let phys_addr = translator.translate_addr(VirtAddr::new(target_page_table_ptr as u64)).unwrap();
+    let target_page_table_ptr: *const PageTable =
+        target.inner_lock().memory_set.page_table.level_4_table();
+    let phys_addr = translator
+        .translate_addr(VirtAddr::new(target_page_table_ptr as u64))
+        .unwrap();
     (phys_addr.as_u64() + physical_memory_offset.as_u64()) as usize
 }

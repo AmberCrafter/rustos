@@ -2,38 +2,47 @@
 
 use alloc::vec::Vec;
 use spin::{Lazy, Mutex};
-use x86_64::{structures::paging::{page::PageRangeInclusive, PageTableFlags, Page, OffsetPageTable, Mapper, Translate, PageTable}, VirtAddr, PhysAddr};
 use x86_64::structures::paging::mapper::TranslateError::PageNotMapped;
+use x86_64::{
+    structures::paging::{
+        page::PageRangeInclusive, Mapper, OffsetPageTable, Page, PageTable, PageTableFlags,
+        Translate,
+    },
+    PhysAddr, VirtAddr,
+};
 
-use crate::{library::memory::{page::PAGE_SIZE, USER_STACK_SIZE}, PHYSICAL_MEMORY_OFFSET};
+use crate::{
+    library::memory::{page::PAGE_SIZE, USER_STACK_SIZE},
+    PHYSICAL_MEMORY_OFFSET,
+};
 
-pub static KERNEL_SPACE: Lazy<Mutex<MemorySet>> = Lazy::new(|| {
-    Mutex::new(MemorySet::new())
-});
+pub static KERNEL_SPACE: Lazy<Mutex<MemorySet>> = Lazy::new(|| Mutex::new(MemorySet::new()));
 
 pub struct MapArea {
     page_range: PageRangeInclusive,
     start_virt_addr: VirtAddr,
     end_virt_addr: VirtAddr,
-    flags: PageTableFlags
+    flags: PageTableFlags,
 }
 
 impl MapArea {
     pub fn map_one(&mut self, page: Page, page_table: &mut OffsetPageTable) {
         // map one page into page table
-        use crate::library::memory::FRAME_ALLOCATORL;
         use crate::library::memory::alloc_frame;
+        use crate::library::memory::FRAME_ALLOCATORL;
 
         match page_table.translate_page(page) {
             Err(PageNotMapped) => {
                 let frame = alloc_frame().expect("Alloc new memory frame failed");
                 unsafe {
-                    page_table.map_to(page, frame, self.flags, FRAME_ALLOCATORL.lock().get_mut()).expect("Map page to frame failed.").flush();
+                    page_table
+                        .map_to(page, frame, self.flags, FRAME_ALLOCATORL.lock().get_mut())
+                        .expect("Map page to frame failed.")
+                        .flush();
                 }
             }
 
-            Ok(frame) => {
-            }
+            Ok(frame) => {}
 
             _ => {}
         }
@@ -46,7 +55,6 @@ impl MapArea {
     }
 }
 
-
 impl MapArea {
     pub fn new(start_virt_addr: VirtAddr, end_virt_addr: VirtAddr, flags: PageTableFlags) -> Self {
         let start = Page::containing_address(start_virt_addr);
@@ -55,7 +63,7 @@ impl MapArea {
             page_range: Page::range_inclusive(start, end),
             start_virt_addr,
             end_virt_addr,
-            flags
+            flags,
         }
     }
 
@@ -65,7 +73,7 @@ impl MapArea {
             page_range: other.page_range,
             start_virt_addr: other.start_virt_addr,
             end_virt_addr: other.end_virt_addr,
-            flags: other.flags
+            flags: other.flags,
         }
     }
 
@@ -89,7 +97,7 @@ impl MapArea {
         for page in self.page_range {
             let start = page.start_address().as_u64() as usize
                 - self.page_range.start.start_address().as_u64() as usize;
-            let src = &data[start..len.min(start+PAGE_SIZE)];
+            let src = &data[start..len.min(start + PAGE_SIZE)];
             let dest = unsafe {
                 let mut dst = page_table.translate_addr(start_virt).unwrap().as_u64();
                 dst += pysical_memory_offset;
@@ -98,7 +106,9 @@ impl MapArea {
             dest.copy_from_slice(src);
             start_virt += PAGE_SIZE;
 
-            if start_virt >= end_virt {break;}
+            if start_virt >= end_virt {
+                break;
+            }
         }
     }
 }
@@ -114,7 +124,7 @@ impl MemorySet {
         use super::page::kernel_mapped_new_page_table;
         Self {
             page_table: kernel_mapped_new_page_table(),
-            areas: Vec::new()
+            areas: Vec::new(),
         }
     }
     fn push(&mut self, mut map_area: MapArea, data: Option<&[u8]>) {
@@ -129,16 +139,15 @@ impl MemorySet {
         start_virt_addr: VirtAddr,
         end_virt_addr: VirtAddr,
         flags: PageTableFlags,
-        data: Option<&[u8]>
+        data: Option<&[u8]>,
     ) {
-        self.push(
-            MapArea::new(start_virt_addr, end_virt_addr, flags),
-            data
-        )
+        self.push(MapArea::new(start_virt_addr, end_virt_addr, flags), data)
     }
     pub fn page_table_address(&mut self, translator: &OffsetPageTable) -> PhysAddr {
         let table_addr: *const PageTable = self.page_table.level_4_table();
-        translator.translate_addr(VirtAddr::new(table_addr as u64)).unwrap()
+        translator
+            .translate_addr(VirtAddr::new(table_addr as u64))
+            .unwrap()
     }
     pub fn remove_all_areas(&mut self) {
         let page_table = &mut self.page_table;
@@ -149,11 +158,11 @@ impl MemorySet {
         self.areas.clear();
     }
     pub fn remove_area_with_start_addr(&mut self, start_addr: VirtAddr) {
-        if let Some((i ,area)) = self
+        if let Some((i, area)) = self
             .areas
             .iter_mut()
             .enumerate()
-            .find(|(i, area)| area.page_range.start.start_address()==start_addr) 
+            .find(|(i, area)| area.page_range.start.start_address() == start_addr)
         {
             area.unmap(&mut self.page_table);
             self.areas.remove(i);
@@ -166,9 +175,7 @@ impl Drop for MemorySet {
     fn drop(&mut self) {
         use alloc::boxed::Box;
         unsafe {
-            Box::from_raw(
-                self.page_table.level_4_table() as *mut PageTable
-            );
+            Box::from_raw(self.page_table.level_4_table() as *mut PageTable);
         }
         // `self.page_table` deallocate after here
     }
@@ -178,7 +185,7 @@ impl Drop for MemorySet {
 impl MemorySet {
     pub fn from(user_space: &MemorySet) -> Self {
         // create a new memory_set defined by input
-        
+
         // create a new memory_set with new page table
         let mut memory_set = Self::new();
         let physical_memory_offset = PHYSICAL_MEMORY_OFFSET.get().unwrap().clone().as_u64();
@@ -188,7 +195,7 @@ impl MemorySet {
             // create a new map_area, just like clone
             let mut new_area = MapArea::from(area);
             memory_set.push(new_area, None);
-            
+
             // copy memory data
             for page in area.page_range {
                 // data src
@@ -203,9 +210,7 @@ impl MemorySet {
                     let len = 4096.min(area.end_virt_addr - page.start_address()) as usize;
                     // generate src data slince
                     // <virt_addr u64> -> <virt_addr usize> -> <pointer *u8> -> <[u8]>
-                    unsafe {
-                        core::slice::from_raw_parts(src as usize as *const u8, len)
-                    }
+                    unsafe { core::slice::from_raw_parts(src as usize as *const u8, len) }
                 };
                 // copy dest
                 let dest = {
@@ -216,9 +221,7 @@ impl MemorySet {
                         .start_address()
                         .as_u64();
                     dest += physical_memory_offset;
-                    unsafe {
-                        core::slice::from_raw_parts_mut(dest as usize as *mut u8, src.len())
-                    }
+                    unsafe { core::slice::from_raw_parts_mut(dest as usize as *mut u8, src.len()) }
                 };
                 dest.copy_from_slice(src);
             }
@@ -235,13 +238,11 @@ impl MemorySet {
         // check file type
         assert_eq!(
             elf.header.pt1.magic,
-            [0x7f,0x45,0x4c,0x46],
+            [0x7f, 0x45, 0x4c, 0x46],
             "Invalid elf"
         );
         let ph_count = elf.header.pt2.ph_count();
-        let mut max_page = Page::containing_address(
-            VirtAddr::new(0)
-        );
+        let mut max_page = Page::containing_address(VirtAddr::new(0));
         for i in 0..ph_count {
             let ph = elf.program_header(i).unwrap();
             if ph.get_type().unwrap() == xmas_elf::program::Type::Load {
@@ -256,20 +257,16 @@ impl MemorySet {
                 if ph_flag.is_write() {
                     flags |= PageTableFlags::WRITABLE;
                 }
-                let map_area = MapArea::new(
-                    start_virt_addr,
-                    end_virt_addr,
-                    flags
-                );
+                let map_area = MapArea::new(start_virt_addr, end_virt_addr, flags);
                 max_page = map_area.page_range.end;
                 // serial_println!("Elf range: {:?} ~ {:?}", start_virt_addr, end_virt_addr);
                 self.push(
                     map_area,
-                    Some(&elf.input[ph.offset() as usize..(ph.offset() + ph.file_size()) as usize])
+                    Some(&elf.input[ph.offset() as usize..(ph.offset() + ph.file_size()) as usize]),
                 );
             }
         }
-        
+
         // memory layout
         // ------------------- lower  0x00
         // ...
@@ -281,7 +278,7 @@ impl MemorySet {
         //   USER_STACK_SIZE
         // [user_stack_top]
         // ...
-        // ------------------- upper  
+        // ------------------- upper
 
         let mut user_stack_bottom = max_page.start_address();
         user_stack_bottom += PAGE_SIZE as u64;
@@ -290,14 +287,15 @@ impl MemorySet {
             MapArea::new(
                 user_stack_bottom,
                 user_stack_top,
-                PageTableFlags::PRESENT |
-                    PageTableFlags::WRITABLE |
-                    PageTableFlags::USER_ACCESSIBLE
-            ), None
+                PageTableFlags::PRESENT
+                    | PageTableFlags::WRITABLE
+                    | PageTableFlags::USER_ACCESSIBLE,
+            ),
+            None,
         );
         (
             user_stack_top.as_u64() as usize,
-            elf.header.pt2.entry_point() as usize
+            elf.header.pt2.entry_point() as usize,
         )
     }
     pub fn from_elf(elf_data: &[u8]) -> (Self, usize, usize) {
