@@ -6,16 +6,16 @@ Experimental OS base on
  - [rcore-os/rCore](https://github.com/rcore-os/rCore-Tutorial-v3)
 
 Goal:
-1. ~~Without all assembly and link file, depends on bootloader and x86_64 crate.~~
-> Context switch will need to use naked function, it's not realistic without assembly in kernel code
-2. ~~Filesystem~~
-> Filesystem is based on stdio, thus we only need to focus on device io (read, write, seek, and so on) in kernel<br>
-> Designation: hardware - kernel ---------- syscall - stdio - filesystem<br>
->              hardware - kernel - driver - syscall --------- filesystem 
-3. ~~Network interface~~
-> This is also based on filesystem
+Get into the user space and run the syscall
 
-> The Filesystem and Network interface will be the next project with stdandard library
+Learn in this project:
+ - Kernel structure
+ - Memory layout
+ - Interrupt and Trap
+ - Context and context switch
+ - Kernel and User space
+ - Framebuffer rendering
+ - Syscall
 
 ### User shell
 Date: 2022-10-30
